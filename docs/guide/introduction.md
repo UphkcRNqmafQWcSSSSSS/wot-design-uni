@@ -4,7 +4,7 @@
 
 ## 快速上手
 
-请查看[快速上手](#/components/quickUse)文档。
+请查看[快速上手](/guide/quick-use.html)文档。
 
 ## 扫码体验
 
@@ -34,8 +34,9 @@
 
 * [意见反馈](https://github.com/Moonofweisheng/wot-design-uni/issues)
 * [更新日志](/guide/changelog)
-* [常见问题](/guide/commonProblems)
+* [常见问题](/guide/common-problems)
 * [Discussions 讨论区](https://github.com/Moonofweisheng/wot-design-uni/discussions)
+* [QQ 群](https://qm.qq.com/cgi-bin/qm/qr?k=O1Z3pal6StL39qHtABqR54Tb56igr90O&jump_from=webapi&authKey=MtVWfi/EQbT03wW7tKXv4bmyKYHBHtzI8VewlzSsOdxFjN0wbgNy17np9Z9yC4Z8)
 
 ## 开源协议
 

@@ -25,7 +25,7 @@ export default {
 
 <script lang="ts" setup>
 import { inject, computed, watch } from 'vue'
-import { notifyProps, NotifyProps } from './type'
+import { notifyProps, type NotifyProps } from './type'
 import { getNotifyOptionKey } from '.'
 import { isDef, addUnit, isFunction } from '../common/util'
 
@@ -40,9 +40,18 @@ const state = inject<NotifyProps>(getNotifyOptionKey(props.selector), props)
 
 const customStyle = computed(() => {
   const { safeHeight, position } = state
-
-  if (!isDef(safeHeight) || position !== 'top') return ''
-  return `top: ${addUnit(safeHeight)}`
+  let customStyle: string = ''
+  switch (position) {
+    case 'top':
+      customStyle = `top: calc(var(--window-top) + ${addUnit(safeHeight || 0)})`
+      break
+    case 'bottom':
+      customStyle = 'bottom: var(--window-bottom)'
+      break
+    default:
+      break
+  }
+  return customStyle
 })
 
 const onClick = (event: MouseEvent) => {

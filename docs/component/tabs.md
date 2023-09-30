@@ -5,9 +5,9 @@
 
 ## 基本用法
 
-`value` 为绑定值，可以为 number 类型（选中的tab的下标）和 string 类型（标签名）。
+`v-model` 为绑定值，可以为 number 类型（选中的tab的下标）和 string 类型（标签名）。
 
-> 当`value`为`number`类型时，`wd-tab`可以不必设置`name`。同时如果value超出了tab数量，会用0自动兜底
+> 当`v-model`为`number`类型时，`wd-tab`可以不必设置`name`。同时如果value超出了tab数量，会用0自动兜底。
 
 ```html
 <wd-tabs v-model="tab">
@@ -29,24 +29,10 @@ const tab = ref<number>(0)
 }
 ```
 
-<!-- ## 滑动动画
-
-设置 `animated` 属性，开启tab切换动画。
-
-```html
-<wd-tabs v-model="tab" animated>
-  <block v-for="item in 4" :key="item">
-    <wd-tab :title="`标签${item}`">
-      <view class="content">内容{{ item }}</view>
-    </wd-tab>
-  </block>
-</wd-tabs>
-
-``` -->
 
 ## 粘性布局
 
-设置 `sticky` 属性，使用粘性布局。可以设置 `offset-top` 属性，当距离窗口顶部多少像素时，固定标签头。
+设置 `sticky` 属性，使用粘性布局。可以设置 `offset-top` 属性，当距离窗口顶部多少像素时，固定标签头。在`H5`端使用自定义导航栏时需要参考[sticky的吸顶距离](/component/sticky.html#吸顶距离)进行配置。
 
 ```html
 <wd-tabs v-model="tab" sticky>
@@ -85,16 +71,6 @@ const tab = ref<number>(0)
   </block>
 </wd-tabs>
 ```
-```typescript
-Page({
-  data: {
-    tab: 0
-  },
-  handleClick ({ detail: { index } }) {
-    console.log(`点击了标签${index}`)
-  }
-})
-```
 
 ## 手势滑动
 
@@ -102,6 +78,20 @@ Page({
 
 ```html
 <wd-tabs v-model="tab" swipeable>
+  <block v-for="item in 4" :key="item">
+    <wd-tab :title="`标签${item}`">
+      <view class="content">内容{{ item }}</view>
+    </wd-tab>
+  </block>
+</wd-tabs>
+```
+
+## 切换动画
+
+设置 `animated` 属性，开启切换标签内容时的过渡动画。
+
+```html
+<wd-tabs v-model="tab" animated>
   <block v-for="item in 4" :key="item">
     <wd-tab :title="`标签${item}`">
       <view class="content">内容{{ item }}</view>
@@ -124,6 +114,12 @@ Page({
 | sticky | 粘性布局 | boolean | - | false | - |
 | offset-top | 粘性布局时距离窗口顶部距离 | number | - | 0 | - |
 | swipeable | 开启手势滑动 | boolean | - | false | - |
+| lineWidth | 底部条宽度，单位像素 | number | - | 19 | - |
+| lineHeight | 底部条高度，单位像素 | number | - | 3 | - |
+| color | 文字颜色 | string | - | - | - |
+| inactiveColor | 非活动标签文字颜色 | string | - | - | - |
+| animated | 是否开启切换标签内容时的转场动画 | boolean | - | false | - |
+| duration | 切换动画过渡时间，单位毫秒 | number | - | 300 | - |
 
 ## Tab Attributes
 
@@ -140,3 +136,10 @@ Page({
 | change | 绑定值变化时触发 | event = { index, name },index为tab下标，name为tab绑定的值 | - |
 | click | 点击标题时触发 | event = { index, name },index为tab下标，name为tab绑定的值 | - |
 | disabled | 点击禁用的标题时触发| event = { index, name },index为tab下标，name为tab绑定的值 | - |
+
+
+## 外部样式类
+
+| 类名 | 说明 | 最低版本 |
+|-----|------|--------|
+| custom-class | 根结点样式 | - |

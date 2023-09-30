@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="logo" src="https://wot-design-uni.netlify.app/wot-design.png" width="200">
+    <img alt="logo" src="https://wot-design-uni.cn/wot-design.png" width="200">
 </p>
 <h1 align="center">Wot Design Uni</h1>
 
@@ -34,6 +34,7 @@
 </p>
 
 <p align="center">
+  🚀 <a href="https://wot-design-uni.cn/">文档网站 (官网)</a>&nbsp;
   🔥 <a href="https://wot-design-uni.netlify.app/">文档网站 (Netlify)</a>
 </p>
 
@@ -52,20 +53,21 @@
 扫描二维码访问演示：
 
 <p>
-<img src="https://wot-design-uni.netlify.app/wx.jpg" width="200" height="200" style="margin-right:30px"/>
-<img src="https://wot-design-uni.netlify.app/alipay.png" width="200" height="200" />
+<img src="https://wot-design-uni.cn/wx.jpg" width="200" height="200" style="margin-right:30px"/>
+<img src="https://wot-design-uni.cn/alipay.png" width="200" height="200" />
 </p>
 
 ## 快速上手
 
-详细说明见 [快速上手](https://wot-design-uni.netlify.app/guide/quickUse.html)
+详细说明见 [快速上手](https://wot-design-uni.cn/guide/quick-use.html)。
 
 ## 链接
 
 * [意见反馈](https://github.com/Moonofweisheng/wot-design-uni/issues)
-* [更新日志](https://wot-design-uni.netlify.app/guide/changelog.html)
-* [常见问题](https://wot-design-uni.netlify.app/guide/commonProblems.html)
+* [更新日志](https://wot-design-uni.cn/guide/changelog.html)
+* [常见问题](https://wot-design-uni.cn/guide/common-problems.html)
 * [Discussions 讨论区](https://github.com/Moonofweisheng/wot-design-uni/discussions)
+* [QQ 群](https://qm.qq.com/cgi-bin/qm/qr?k=O1Z3pal6StL39qHtABqR54Tb56igr90O&jump_from=webapi&authKey=MtVWfi/EQbT03wW7tKXv4bmyKYHBHtzI8VewlzSsOdxFjN0wbgNy17np9Z9yC4Z8)
 
 
 ## 贡献指南
@@ -94,8 +96,8 @@
 ### 扫码捐赠
 
 <p>
-<img src="https://wot-design-uni.netlify.app/weixinQrcode.jpg" width="200" height="200" style="margin-right:30px"/>
-<img src="https://wot-design-uni.netlify.app/alipayQrcode.jpg" width="200" height="200" />
+<img src="https://wot-design-uni.cn/weixinQrcode.jpg" width="200" height="200" style="margin-right:30px"/>
+<img src="https://wot-design-uni.cn/alipayQrcode.jpg" width="200" height="200" />
 </p>
 
 ## LICENSE

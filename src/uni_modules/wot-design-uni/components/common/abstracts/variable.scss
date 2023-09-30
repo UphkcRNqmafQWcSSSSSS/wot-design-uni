@@ -20,6 +20,17 @@ $-color-blue: var(--wot-color-blue, #2bb3ed) !default; // 蓝色
 
 $-color-info: var(--wot-color-info, #909399) !default;
 
+$-font-gray-1: var(--wot-font-gray-1, rgba(0, 0, 0, 0.9));
+$-font-gray-2: var(--wot-font-gray-2, rgba(0, 0, 0, 0.6));
+$-font-gray-3: var(--wot-font-gray-3, rgba(0, 0, 0, 0.4));
+$-font-gray-4: var(--wot-font-gray-4, rgba(0, 0, 0, 0.26));
+
+$-font-white-1: var(--wot-font-white-1, rgba(255, 255, 255, 1));
+$-font-white-2: var(--wot-font-white-2, rgba(255, 255, 255, 0.55));
+$-font-white-3: var(--wot-font-white-3, rgba(255, 255, 255, 0.35));
+$-font-white-4: var(--wot-font-white-4, rgba(255, 255, 255, 0.22));
+
+
 
 /* 文字颜色（默认浅色背景下 */
 $-color-title: var(--wot-color-title, $-color-black) !default; // 模块标题/重要正文 000
@@ -704,23 +715,55 @@ $-curtain-content-close-color: var(--wot-curtain-content-close-color, $-color-wh
 $-curtain-content-close-fs: var(--wot-curtain-content-close-fs, $-fs-big) !default; // 关闭按钮大小
 
 // Notify
-$notify-text-color: var(--wot-notify-text-color, $-color-white) !default;
-$notify-padding: var(--wot-notify-padding, 8px 16px) !default;
-$notify-font-size: var(--wot-notify-font-size, $-fs-content) !default;
-$notify-line-height: var(--wot-notify-line-height, 20px) !default;
-$notify-primary-background: var(--wot-notify-primary-background, $-color-theme) !default;
-$notify-success-background: var(--wot-notify-success-background, $-color-success) !default;
-$notify-danger-background: var(--wot-notify-danger-background, $-color-danger) !default;
-$notify-warning-background: var(--wot-notify-warning-background, $-color-warning) !default;
+$-notify-text-color: var(--wot-notify-text-color, $-color-white) !default;
+$-notify-padding: var(--wot-notify-padding, 8px 16px) !default;
+$-notify-font-size: var(--wot-notify-font-size, $-fs-content) !default;
+$-notify-line-height: var(--wot-notify-line-height, 20px) !default;
+$-notify-primary-background: var(--wot-notify-primary-background, $-color-theme) !default;
+$-notify-success-background: var(--wot-notify-success-background, $-color-success) !default;
+$-notify-danger-background: var(--wot-notify-danger-background, $-color-danger) !default;
+$-notify-warning-background: var(--wot-notify-warning-background, $-color-warning) !default;
 
 // Skeleton
-$skeleton-background-color: var(--wot-skeleton-background-color, #eee) !default;
-$skeleton-animation-gradient: var(--wot-skeleton-animation-gradient, rgba(0, 0, 0, 0.04)) !default;
-$skeleton-animation-flashed: var(--wot-skeleton-animation-flashed, rgba(230, 230, 230, 0.3)) !default;
-$skeleton-text-height-default: var(--wot-skeleton-text-height-default, 16px) !default;
-$skeleton-rect-height-default: var(--wot-skeleton-rect-height-default, 16px) !default;
-$skeleton-circle-height-default: var(--wot-skeleton-circle-height-default, 48px) !default;
-$skeleton-row-margin-bottom: var(--wot-skeleton-row-margin-bottom, 16px) !default;
-$skeleton-border-radius-text: var(--wot-skeleton-border-radius-text, 2px) !default;
-$skeleton-border-radius-rect: var(--wot-skeleton-border-radius-rect, 4px) !default;
-$skeleton-border-radius-circle: var(--wot-skeleton-border-radius-circle, 50%) !default;
+$-skeleton-background-color: var(--wot-skeleton-background-color, #eee) !default;
+$-skeleton-animation-gradient: var(--wot-skeleton-animation-gradient, rgba(0, 0, 0, 0.04)) !default;
+$-skeleton-animation-flashed: var(--wot-skeleton-animation-flashed, rgba(230, 230, 230, 0.3)) !default;
+$-skeleton-text-height-default: var(--wot-skeleton-text-height-default, 16px) !default;
+$-skeleton-rect-height-default: var(--wot-skeleton-rect-height-default, 16px) !default;
+$-skeleton-circle-height-default: var(--wot-skeleton-circle-height-default, 48px) !default;
+$-skeleton-row-margin-bottom: var(--wot-skeleton-row-margin-bottom, 16px) !default;
+$-skeleton-border-radius-text: var(--wot-skeleton-border-radius-text, 2px) !default;
+$-skeleton-border-radius-rect: var(--wot-skeleton-border-radius-rect, 4px) !default;
+$-skeleton-border-radius-circle: var(--wot-skeleton-border-radius-circle, 50%) !default;
+
+// circle
+$-circle-text-color: var(--wot-circle-text-color, $-color-content) !default; // circle文字颜色
+
+// swiper
+$-swiper-radius: var(--wot-swiper-radius, 8px);
+$-swiper-item-padding: var(--wot-swiper-item-padding, 0);
+
+
+// swiper-nav
+// dot & dots-bar
+$-swiper-nav-dot-color: var(--wot-swiper-nav-dot-color, $-font-white-2) !default;
+$-swiper-nav-dot-active-color: var(--wot-swiper-nav-dot-active-color, $-font-white-1) !default;
+$-swiper-nav-dot-size: var(--wot-swiper-nav-dot-size, 12rpx) !default;
+$-swiper-nav-dots-bar-active-width: var(--wot-swiper-nav-dots-bar-active-width, 40rpx) !default;
+// fraction
+$-swiper-nav-fraction-color: var(--wot-swiper-nav-fraction-color, $-font-white-1) !default;
+$-swiper-nav-fraction-bg-color: var(--wot-swiper-nav-fraction-bg-color, $-font-gray-3) !default;
+$-swiper-nav-fraction-height: var(--wot-swiper-nav-fraction-height, 48rpx) !default;
+$-swiper-nav-fraction-font-size: var(--wot-swiper-nav-fraction-font-size, 24rpx) !default;
+// button
+$-swiper-nav-btn-color: var(--wot-swiper-nav-btn-color, $-font-white-1) !default;
+$-swiper-nav-btn-bg-color: var(--wot-swiper-nav-btn-bg-color, $-font-gray-3) !default;
+$-swiper-nav-btn-size: var(--wot-swiper-nav-btn-size, 48rpx) !default;
+
+
+// segmented
+$-segmented-item-bg-color: var(--wot-segmented-item-bg-color, #eeeeee) !default;
+$-segmented-item-color: var(--wot-segmented-item-color, rgba(0, 0, 0, 0.85)) !default; // 标题文字颜色
+$-segmented-item-acitve-bg: var(--wot-segmented-item-acitve-bg, #FFFFFF) !default; // 标题文字颜色
+$-segmented-item-disabled-color: var(--wot-segmented-item-disabled-color, rgba(0, 0, 0, 0.25)) !default; // 标题文字禁用颜色
+

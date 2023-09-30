@@ -1,7 +1,7 @@
 <!--
  * @Author: weisheng
  * @Date: 2023-08-07 18:49:03
- * @LastEditTime: 2023-08-15 23:22:19
+ * @LastEditTime: 2023-09-25 11:08:33
  * @LastEditors: weisheng
  * @Description: 
  * @FilePath: \wot-design-uni\src\components\page-wraper\page-wraper.vue
@@ -10,9 +10,9 @@
 <template>
   <wd-config-provider :theme="theme">
     <view class="page-wraper">
-      <!-- <wd-cell title="切换暗黑" title-width="240px" center>
-        <wd-switch v-model="isDark" name="switchVal" />
-      </wd-cell> -->
+      <wd-cell title="切换暗黑" title-width="240px" center v-if="showDarkMode">
+        <wd-switch v-model="isDark" />
+      </wd-cell>
       <slot />
     </view>
     <wd-notify selector="notify" />
@@ -32,6 +32,14 @@ import { computed, ref, onMounted } from 'vue'
 import { setNotifyDefaultOptions } from '@/uni_modules/wot-design-uni'
 import { useDark } from '../../store'
 
+interface Props {
+  showDarkMode?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showDarkMode: false
+})
+
 const darkMode = useDark()
 const isDark = ref<boolean>(false)
 
@@ -41,9 +49,6 @@ const theme = computed(() => {
 
 onMounted(() => {
   setNotifyDefaultOptions({
-    // #ifdef H5
-    safeHeight: 44,
-    // #endif
     onClick: (event) => console.log('onClick', event),
     onClosed: () => console.log('onClosed'),
     onOpened: () => console.log('onOpened')
@@ -58,5 +63,9 @@ onMounted(() => {
 }
 .page-wraper {
   min-height: calc(100vh - var(--window-top));
+  box-sizing: border-box;
+  padding-bottom: 0;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 </style>

@@ -94,6 +94,10 @@ const list = ref([
       {
         id: 'tabs',
         name: 'Tabs 标签页'
+      },
+      {
+        id: 'segmented',
+        name: 'Segmented 分段器'
       }
     ]
   },
@@ -208,6 +212,10 @@ const list = ref([
         name: 'Progress 进度条'
       },
       {
+        id: 'circle',
+        name: 'Circle 环形进度条'
+      },
+      {
         id: 'sortButton',
         name: 'SortButton 排序按钮'
       },
@@ -294,6 +302,14 @@ const list = ref([
       {
         id: 'tag',
         name: 'Tag 标签'
+      },
+      {
+        id: 'watermark',
+        name: 'Watermark 水印'
+      },
+      {
+        id: 'swiper',
+        name: 'Swiper 轮播图'
       }
     ]
   }

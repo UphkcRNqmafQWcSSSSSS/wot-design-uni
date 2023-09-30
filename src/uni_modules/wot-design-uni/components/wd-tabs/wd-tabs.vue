@@ -57,7 +57,7 @@
 
         <!--标签页-->
         <view class="wd-tabs__container" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd" @touchcancel="onTouchEnd">
-          <view class="wd-tabs__body">
+          <view :class="['wd-tabs__body', animated ? 'is-animated' : '']" :style="bodyStyle">
             <slot />
           </view>
         </view>
@@ -110,7 +110,7 @@
 
       <!--标签页-->
       <view class="wd-tabs__container" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd" @touchcancel="onTouchEnd">
-        <view class="wd-tabs__body">
+        <view :class="['wd-tabs__body', animated ? 'is-animated' : '']" :style="bodyStyle">
           <slot />
         </view>
       </view>
@@ -131,8 +131,8 @@ export default {
 }
 </script>
 <script lang="ts" setup>
-import { getCurrentInstance, onMounted, provide, ref, watch } from 'vue'
-import { checkNumRange, debounce, getRect, getType } from '../common/util'
+import { computed, getCurrentInstance, onMounted, provide, ref, watch } from 'vue'
+import { checkNumRange, debounce, getRect, getType, objToStyle } from '../common/util'
 import { useTouch } from '../mixins/useTouch'
 
 const $item = '.wd-tabs__nav-item'
@@ -141,7 +141,7 @@ const $container = '.wd-tabs__nav-container'
 interface Props {
   customClass?: string
   // 绑定值
-  modelValue: number
+  modelValue: number | string
   // 标签数超过阈值可滑动
   slidableNum?: number
   // 标签数超过阈值显示导航地图
@@ -158,6 +158,10 @@ interface Props {
   lineHeight?: number
   color?: string
   inactiveColor?: string
+  // 是否开启切换标签内容时的过渡动画
+  animated?: boolean
+  // 切换动画过渡时间，单位毫秒
+  duration?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -169,7 +173,9 @@ const props = withDefaults(defineProps<Props>(), {
   offsetTop: 0,
   swipeable: false,
   lineWidth: 19,
-  lineHeight: 3
+  lineHeight: 3,
+  animated: false,
+  duration: 300
 })
 
 // 选中值的索引，默认第一个
@@ -180,8 +186,6 @@ const lineStyle = ref<string>('')
 const items = ref<Record<string, any>[]>([])
 // map的开关
 const mapShow = ref<boolean>(false)
-// 标签页偏移量
-const bodyStyle = ref<string>('')
 // scroll-view偏移量
 const scrollLeft = ref<number>(0)
 
@@ -195,6 +199,18 @@ const inited = ref<boolean>(false)
 const { proxy } = getCurrentInstance() as any
 
 const touch = useTouch()
+
+const bodyStyle = computed(() => {
+  if (!props.animated) {
+    return ''
+  }
+
+  return objToStyle({
+    left: -100 * activeIndex.value + '%',
+    'transition-duration': props.duration + 'ms',
+    '-webkit-transition-duration': props.duration + 'ms'
+  })
+})
 
 /**
  * @description 修改选中的tab Index
@@ -225,11 +241,11 @@ watch(
       // eslint-disable-next-line quotes
       console.error("[wot design] error(wd-tabs): tabs's value cannot be null or undefined")
     }
-    if (getType(newValue) === 'number' && newValue < 0) {
+    if (typeof newValue === 'number' && newValue < 0) {
       // eslint-disable-next-line quotes
       console.error("[wot design] error(wd-tabs): tabs's value cannot be less than zero")
     }
-    setActive && setActive(newValue)
+    // setActive && setActive(newValue)
   },
   {
     immediate: true,
@@ -281,7 +297,7 @@ function setChild(child) {
   updateItems()
 
   // 提前设置好高亮的 tab，避免等到 mounted 时出现闪烁延迟问题
-  if (getType(props.modelValue) === 'number' && props.modelValue >= items.value.length) {
+  if (typeof props.modelValue === 'number' && props.modelValue >= items.value.length) {
     return
   }
   // 如果是字符串直接匹配，匹配不到用0兜底
@@ -289,7 +305,10 @@ function setChild(child) {
     const index = items.value.findIndex((item) => item.name === props.modelValue)
 
     if (index === -1) return
-
+    emit('change', {
+      index: index,
+      name: items.value[index].name
+    })
     emit('update:modelValue', index)
   }
   children[props.modelValue].$.exposed.setShow(true, true)
@@ -356,12 +375,13 @@ function setActiveTab() {
   children.forEach((child, index) => {
     child.$.exposed.setShow(child.$.exposed.painted.value || index === activeIndex.value, index === activeIndex.value)
   })
-
-  emit('change', {
-    index: activeIndex.value,
-    name: items.value[activeIndex.value].name
-  })
-  emit('update:modelValue', activeIndex.value)
+  if (activeIndex.value !== props.modelValue) {
+    emit('change', {
+      index: activeIndex.value,
+      name: items.value[activeIndex.value].name
+    })
+    emit('update:modelValue', activeIndex.value)
+  }
 }
 /**
  * @description scroll-view滑动到active的tab_nav

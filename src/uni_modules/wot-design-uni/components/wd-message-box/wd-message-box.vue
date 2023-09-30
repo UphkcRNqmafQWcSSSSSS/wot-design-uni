@@ -60,8 +60,9 @@ export default {
 
 <script lang="ts" setup>
 import { computed, inject, ref, watch } from 'vue'
-import { MessageOptions, MessageType } from './types'
+import type { MessageOptions, MessageType } from './types'
 import { defaultOptions, messageDefaultOptionKey } from '.'
+import { isDef } from '../common/util'
 
 interface Props {
   useSlot?: boolean
@@ -83,8 +84,8 @@ const bodyClass = computed(() => {
   return `wd-message-box__body ${!title.value ? 'is-no-title' : ''} ${type.value === 'prompt' ? 'is-prompt' : ''}`
 })
 
-const messageOptionKey = props.selector ? '__MESSAGE_OPTION__' + props.selector : messageDefaultOptionKey
-const messageOption = inject(messageOptionKey) || ref<MessageOptions>(defaultOptions) // message选项
+const messageOptionKey = props.selector ? messageDefaultOptionKey + props.selector : messageDefaultOptionKey
+const messageOption = inject(messageOptionKey, ref<MessageOptions>(defaultOptions)) // message选项
 
 /**
  * 消息文案
@@ -262,8 +263,8 @@ function inputValChange(value: string | number) {
  */
 function reset(option: MessageOptions) {
   if (option) {
-    title.value = option.title || title.value
-    showCancelButton.value = option.showCancelButton || showCancelButton.value
+    title.value = isDef(option.title) ? option.title : title.value
+    showCancelButton.value = isDef(option.showCancelButton) ? option.showCancelButton : showCancelButton.value
     show.value = option.show!
     closeOnClickModal.value = option.closeOnClickModal!
     confirmButtonText.value = option.confirmButtonText!
