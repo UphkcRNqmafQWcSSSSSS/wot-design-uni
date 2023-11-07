@@ -6,17 +6,15 @@
         <view v-if="!useContentSlot" class="wd-tooltip__inner">{{ content }}</view>
       </view>
     </view>
-    <wd-transition :show="modelValue" name="fade">
-      <view class="wd-tooltip__pos" :style="popover.popStyle.value">
-        <view class="wd-tooltip__container custom-pop">
-          <view v-if="visibleArrow" :class="`wd-tooltip__arrow ${popover.arrowClass.value} ${customArrow}`" :style="popover.arrowStyle.value"></view>
-          <!-- 普通模式 -->
-          <view v-if="!useContentSlot" class="wd-tooltip__inner">{{ content }}</view>
-          <!-- 用户自定义样式 -->
-          <slot name="content" v-else />
-        </view>
-        <wd-icon v-if="showClose" name="close" class="wd-tooltip__close-icon" @click="toggle"></wd-icon>
+    <wd-transition custom-class="wd-tooltip__pos" :custom-style="popover.popStyle.value" :show="modelValue" name="fade" :duration="200">
+      <view class="wd-tooltip__container custom-pop">
+        <view v-if="visibleArrow" :class="`wd-tooltip__arrow ${popover.arrowClass.value} ${customArrow}`" :style="popover.arrowStyle.value"></view>
+        <!-- 普通模式 -->
+        <view v-if="!useContentSlot" class="wd-tooltip__inner">{{ content }}</view>
+        <!-- 用户自定义样式 -->
+        <slot name="content" v-else />
       </view>
+      <wd-icon v-if="showClose" name="close" custom-class="wd-tooltip__close-icon" @click="toggle"></wd-icon>
     </wd-transition>
     <view @click="toggle" class="wd-tooltip__target" id="target">
       <slot />
@@ -36,9 +34,10 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onBeforeMount, onBeforeUnmount, onMounted, watch } from 'vue'
-import { usePopover } from '../mixins/usePopover'
+import { getCurrentInstance, inject, onBeforeMount, onBeforeUnmount, onMounted, watch } from 'vue'
+import { usePopover } from '../composables/usePopover'
 import { closeOther, pushToQueue, removeFromQueue } from '../common/clickoutside'
+import { type Queue, queueKey } from '../composables/useQueue'
 
 type PlacementType =
   | 'top'
@@ -85,6 +84,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const popover = usePopover()
+const queue = inject<Queue | null>(queueKey, null)
 
 const selector: string = 'tooltip'
 const emit = defineEmits(['update:modelValue', 'menuclick', 'change', 'open', 'close'])
@@ -96,7 +96,7 @@ watch(
     // 类型校验，支持所有值(除null、undefined。undefined建议统一写成void (0)防止全局undefined被覆盖)
     if (newVal === null || newVal === undefined) {
       // eslint-disable-next-line prettier/prettier
-        throw Error('value can\'t be null or undefined')
+        throw Error('[wot-design] warning(wd-tooltip): content can\'t be null or undefined')
     }
   }
 )
@@ -106,7 +106,11 @@ watch(
   (newValue) => {
     if (newValue) {
       popover.control(props.placement, props.offset)
-      closeOther(proxy)
+      if (queue && queue.closeOther) {
+        queue.closeOther(proxy)
+      } else {
+        closeOther(proxy)
+      }
     }
     popover.showStyle.value = newValue ? 'display: inline-block;' : 'display: none;'
     emit('change', { show: newValue })
@@ -119,12 +123,20 @@ onMounted(() => {
 })
 
 onBeforeMount(() => {
-  pushToQueue(proxy)
+  if (queue && queue.pushToQueue) {
+    queue.pushToQueue(proxy)
+  } else {
+    pushToQueue(proxy)
+  }
   popover.showStyle.value = props.modelValue ? 'opacity: 1;' : 'opacity: 0;'
 })
 
 onBeforeUnmount(() => {
-  removeFromQueue(proxy)
+  if (queue && queue.removeFromQueue) {
+    queue.removeFromQueue(proxy)
+  } else {
+    removeFromQueue(proxy)
+  }
 })
 
 function toggle(event) {

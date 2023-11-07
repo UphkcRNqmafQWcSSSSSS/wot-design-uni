@@ -115,7 +115,7 @@ function handleClose() {
 |---------|-----|-----|---------|
 | click | 点击幕帘时触发 | - | - |
 | close | 弹出层关闭时触发 | - | - |
-| clickmodal | 点击遮罩时触发 | - | - |
+| click-modal | 点击遮罩时触发 | - | - |
 | beforeenter | 进入前触发 | - | - |
 | enter | 进入时触发 | - | - |
 | afterenter | 进入后触发 | - | - |
@@ -129,5 +129,5 @@ function handleClose() {
 
 | 类名 | 说明 | 最低版本 |
 |-----|------|--------|
-| custom-class | 根结点样式 | - |
+| custom-class | 根节点样式 | - |
 

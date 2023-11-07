@@ -60,7 +60,7 @@ const list = ref([
       },
       {
         id: 'configProvider',
-        name: 'configProvider 全局配置'
+        name: 'ConfigProvider 全局配置'
       },
       {
         id: 'popup',
@@ -98,6 +98,18 @@ const list = ref([
       {
         id: 'segmented',
         name: 'Segmented 分段器'
+      },
+      {
+        id: 'tabbar',
+        name: 'Tabbar 标签栏'
+      },
+      {
+        id: 'navbar',
+        name: 'Navbar 导航栏'
+      },
+      {
+        id: 'sidebar',
+        name: 'Sidebar 侧边栏'
       }
     ]
   },
@@ -202,6 +214,10 @@ const list = ref([
       {
         id: 'messageBox',
         name: 'MessageBox 弹框'
+      },
+      {
+        id: 'overlay',
+        name: 'Overlay 遮罩层'
       },
       {
         id: 'noticeBar',
@@ -310,6 +326,10 @@ const list = ref([
       {
         id: 'swiper',
         name: 'Swiper 轮播图'
+      },
+      {
+        id: 'table',
+        name: 'Table 表格'
       }
     ]
   }
@@ -361,7 +381,7 @@ function kindToggle(id: string) {
   font-size: 12px;
 }
 .page__bd {
-  padding: 0 15px;
+  padding: 0 15px 30px 20px;
   user-select: none;
 }
 .logo {
@@ -401,13 +421,12 @@ function kindToggle(id: string) {
 }
 
 .kind-list__item {
-  margin: 20px 0;
   border-radius: 30px;
   background: #fff;
   overflow: hidden;
-}
-.kind-list__item:first-child {
-  margin-top: 0;
+  &:not(:last-child) {
+    margin-bottom: 20px;
+  }
 }
 
 .kind-list__img {

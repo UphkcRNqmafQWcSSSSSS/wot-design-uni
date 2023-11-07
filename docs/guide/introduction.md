@@ -21,7 +21,7 @@
 ## ✨ 特性
 
 - 🚀 支持 APP、H5、微信小程序 等平台.
-- 🚀 50+ 个高质量组件，覆盖移动端主流场景.
+- 🚀 60+ 个高质量组件，覆盖移动端主流场景.
 - 💪 使用 Typescript 构建，提供良好的组件类型系统.
 - 💪 采用 Vue3 最新特性，提升组件性能.
 - 📖 提供丰富的文档和组件示例.
@@ -37,7 +37,9 @@
 * [常见问题](/guide/common-problems)
 * [Discussions 讨论区](https://github.com/Moonofweisheng/wot-design-uni/discussions)
 * [QQ 群](https://qm.qq.com/cgi-bin/qm/qr?k=O1Z3pal6StL39qHtABqR54Tb56igr90O&jump_from=webapi&authKey=MtVWfi/EQbT03wW7tKXv4bmyKYHBHtzI8VewlzSsOdxFjN0wbgNy17np9Z9yC4Z8)
-
+* [快速上手项目](https://github.com/Moonofweisheng/wot-starter)
+* [Vue3路由库](https://moonofweisheng.gitee.io/uni-mini-router/)
+  
 ## 开源协议
 
 本项目遵循 MIT 协议。

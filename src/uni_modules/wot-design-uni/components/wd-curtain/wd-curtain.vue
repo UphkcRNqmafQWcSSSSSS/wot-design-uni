@@ -13,7 +13,7 @@
       @leave="leave"
       @after-leave="afterleave"
       @close="close"
-      @clickmodal="clickModal"
+      @click-modal="clickModal"
       :custom-class="`wd-curtain ${customClass}`"
     >
       <view class="wd-curtain__content">
@@ -93,7 +93,7 @@ const emit = defineEmits([
   'afterleave',
   'close',
   'closed',
-  'clickmodal',
+  'click-modal',
   'load',
   'error',
   'click'
@@ -147,7 +147,7 @@ function close() {
 }
 
 function clickModal() {
-  emit('clickmodal')
+  emit('click-modal')
 }
 
 function imgLoad(event) {

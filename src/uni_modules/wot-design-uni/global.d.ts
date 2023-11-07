@@ -1,7 +1,7 @@
 /*
  * @Author: weisheng
  * @Date: 2023-09-25 17:28:12
- * @LastEditTime: 2023-09-28 10:52:51
+ * @LastEditTime: 2023-11-03 23:21:14
  * @LastEditors: weisheng
  * @Description:
  * @FilePath: \wot-design-uni\src\uni_modules\wot-design-uni\global.d.ts
@@ -44,7 +44,7 @@ declare module '@vue/runtime-core' {
     WdLoading: typeof import('./components/wd-loading/wd-loading.vue')['default']
     WdLoadmore: typeof import('./components/wd-loadmore/wd-loadmore.vue')['default']
     WdMessageBox: typeof import('./components/wd-message-box/wd-message-box.vue')['default']
-    WdModal: typeof import('./components/wd-modal/wd-modal.vue')['default']
+    WdModal: typeof import('./components/wd-overlay/wd-overlay.vue')['default']
     WdNoticeBar: typeof import('./components/wd-notice-bar/wd-notice-bar.vue')['default']
     WdPagination: typeof import('./components/wd-pagination/wd-pagination.vue')['default']
     WdPicker: typeof import('./components/wd-picker/wd-picker.vue')['default']
@@ -81,6 +81,14 @@ declare module '@vue/runtime-core' {
     WdSwiper: typeof import('./components/wd-swiper/wd-swiper.vue')['default']
     WdSwiperNav: typeof import('./components/wd-swiper-nav/wd-swiper-nav.vue')['default']
     WdSegmented: typeof import('./components/wd-segmented/wd-segmented.vue')['default']
+    WdTabbar: typeof import('./components/wd-tabbar/wd-tabbar.vue')['default']
+    WdTabbarItem: typeof import('./components/wd-tabbar-item/wd-tabbar-item.vue')['default']
+    WdNavbar: typeof import('./components/wd-navbar/wd-navbar.vue')['default']
+    WdNavbarCapsule: typeof import('./components/wd-navbar-capsule/wd-navbar-capsule.vue')['default']
+    WdTable: typeof import('./components/wd-table/wd-table.vue')['default']
+    WdTableCol: typeof import('./components/wd-table-col/wd-table-col.vue')['default']
+    WdSidebar: typeof import('./components/wd-sidebar/wd-sidebar.vue')['default']
+    WdSidebarItem: typeof import('./components/wd-sidebar-item/wd-sidebar-item.vue')['default']
   }
 }
 

@@ -1,7 +1,7 @@
 <!--
  * @Author: weisheng
  * @Date: 2023-08-01 11:12:05
- * @LastEditTime: 2023-09-25 11:09:32
+ * @LastEditTime: 2023-11-02 19:01:52
  * @LastEditors: weisheng
  * @Description: 
  * @FilePath: \wot-design-uni\src\components\demo-block\demo-block.vue
@@ -30,8 +30,8 @@ import { ref, watch } from 'vue'
 interface Props {
   customClass?: string
   title?: string
-  ver?: number
-  hor?: number
+  ver?: number | string
+  hor?: number | string
   transparent?: boolean
 }
 
@@ -54,7 +54,7 @@ watch(
 )
 
 function setStyle() {
-  style.value = `margin: ${props.ver}px ${props.hor}px`
+  style.value = `margin: 0 ${props.hor}px;padding:${props.ver}px 0;`
 }
 </script>
 <style lang="scss" scoped>
@@ -62,6 +62,7 @@ function setStyle() {
   .is-white {
     background: $-dark-background2;
   }
+
   .demo-block {
     color: $-dark-color3;
   }
@@ -69,14 +70,16 @@ function setStyle() {
 
 .demo-block {
   position: relative;
+
   &:not(:first-child) {
     margin-top: 15px;
   }
+
   &:not(:last-child) {
     margin-bottom: 15px;
   }
+
   color: #666;
-  overflow: hidden;
 }
 
 .is-white {
@@ -84,8 +87,7 @@ function setStyle() {
 }
 
 .demo-title {
-  padding: 0 15px;
-  margin: 10px 0;
+  padding: 10px 15px;
   font-size: 13px;
 }
 </style>

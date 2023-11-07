@@ -32,7 +32,7 @@
           :cursor-spacing="cursorSpacing"
           :fixed="fixed"
           :cursor="cursor"
-          :show-confirm-barb="showConfirmBar"
+          :show-confirm-bar="showConfirmBar"
           :selection-start="selectionStart"
           :selection-end="selectionEnd"
           :adjust-position="adjustPosition"
@@ -95,6 +95,7 @@
           :selection-end="selectionEnd"
           :adjust-position="adjustPosition"
           :hold-keyboard="holdKeyboard"
+          :always-embed="alwaysEmbed"
           :placeholder-class="inputPlaceholderClass"
           @input="handleInput"
           @focus="handleFocus"
@@ -138,7 +139,7 @@ export default {
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { objToStyle, requestAnimationFrame } from '../common/util'
-import { useCell } from '../mixins/useCell'
+import { useCell } from '../composables/useCell'
 
 interface Props {
   customTextareaContainerClass?: string
@@ -167,6 +168,7 @@ interface Props {
   maxlength?: number
   disabled?: boolean
   alignRight?: boolean
+  alwaysEmbed?: boolean
   // 原生属性结束
   modelValue: string | number
   minlength?: number
@@ -206,6 +208,7 @@ const props = withDefaults(defineProps<Props>(), {
   showPassword: false,
   disabled: false,
   alignRight: false,
+  alwaysEmbed: false,
   readonly: false,
   useSuffixSlot: false,
   usePrefixSlot: false,

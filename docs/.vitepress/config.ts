@@ -1,7 +1,7 @@
 /*
  * @Author: weisheng
  * @Date: 2023-07-27 10:26:09
- * @LastEditTime: 2023-09-28 11:22:30
+ * @LastEditTime: 2023-11-06 20:48:43
  * @LastEditors: weisheng
  * @Description: 
  * @FilePath: \wot-design-uni\docs\.vitepress\config.ts
@@ -103,13 +103,12 @@ export default defineConfig({
         ]
       },
       { text: '捐赠作者', link: '/reward/reward', activeMatch: '/reward/' },
-
       {
         text: '相关链接',
         items: [
-          { text: 'uni-mini-router', link: 'https://gitee.com/fant-mini/uni-mini-router' },
+          { text: 'Vue3路由库', link: 'https://moonofweisheng.gitee.io/uni-mini-router/' },
+          { text: '快速上手项目', link: 'https://github.com/Moonofweisheng/wot-starter' },
           { text: 'uni-mini-ci', link: 'https://gitee.com/fant-mini/uni-mini-ci' },
-          { text: 'fant-mini-plus', link: 'https://fant-mini-plus.top/fant-mini-plus/' },
           { text: 'wot-design', link: 'https://ftf.jd.com/wot-design/' },
           { text: 'wot-design-mini', link: 'https://ftf.jd.com/wot-design-mini/' }
         ],
@@ -196,6 +195,15 @@ export default defineConfig({
           }, {
             link: "/component/segmented",
             text: "Segmented 分段器"
+          }, {
+            link: "/component/tabbar",
+            text: "Tabbar 标签栏"
+          }, {
+            link: "/component/navbar",
+            text: "Navbar 导航栏"
+          }, {
+            link: "/component/sidebar",
+            text: "Sidebar 侧边栏"
           }]
         }, {
     
@@ -273,6 +281,9 @@ export default defineConfig({
             link: "/component/notice-bar",
             text: "NoticeBar 通知栏"
           }, {
+            link: "/component/overlay",
+            text: "Overlay 遮罩层"
+          }, {
             link: "/component/progress",
             text: "Progress 进度条"
           }, {
@@ -302,7 +313,7 @@ export default defineConfig({
           text: "数据展示",
           items: [{
             link: "/component/badge",
-            text: "Badge 角标"
+            text: "Badge 徽标"
           }, {
             link: "/component/card",
             text: "Card 卡片"
@@ -348,6 +359,9 @@ export default defineConfig({
           }, {
             link: "/component/swiper",
             text: "Swiper 轮播图"
+          }, {
+            link: "/component/table",
+            text: "Table 表格"
           }]
         }
       ]

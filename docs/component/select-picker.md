@@ -1,6 +1,6 @@
 <frame/>
 
-# SelectPicker 单复选选择器
+# SelectPicker 单复选选择器 <el-tag text style="vertical-align: middle;margin-left:8px;" type="warning">0.1.34 更新</el-tag>
 
 ## 基本用法
 
@@ -341,6 +341,7 @@ function handleConfirm({ value, selectedItems }) {
 | filterable             | 可搜索（目前只支持本地搜索）                                                                             | boolean                           | -                | false    | -    |
 | filter-placeholder     | 搜索框占位符                                                                                             | string                            | -                | 搜索     | -    |
 | ellipsis               | 是否超出隐藏                                                                                             | boolean                           | -                | false    | -    |
+| scroll-into-view       | 重新打开是否滚动到选中项                                                                                 | boolean                           | -                | true    | 0.1.34    |
 
 ## 选项数据结构
 
@@ -376,7 +377,7 @@ function handleConfirm({ value, selectedItems }) {
 
 | 类名                 | 说明                     | 最低版本 |
 | -------------------- | ------------------------ | -------- |
-| custom-class         | 根结点样式               | -        |
+| custom-class         | 根节点样式               | -        |
 | custom-label-class   | label 外部自定义样式     | -        |
 | custom-value-class   | value 外部自定义样式     | -        |
 | custom-content-class | 弹出层内容区域自定义样式 | -        |

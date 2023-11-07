@@ -17,8 +17,20 @@ $-color-danger: var(--wot-color-danger, #fa4350) !default; // 危险出错色
 $-color-purple: var(--wot-color-purple, #8268de) !default; // 紫色
 $-color-yellow: var(--wot-color-yellow, #f0cd1d) !default; // 黄色
 $-color-blue: var(--wot-color-blue, #2bb3ed) !default; // 蓝色
-
 $-color-info: var(--wot-color-info, #909399) !default;
+
+$-color-theme: var(--wot-color-theme, $default-theme) !default; // 品牌色
+$-color-white: var(--wot-color-white, rgb(255, 255, 255)) !default; // 用于mix的白色
+$-color-black: var(--wot-color-black, rgb(0, 0, 0)) !default; // 用于mix的黑色
+
+$-color-gray-1: var(--wot-color-gray-1, #f7f8fa) !default;
+$-color-gray-2: var(--wot-color-gray-2, #f2f3f5) !default;
+$-color-gray-3: var(--wot-color-gray-3, #ebedf0) !default;
+$-color-gray-4: var(--wot-color-gray-4, #dcdee0) !default;
+$-color-gray-5: var(--wot-color-gray-5, #c8c9cc) !default;
+$-color-gray-6: var(--wot-color-gray-6, #969799) !default;
+$-color-gray-7: var(--wot-color-gray-7, #646566) !default;
+$-color-gray-8: var(--wot-color-gray-8, #323233) !default;
 
 $-font-gray-1: var(--wot-font-gray-1, rgba(0, 0, 0, 0.9));
 $-font-gray-2: var(--wot-font-gray-2, rgba(0, 0, 0, 0.6));
@@ -55,7 +67,7 @@ $-dark-color: var(--wot-dark-color, $-color-white) !default;
 $-dark-color2: var(--wot-dark-color2, #f2270c) !default;
 $-dark-color3: var(--wot-dark-color3, rgba(232, 230, 227, 0.8)) !default;
 $-dark-color-gray: var(--wot-dark-color-gray, $-color-secondary) !default;
-$-dark-border-color:var(--wot-dark-border-color, #3a3a3c) !default;
+$-dark-border-color: var(--wot-dark-border-color, #3a3a3c) !default;
 
 /* 文字颜色-深背景 */
 $-color-title-indark: var(--wot-color-title-indark, $-color-white) !default; // 模块标题/重要正文 fff
@@ -74,9 +86,9 @@ $-color-inlight-title-mask: var(--wot-color-inlight-title-mask, #000000) !defaul
 $-color-icon: var(--wot-color-icon, #d9d9d9) !default; // icon颜色
 $-color-icon-active: var(--wot-color-icon-active, #eee) !default; // icon颜色hover
 $-color-icon-disabled: var(--wot-color-icon-disabled, #a7a7a7) !default; // icon颜色disabled
-/* modal */
-$-modal-bg: rgba(0, 0, 0, 0.65) !default;
-$-modal-bg-dark: rgba(0, 0, 0, 0.75) !default;
+/* overlay */
+$-overlay-bg: rgba(0, 0, 0, 0.65) !default;
+$-overlay-bg-dark: rgba(0, 0, 0, 0.75) !default;
 
 
 /*----------------------------------------- Theme color. end -------------------------------------------*/
@@ -575,9 +587,10 @@ $-steps-dot-size: var(--wot-steps-dot-size, 7px) !default; // 点状大小
 $-steps-dot-active-size: var(--wot-steps-dot-active-size, 9px) !default; // 点状高亮大小
 
 /* switch */
-$-switch-width: var(--wot-switch-width, 51px) !default; // 宽度
-$-switch-height: var(--wot-switch-height, 32px) !default; // 高度
-$-switch-circle-size: var(--wot-switch-circle-size, 28px) !default; // 圆点大小
+$-switch-size: var(--wot-switch-size, 28px) !default; // switch大小
+$-switch-width: var(--wot-switch-width, calc(1.8em + 4px)) !default; // 宽度
+$-switch-height: var(--wot-switch-height, calc(1em + 4px)) !default; // 高度
+$-switch-circle-size: var(--wot-switch-circle-size, 1em) !default; // 圆点大小
 $-switch-border-color: var(--wot-switch-border-color, #e5e5e5) !default; // 边框颜色选中状态背景颜色
 $-switch-active-color: var(--wot-switch-active-color, resultColor($open-linear, 315deg, $-color-theme, "light""dark", #4f7cf8 #668df8, 0% 100%)) !default; // 选中状态背景
 $-switch-active-shadow-color: var(--wot-switch-active-shadow-color, rgba(0, 83, 162, 0.5)) !default; // 选中状态shadow颜色
@@ -603,7 +616,7 @@ $-tabs-nav-map-arrow-color: var(--wot-tabs-nav-map-arrow-color, rgba(0, 0, 0, 0.
 $-tabs-nav-map-btn-before-bg: var(--wot-tabs-nav-map-btn-before-bg, linear-gradient(270deg, rgba(255, 255, 255, 1) 1%, rgba(255, 255, 255, 0) 100%)) !default; // 左侧map遮罩阴影
 $-tabs-nav-map-button-back-color: var(--wot-tabs-nav-map-button-back-color, rgba(0, 0, 0, 0.04)) !default; // map 类型按钮边框颜色
 $-tabs-nav-map-button-radius: var(--wot-tabs-nav-map-button-radius, 16px) !default; // map 类型按钮圆角大小
-$-tabs-nav-map-modal-bg: var(--wot-tabs-nav-map-modal-bg, $-modal-bg) !default; // map 类型蒙层背景色
+$-tabs-nav-map-modal-bg: var(--wot-tabs-nav-map-modal-bg, $-overlay-bg) !default; // map 类型蒙层背景色
 
 /* tag */
 $-tag-fs: var(--wot-tag-fs, $-fs-secondary) !default; // 字号
@@ -631,7 +644,7 @@ $-tag-close-active-color: var(--wot-tag-close-active-color, rgba(0, 0, 0, 0.45))
 $-toast-padding: var(--wot-toast-padding, 16px 24px) !default; // padding
 $-toast-max-width: var(--wot-toast-max-width, 300px) !default; // 最大宽度
 $-toast-radius: var(--wot-toast-radius, 8px) !default; // 圆角大小
-$-toast-bg: var(--wot-toast-bg, $-modal-bg) !default; // 背景色
+$-toast-bg: var(--wot-toast-bg, $-overlay-bg) !default; // 背景色
 $-toast-fs: var(--wot-toast-fs, $-fs-content) !default; // 字号
 $-toast-with-icon-min-width: var(--wot-toast-with-icon-min-width, 150px) !default; // 有图标的情况下最小宽度
 $-toast-icon-size: var(--wot-toast-icon-size, 39px) !default; // 图标大小
@@ -762,8 +775,63 @@ $-swiper-nav-btn-size: var(--wot-swiper-nav-btn-size, 48rpx) !default;
 
 
 // segmented
+$-segmented-padding: var(--wot-segmented-padding, 4px) !default; // 分段器padding
 $-segmented-item-bg-color: var(--wot-segmented-item-bg-color, #eeeeee) !default;
 $-segmented-item-color: var(--wot-segmented-item-color, rgba(0, 0, 0, 0.85)) !default; // 标题文字颜色
 $-segmented-item-acitve-bg: var(--wot-segmented-item-acitve-bg, #FFFFFF) !default; // 标题文字颜色
 $-segmented-item-disabled-color: var(--wot-segmented-item-disabled-color, rgba(0, 0, 0, 0.25)) !default; // 标题文字禁用颜色
 
+// tabbar
+$-tabbar-height: var(--wot-tabbar-height, 50px) !default;
+$-tabbar-box-shadow: var(--wot-tabbar-box-shadow, 0 6px 30px 5px rgba(0, 0, 0, 0.05), 0 16px 24px 2px rgba(0, 0, 0, 0.04), 0 8px 10px -5px rgba(0, 0, 0, 0.08)) !default; // round类型tabbar阴影
+
+// tabbar-item
+$-tabbar-item-title-font-size: var(--wot-tabbar-item-title-font-size, 10px) !default; // tabbar选项文字大小
+$-tabbar-item-title-line-height: var(--wot-tabbar-item-title-line-height, initial) !default; // tabbar选项标题文字行高
+$-tabbar-inactive-color: var(--wot-tabbar-inactive-color, $-color-title) !default; // 标题文字和图标颜色
+$-tabbar-active-color: var(--wot-tabbar-active-color, $-color-theme) !default; // 选中文字和图标颜色
+
+
+// navbar
+$-navbar-height: var(--wot-navbar-height, 44px) !default; // navbar高度
+$-navbar-color: var(--wot-navbar-color, $-font-gray-1) !default; // navbar字体颜色
+$-navbar-background: var(--wot-navbar-background, $-color-white) !default; // navbar背景颜色
+$-navbar-arrow-size: var(--wot-navbar-arrow-size, 24px) !default; // navbar左箭头图标大小
+$-navbar-desc-font-size: var(--wot-navbar-desc-font-size, 16px); // navbar 左箭头字体大小
+$-navbar-desc-font-color: var(--wot-navbar-desc-font-color, $-font-gray-1) !default; // navbar左右两侧字体颜色
+$-navbar-title-font-size: var(--wot-navbar-title-font-size, 18px); // navbar title字体大小
+$-navbar-title-font-weight: var(--wot-navbar-title-font-weight, 600); // navbar title字重
+$-navbar-disabled-opacity: var(--wot-navbar-disabled-opacity, 0.6) !default; // navbar左右两侧字体禁用
+$-navbar-hover-color :var(--wot-navbar-hover-color, #eee) !default; // navbar hover样式
+
+// navbar capsule
+$-navbar-capsule-border-color: var(--wot-navbar-capsule-border-color, #e7e7e7);
+$-navbar-capsule-border-radius: var(--wot-navbar-capsule-border-radius, 16px);
+$-navbar-capsule-width: var(--wot-navbar-capsule-width, 88px);
+$-navbar-capsule-height: var(--wot-navbar-capsule-height, 32px);
+
+// table
+$-table-color: var(--wot-table-color, $-font-gray-1); // 表格字体颜色
+$-table-bg: var(--wot-table-bg, #FFFFFF); // 表格背景颜色
+$-table-stripe-bg: var(--wot-table-stripe-bg, #f3f3f3); // 表格背景颜色
+$-table-border-color: var(--wot-table-border-color, #ececec); // 表格边框颜色
+$-table-font-size: var(--wot-table-font-size, 13px); // 表格字体大小
+
+// sidebar
+$-sidebar-bg: var(--wot-sidebar-bg, $-color-gray-1); // 侧边栏背景色
+$-sidebar-width: var(--wot-sidebar-width, 104px); // 侧边栏宽度
+$-sidebar-height: var(--wot-sidebar-height, 100%); // 侧边栏高度
+
+// sidebar-item
+$-sidebar-color: var(--wd-sidebar-color, $-font-gray-1);
+$-sidebar-item-height: var(--wd-sidebar-item-height, 56px);
+$-sidebar-item-line-height: var(--wd-sidebar-item-line-height, 24px);
+$-sidebar-disabled-color: var(--wd-side-bar-disabled-color, $-font-gray-4);
+$-sidebar-active-color: var(--wd-sidebar-active-color, $-color-theme); // 激活项字体颜色
+$-sidebar-active-bg: var(--wot-sidebar-active-bg, $-color-white); // 激活项背景颜色
+$-sidebar-hover-bg: var(--wot-sidebar-hover-bg, $-color-gray-2); // 激活项点击背景颜色
+$-sidebar-border-radius: var(--wd-sidebar-border-radius, 8px);
+$-sidebar-font-size: var(--wd-sidebar-font-size, 16px);
+$-sidebar-icon-size: var(--wd-sidebar-icon-size, 20px);
+$-sidebar-active-border-width: var(--wd-sidebar-active-border-width, 4px);
+$-sidebar-active-border-height: var(--wd-sidebar-active-border-height, 16px);

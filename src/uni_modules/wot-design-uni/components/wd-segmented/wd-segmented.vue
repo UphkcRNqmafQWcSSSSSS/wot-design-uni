@@ -33,8 +33,7 @@ export default {
 <script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, reactive, ref, watch } from 'vue'
 import { addUnit, getRect, isObj, objToStyle } from '../common/util'
-import { CSSProperties } from 'vue'
-import { fa } from 'element-plus/es/locale'
+import type { CSSProperties } from 'vue'
 const $item = '.wd-segmented__item'
 
 type SegmentedType = 'large' | 'middle' | 'small'
@@ -132,7 +131,6 @@ function updateActiveStyle() {
     const style: CSSProperties = {
       position: 'absolute',
       width: addUnit(sectionItemInfo.width),
-      height: addUnit(sectionItemInfo.height),
       transition: transition,
       transform: `translateX(${left}px)`,
       'z-index': 0

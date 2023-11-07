@@ -248,6 +248,7 @@
 | use-icon-slot | 是否开启 `GridItem` icon 插槽                                                                                             | boolean        | -                                           | false  | -        |
 | use-text-slot | 是否开启 `GridItem` text 内容插槽                                                                                         | boolean        | -                                           | false  | -        |
 | icon-size     | 图标大小                                                                                                                  | string         | -                                           | 26px   | -        |
+| badge-props | 自定义徽标的属性，传入的对象会被透传给 [Badge 组件的 props](/component/badge#attributes)	| BadgeProps    | -      | -  | 0.1.50   |
 
 ## GridItem Events
 
@@ -273,12 +274,12 @@
 
 | 类名         | 说明            | 最低版本 |
 | ------------ | --------------- | -------- |
-| custom-class | Grid 根结点样式 | -        |
+| custom-class | Grid 根节点样式 | -        |
 
 ## GridItem 外部样式类
 
 | 类名         | 说明                    | 最低版本 |
 | ------------ | ----------------------- | -------- |
-| custom-class | GridItem 根结点样式     | -        |
+| custom-class | GridItem 根节点样式     | -        |
 | custom-text  | GridItem 下方文字样式   | -        |
 | custom-icon  | GridItem 上方 icon 样式 | -        |

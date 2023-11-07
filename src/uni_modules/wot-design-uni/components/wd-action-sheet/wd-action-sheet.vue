@@ -13,7 +13,7 @@
       @close="close"
       @after-enter="handleOpened"
       @after-leave="handleClosed"
-      @clickmodal="handleClickModal"
+      @click-modal="handleClickModal"
       :z-index="zIndex"
     >
       <view
@@ -136,7 +136,7 @@ watch(
   { deep: true, immediate: true }
 )
 
-const emit = defineEmits(['select', 'clickmodal', 'cancel', 'closed', 'close', 'open', 'opened', 'update:modelValue'])
+const emit = defineEmits(['select', 'click-modal', 'cancel', 'closed', 'close', 'open', 'opened', 'update:modelValue'])
 
 function isArray() {
   return props.panels.length && !(props.panels[0] instanceof Array)
@@ -166,7 +166,7 @@ function select(rowIndex: number, type: 'action' | 'panels', colIndex?: number) 
   close()
 }
 function handleClickModal() {
-  emit('clickmodal')
+  emit('click-modal')
   if (props.closeOnClickModal) {
     close()
   }
