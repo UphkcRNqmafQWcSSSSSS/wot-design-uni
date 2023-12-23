@@ -19,8 +19,11 @@
       @confirm="handleConfirm"
     />
     <view v-else-if="dynamic" class="wd-tag__text" :style="textStyle" @click="handleAdd">
-      <wd-icon name="add" class="wd-tag__add" custom-class="wd-tag__icon" />
-      <text>新增标签</text>
+      <slot name="add" v-if="$slots.add"></slot>
+      <template v-else>
+        <wd-icon name="add" custom-class="wd-tag__add wd-tag__icon" />
+        <text>新增标签</text>
+      </template>
     </view>
   </view>
 </template>
@@ -39,9 +42,11 @@ export default {
 import { objToStyle } from '../common/util'
 import { computed, ref, watch } from 'vue'
 
+type TagType = 'default' | 'primary' | 'success' | 'warning' | 'danger'
+
 interface Props {
   useIconSlot?: boolean
-  type?: string
+  type?: TagType
   icon?: string
   closable?: boolean
   plain?: boolean
@@ -54,6 +59,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  type: 'default',
   customClass: '',
   useIconSlot: false,
   closable: false,
@@ -81,7 +87,7 @@ watch(
     if (!newValue) return
     // type: 'primary', 'danger', 'warning', 'success'
     const type = ['primary', 'danger', 'warning', 'success']
-    if (type.indexOf(newValue) === -1) throw Error(`type must be one of ${type.toString()}`)
+    if (type.indexOf(newValue) === -1) console.error(`type must be one of ${type.toString()}`)
     computeTagClass()
   },
   { deep: true, immediate: true }

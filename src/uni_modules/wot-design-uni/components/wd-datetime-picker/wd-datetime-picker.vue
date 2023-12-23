@@ -48,7 +48,7 @@
             {{ cancelButtonText }}
           </view>
           <!--标题-->
-          <view v-if="title" class="wd-picker__title">{{ JSON.stringify(title) }}</view>
+          <view v-if="title" class="wd-picker__title">{{ title }}</view>
           <!--确定按钮-->
           <view :class="`wd-picker__action ${loading || isLoading ? 'is-loading' : ''}`" @click="onConfirm">
             {{ confirmButtonText }}
@@ -135,7 +135,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onBeforeMount, onMounted, ref, watch } from 'vue'
+import { getCurrentInstance, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue'
 import { deepClone, getType, isArray, isDef, isEqual, padZero } from '../common/util'
 import { useCell } from '../composables/useCell'
 import { type DateTimeType, getPickerValue } from '../wd-datetime-picker-view/type'
@@ -296,7 +296,9 @@ watch(
       // 每次value更新时都需要刷新整个列表
       innerValue.value = deepClone(getDefaultInnerValue())
     }
-    setShowValue(false, false, true)
+    nextTick(() => {
+      setShowValue(false, false, true)
+    })
   },
   {
     deep: true,
@@ -308,7 +310,7 @@ watch(
   () => props.displayFormat,
   (fn) => {
     if (fn && getType(fn) !== 'function') {
-      throw Error('The type of displayFormat must be Function')
+      console.error('The type of displayFormat must be Function')
     }
   },
   {
@@ -320,7 +322,7 @@ watch(
   () => props.filter,
   (fn) => {
     if (fn && getType(fn) !== 'function') {
-      throw Error('The type of filter must be Function')
+      console.error('The type of filter must be Function')
     }
   },
   {
@@ -332,7 +334,7 @@ watch(
   () => props.formatter,
   (fn) => {
     if (fn && getType(fn) !== 'function') {
-      throw Error('The type of formatter must be Function')
+      console.error('The type of formatter must be Function')
     }
   },
   {
@@ -344,7 +346,7 @@ watch(
   () => props.beforeConfirm,
   (fn) => {
     if (fn && getType(fn) !== 'function') {
-      throw Error('The type of beforeConfirm must be Function')
+      console.error('The type of beforeConfirm must be Function')
     }
   },
   {
@@ -356,7 +358,7 @@ watch(
   () => props.displayFormatTabLabel,
   (fn) => {
     if (fn && getType(fn) !== 'function') {
-      throw Error('The type of displayFormatTabLabel must be Function')
+      console.error('The type of displayFormatTabLabel must be Function')
     }
   },
   {
@@ -578,8 +580,8 @@ function onConfirm() {
   const { beforeConfirm } = props
   if (beforeConfirm) {
     beforeConfirm(
-      innerValue.value,
-      (isPass) => {
+      region.value ? [innerValue.value, endInnerValue.value] : innerValue.value,
+      (isPass: boolean) => {
         isPass && handleConfirm()
       },
       proxy.$.exposed

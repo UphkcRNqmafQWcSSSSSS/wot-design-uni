@@ -45,12 +45,12 @@
 - 💪 使用 Typescript 构建，提供良好的组件类型系统.
 - 💪 采用 Vue3 最新特性，提升组件性能.
 - 📖 提供丰富的文档和组件示例.
-- 🎨 支持主题定制，可以定制 scss 变量以及组件的样式自定义.
+- 🎨 支持修改 CSS 变量实现主题定制.
 - 🍭 支持暗黑模式
 
 ## 📱 预览
 
-扫描二维码访问演示：
+扫描二维码访问演示，注意：因微信审核机制限制，当前的微信小程序示例可能不是最新版本，可以clone代码到本地预览。
 
 <p>
 <img src="https://wot-design-uni.cn/wx.jpg" width="200" height="200" style="margin-right:30px"/>
@@ -71,10 +71,13 @@
 * [快速上手项目](https://github.com/Moonofweisheng/wot-starter)
 * [Vue3路由库](https://moonofweisheng.gitee.io/uni-mini-router/)
 
+## 开发计划
+
+开发计划已公布在[Discussions 讨论区](https://github.com/Moonofweisheng/wot-design-uni/discussions/45)中，欢迎参与讨论，提出意见和建议。
 
 ## 贡献指南
 
-修改代码请阅读我们的 [贡献指南](https://github.com/Moonofweisheng/wot-design-uni/blob/develop/.github/CONTRIBUTING.md)。
+修改代码请阅读我们的 [贡献指南](./.github/CONTRIBUTING.md)。
 
 使用过程中发现任何问题都可以提 [Issue](https://github.com/Moonofweisheng/wot-design-uni/issues) 给我们，当然，我们也非常欢迎你给我们发 [PR](https://github.com/Moonofweisheng/wot-design-uni/pulls)。
 

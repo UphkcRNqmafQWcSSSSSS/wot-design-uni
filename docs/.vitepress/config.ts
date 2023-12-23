@@ -1,7 +1,7 @@
 /*
  * @Author: weisheng
  * @Date: 2023-07-27 10:26:09
- * @LastEditTime: 2023-11-06 20:48:43
+ * @LastEditTime: 2023-12-07 15:08:32
  * @LastEditors: weisheng
  * @Description: 
  * @FilePath: \wot-design-uni\docs\.vitepress\config.ts
@@ -177,6 +177,9 @@ export default defineConfig({
             }, {
               link: "/component/transition",
               text: "Transition 动画"
+            }, {
+              link: "/component/fab",
+              text: "Fab 悬浮按钮"
             }
           ]
         },
@@ -307,6 +310,12 @@ export default defineConfig({
           }, {
             link: "/component/tooltip",
             text: "Tooltip 文字提示"
+          }, {
+            link: "/component/count-down",
+            text: "CountDown 倒计时"
+          }, {
+            link: "/component/number-keyboard",
+            text: "NumberKeyboard 数字键盘"
           }]
         }, {
     
@@ -329,6 +338,9 @@ export default defineConfig({
           }, {
             link: "/component/divider",
             text: "Divider 分割线"
+          }, {
+            link: "/component/gap",
+            text: "Gap 间隔槽"
           }, {
             link: "/component/img",
             text: "Img 图片"

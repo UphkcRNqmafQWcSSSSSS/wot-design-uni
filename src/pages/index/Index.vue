@@ -73,6 +73,10 @@ const list = ref([
       {
         id: 'transition',
         name: 'Transition 动画'
+      },
+      {
+        id: 'fab',
+        name: 'Fab 悬浮按钮'
       }
     ]
   },
@@ -254,6 +258,14 @@ const list = ref([
       {
         id: 'tooltip',
         name: 'Tooltip 文字提示'
+      },
+      {
+        id: 'countDown',
+        name: 'CountDown 倒计时'
+      },
+      {
+        id: 'numberKeyboard',
+        name: 'NumberKeyboard 数字键盘'
       }
     ]
   },
@@ -286,6 +298,10 @@ const list = ref([
       {
         id: 'divider',
         name: 'Divider 分割线'
+      },
+      {
+        id: 'gap',
+        name: 'Gap 间隔槽'
       },
       {
         id: 'img',

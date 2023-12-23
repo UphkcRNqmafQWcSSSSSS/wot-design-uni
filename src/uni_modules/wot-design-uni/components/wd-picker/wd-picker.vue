@@ -80,8 +80,8 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { getCurrentInstance, onBeforeMount, ref, watch, computed, onMounted } from 'vue'
-import { deepClone, defaultDisplayFormat, getType } from '../common/util'
+import { getCurrentInstance, onBeforeMount, ref, watch, computed, onMounted, nextTick } from 'vue'
+import { deepClone, defaultDisplayFormat, getType, isDef } from '../common/util'
 import { useCell } from '../composables/useCell'
 import { type ColumnItem, formatArray } from '../wd-picker-view/type'
 
@@ -199,7 +199,7 @@ watch(
   () => props.displayFormat,
   (fn) => {
     if (fn && getType(fn) !== 'function') {
-      throw Error('The type of displayFormat must be Function')
+      console.error('The type of displayFormat must be Function')
     }
     if (pickerViewWd.value && pickerViewWd.value.selectedIndex && pickerViewWd.value.selectedIndex.length !== 0) {
       if (props.modelValue) {
@@ -217,11 +217,17 @@ watch(
 
 watch(
   () => props.modelValue,
-  (newValue, oldValue) => {
+  (newValue) => {
     pickerValue.value = newValue
     // 获取初始选中项,并展示初始选中文案
-    if (newValue && pickerViewWd.value) {
-      setShowValue(pickerViewWd.value!.getSelects())
+    if (isDef(newValue)) {
+      if (pickerViewWd.value && pickerViewWd.value.getSelects) {
+        nextTick(() => {
+          setShowValue(pickerViewWd.value!.getSelects())
+        })
+      } else {
+        setShowValue(getSelects(props.modelValue))
+      }
     } else {
       showValue.value = ''
     }
@@ -238,8 +244,14 @@ watch(
     displayColumns.value = newValue
     resetColumns.value = newValue
     // 获取初始选中项,并展示初始选中文案
-    if (props.modelValue && pickerViewWd.value) {
-      setShowValue(pickerViewWd.value!.getSelects())
+    if (props.modelValue) {
+      if (pickerViewWd.value && pickerViewWd.value.getSelects) {
+        nextTick(() => {
+          setShowValue(pickerViewWd.value!.getSelects())
+        })
+      } else {
+        setShowValue(getSelects(props.modelValue))
+      }
     } else {
       showValue.value = ''
     }
@@ -254,7 +266,7 @@ watch(
   () => props.columnChange,
   (newValue) => {
     if (newValue && getType(newValue) !== 'function') {
-      throw Error('The type of columnChange must be Function')
+      console.error('The type of columnChange must be Function')
     }
   },
   {

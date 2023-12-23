@@ -1,6 +1,196 @@
 # 更新日志 
 
 
+### [0.1.70](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.69...v0.1.70) (2023-12-23)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 picker 的列value为0时回显异常的问题 ([2ba93c3](https://github.com/Moonofweisheng/wot-design-uni/commit/2ba93c328c54c41b6e1e9ead946e9c46e278ebb9)), closes [#155](https://github.com/Moonofweisheng/wot-design-uni/issues/155)
+
+### [0.1.69](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.68...v0.1.69) (2023-12-13)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Notify 使用文档错误的问题 ([3fe6423](https://github.com/Moonofweisheng/wot-design-uni/commit/3fe6423c9c6727eaa3655029bf862b9be182b70b)), closes [#148](https://github.com/Moonofweisheng/wot-design-uni/issues/148)
+
+### [0.1.68](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.67...v0.1.68) (2023-12-07)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  增加 Gap 组件的文档 ([9e3a8c1](https://github.com/Moonofweisheng/wot-design-uni/commit/9e3a8c1506f9ef93f9f0155ac948c8bc4d215ea8))
+
+### [0.1.67](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.66...v0.1.67) (2023-12-06)
+
+
+### ✨ Features | 新功能
+
+* ✨ 新增 Gap 间隔槽组件 ([#147](https://github.com/Moonofweisheng/wot-design-uni/issues/147)) ([fa7cd16](https://github.com/Moonofweisheng/wot-design-uni/commit/fa7cd163810cbcd63fc2a99a6a92ccd8a803b2f1))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复Picker组件v-model数据不更新的问题 ([e60f475](https://github.com/Moonofweisheng/wot-design-uni/commit/e60f47538130625a8c8f93e3a6795b7e71588002)), closes [#146](https://github.com/Moonofweisheng/wot-design-uni/issues/146)
+
+### [0.1.66](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.65...v0.1.66) (2023-12-01)
+
+
+### ✨ Features | 新功能
+
+* ✨ Tag 组件type增加属性值default ([#143](https://github.com/Moonofweisheng/wot-design-uni/issues/143)) ([48f0e4b](https://github.com/Moonofweisheng/wot-design-uni/commit/48f0e4b3c484755a0da4eb11fa814c6b52be74b1))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 ActionSheet 组件设置custom-class无效的问题 ([1e5bcf7](https://github.com/Moonofweisheng/wot-design-uni/commit/1e5bcf7d0a8be66b80de81a0359d3fb429fdf52d))
+
+### [0.1.65](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.64...v0.1.65) (2023-11-29)
+
+
+### ✨ Features | 新功能
+
+* ✨ 新增 NumberKeyboard 数字键盘组件 ([#139](https://github.com/Moonofweisheng/wot-design-uni/issues/139)) ([7bb4455](https://github.com/Moonofweisheng/wot-design-uni/commit/7bb4455c6d9eca179ba174b8ad0da6ae8a09defc))
+* Tag新增类型标签添加slot ([7977dbb](https://github.com/Moonofweisheng/wot-design-uni/commit/7977dbbe3565eb06b700f2c55a31803647760fa9))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  新增关于 Tag 组件的add插槽的介绍 ([537fa5e](https://github.com/Moonofweisheng/wot-design-uni/commit/537fa5ebf8dcdc14ee12fc1f1e5a5f829653a14a))
+
+### [0.1.64](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.63...v0.1.64) (2023-11-25)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复DateTimePicker标题展示和模式为区间时before-confirm参数错误的问题 ([7bcd12b](https://github.com/Moonofweisheng/wot-design-uni/commit/7bcd12ba633224dd42b160f0b43fadc99ac76707))
+
+### [0.1.63](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.62...v0.1.63) (2023-11-23)
+
+
+### ✨ Features | 新功能
+
+* ✨ CountDown 倒计时组件支持custom-class和custom-style ([dd60d6d](https://github.com/Moonofweisheng/wot-design-uni/commit/dd60d6df855cc49eba36beb7bcfb9eeb96ed0c82))
+* ✨ Search 搜索组件支持自动聚焦和清空后自动聚焦 ([2e3ab63](https://github.com/Moonofweisheng/wot-design-uni/commit/2e3ab63d3dad582c44d9d9f8d2b57e21ee22f380))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复文档中config-provider等页面的错误 ([f71e641](https://github.com/Moonofweisheng/wot-design-uni/commit/f71e6412e770f2043e4cb9a35950a68aacf0e542))
+
+### [0.1.62](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.61...v0.1.62) (2023-11-22)
+
+
+### ✨ Features | 新功能
+
+* ✨ Badge 徽标组件支持控制是否显示0值 ([65cfb2c](https://github.com/Moonofweisheng/wot-design-uni/commit/65cfb2ca15c29783f6de48de0bda4ddc3d43664a))
+* ✨ Upload 上传组件支持h5端获取文件后缀名 ([59fe70c](https://github.com/Moonofweisheng/wot-design-uni/commit/59fe70c0d0c55c7ecca26902b41599be94e34fe3))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  优化 Upload 文档中关于云存储内容的样式 ([607ce05](https://github.com/Moonofweisheng/wot-design-uni/commit/607ce05100ffef9c5c98b503e580a718551f5552))
+
+### [0.1.61](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.60...v0.1.61) (2023-11-20)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复 Tag 标签组件文档错乱的问题 ([502203b](https://github.com/Moonofweisheng/wot-design-uni/commit/502203bebf08d7e6851b8dd2f94768f6c620da26))
+* ✏️  ImgCropper 组件演示页面增加微信小程序隐私协议弹框 ([3af9246](https://github.com/Moonofweisheng/wot-design-uni/commit/3af9246d1f1876ba3c83f6829a9716ad37ae5829))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Calendar 日历组件存在未定义属性导致警告的问题 ([d0d3152](https://github.com/Moonofweisheng/wot-design-uni/commit/d0d3152a5ca1a3e06135b12f4565211258619d1f))
+* 🐛 修复 CountDown 倒计时组件文档手动控制示例错误的问题 ([3c373fb](https://github.com/Moonofweisheng/wot-design-uni/commit/3c373fbf3af02c8a73ddd3a4063f9408ec4f33ff))
+* 🐛 修复 SelectPicker 组件loading状态仍可以滚动的问题 ([c5a1bff](https://github.com/Moonofweisheng/wot-design-uni/commit/c5a1bfff576aad8a6f03288a6a12a8ed24f776f2))
+
+
+### ✨ Features | 新功能
+
+* ✨ Upload 上传组件支持上传至云存储 ([523a6be](https://github.com/Moonofweisheng/wot-design-uni/commit/523a6be40b065c4cc28cfe81fdcb200142d9a455))
+
+### [0.1.60](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.59...v0.1.60) (2023-11-20)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复 CountDown 倒计时组件默认slot用法的介绍错误的问题 ([2fbb88f](https://github.com/Moonofweisheng/wot-design-uni/commit/2fbb88fcd9fe21de09637d48149278d9aef5e1d9))
+
+### [0.1.59](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.58...v0.1.59) (2023-11-19)
+
+### [0.1.58](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.57...v0.1.58) (2023-11-19)
+
+
+### ✨ Features | 新功能
+
+* ✨ 新增 CountDown 倒计时组件 ([a805d04](https://github.com/Moonofweisheng/wot-design-uni/commit/a805d04827600525c08fbc1848cb3a524b48e81a))
+* ✨ CountDown 倒计时组件支持小程序 ([22f249a](https://github.com/Moonofweisheng/wot-design-uni/commit/22f249ae5bdedea1ecebfe31350c7b5a1e394f2e))
+
+### [0.1.57](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.56...v0.1.57) (2023-11-17)
+
+
+### ✨ Features | 新功能
+
+* ✨ 新增 Fab 悬浮动作按钮组件 ([3c526fe](https://github.com/Moonofweisheng/wot-design-uni/commit/3c526feb102ccf17da0678a6e1c004bb82d57f0f))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复 Cell 组件点击反馈的介绍错误的问题 ([9096d81](https://github.com/Moonofweisheng/wot-design-uni/commit/9096d81f514348d6103f33590387d0406b217198))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Table 表格组件数字英文换行失效的问题 ([47ac339](https://github.com/Moonofweisheng/wot-design-uni/commit/47ac3390cb58d250129a9db6ade8d90f980855a1))
+
+### [0.1.56](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.55...v0.1.56) (2023-11-12)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Tabbar 标签栏组件 bordered 属性无效的问题 ([69c2656](https://github.com/Moonofweisheng/wot-design-uni/commit/69c265638c6fc36a1479a37c052a572da333006f))
+
+### [0.1.55](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.54...v0.1.55) (2023-11-12)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 修正README.md 中[贡献指南]链接错误，跳转失败的问题。 ([071de88](https://github.com/Moonofweisheng/wot-design-uni/commit/071de88f98fa90492032193606941fbcdfe9283d))
+
+
+### ✨ Features | 新功能
+
+* ✨ Swiper 轮播图组件增加imageMode属性支持自定义图片裁剪缩放模式 ([4205c01](https://github.com/Moonofweisheng/wot-design-uni/commit/4205c0149d3224e318ef21563e96f0a843ad13bc))
+
+### [0.1.54](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.53...v0.1.54) (2023-11-10)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 修正ColPicker多列选择器v-model类型提示使用Record<string, any>[]实际上的数据是单维数组的问题 ([c490ac6](https://github.com/Moonofweisheng/wot-design-uni/commit/c490ac607e6f9eb7207b90943b83ce1696a30fd4))
+
+### [0.1.53](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.52...v0.1.53) (2023-11-09)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Input 输入框组件包含无用显示内容的问题 ([13a3106](https://github.com/Moonofweisheng/wot-design-uni/commit/13a3106055d66083d640912bfff67f2e08781f03))
+
+### [0.1.52](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.51...v0.1.52) (2023-11-09)
+
+
+### ✨ Features | 新功能
+
+* ✨ Input绑定值为null时的警告从error改为warn ([70f1407](https://github.com/Moonofweisheng/wot-design-uni/commit/70f1407eec057668da0117c9861b523ab667da70))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Badge 徽标组件暗黑模式下边框颜色未兼容的问题 ([c0a0b5a](https://github.com/Moonofweisheng/wot-design-uni/commit/c0a0b5aaea238f144978a3a9b2ab6db202dfdc21)), closes [#115](https://github.com/Moonofweisheng/wot-design-uni/issues/115)
+
 ### [0.1.51](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.50...v0.1.51) (2023-11-06)
 
 
