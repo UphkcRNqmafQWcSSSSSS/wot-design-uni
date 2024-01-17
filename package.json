@@ -1,6 +1,6 @@
 {
   "name": "wot-design-uni",
-  "version": "0.1.70",
+  "version": "0.2.15",
   "repository": {
     "type": "git",
     "url": "https://github.com/Moonofweisheng/wot-design-uni.git"
@@ -42,6 +42,7 @@
     "docs:serve": "vitepress serve docs",
     "dev:docs": "vitepress dev docs --port 5174",
     "build:docs": "npm run build:h5 && vitepress build docs && node build/demoCopy.js",
+    "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
     "lint": "eslint --fix --ext .js,.vue,.ts src",
     "commit": "git-cz",
@@ -106,7 +107,7 @@
     "rollup-plugin-visualizer": "^5.9.0",
     "sass": "^1.59.3",
     "standard-version": "^9.5.0",
-    "typescript": "^4.9.4",
+    "typescript": "^5.3.3",
     "uni-read-pages-vite": "^0.0.6",
     "vite": "4.0.3",
     "vitest": "^0.30.1",

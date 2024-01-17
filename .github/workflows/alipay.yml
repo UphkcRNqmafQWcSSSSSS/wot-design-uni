@@ -37,14 +37,17 @@ jobs:
           }' > .minicirc
         fi
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+    - name: Install pnpm
+      run: corepack enable
+
+    - uses: actions/setup-node@v3
       with:
-        node-version: "14.x"
+        node-version: '18'
+        cache: 'pnpm'
         
 
     - name: upload
       run: |
         npm i uni-mini-ci -g
-        yarn install
-        yarn upload:mp-alipay
+        pnpm install
+        pnpm upload:mp-alipay

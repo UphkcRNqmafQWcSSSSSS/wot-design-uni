@@ -1,6 +1,164 @@
 # 更新日志 
 
 
+### [0.2.15](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.14...v0.2.15) (2024-01-15)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Tab class类名属性错误的问题 ([dc87df7](https://github.com/Moonofweisheng/wot-design-uni/commit/dc87df70c7920d7cfabc571ace8beb2ce0dc2a7c))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复 Upload 文档中before-upload钩子参数描述错误的问题 ([3ec7299](https://github.com/Moonofweisheng/wot-design-uni/commit/3ec7299ce724fce771b782f6110ba6ec29376291))
+
+### [0.2.14](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.13...v0.2.14) (2024-01-14)
+
+
+### ✨ Features | 新功能
+
+* ✨ InputNumber步进器支持禁用输入框 ([933bce3](https://github.com/Moonofweisheng/wot-design-uni/commit/933bce314618956ff922daacef5b3594f36baf9b))
+
+### [0.2.13](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.12...v0.2.13) (2024-01-12)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复演示文档刷新后指向localhost的问题 ([4cd8b16](https://github.com/Moonofweisheng/wot-design-uni/commit/4cd8b16bdf5ea8e93cff85396025844e9ebd031c))
+
+### [0.2.12](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.11...v0.2.12) (2024-01-11)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Tabbar 错误地抛出提示信息的问题 ([1c89ed0](https://github.com/Moonofweisheng/wot-design-uni/commit/1c89ed0a7158e79556e83c6aeb89bd1e93e4ea0d))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  增加 Circle 组件使用插槽的示例 ([6341594](https://github.com/Moonofweisheng/wot-design-uni/commit/6341594295732dac951c465d95537f36addbbf9c))
+* ✏️  增加展示gitee的star徽标 ([1abf962](https://github.com/Moonofweisheng/wot-design-uni/commit/1abf962e37e27c1c1688bed2026c66022e63ce9b))
+
+### [0.2.11](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.10...v0.2.11) (2024-01-09)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Overlay 类型声明错误的问题 ([930e59a](https://github.com/Moonofweisheng/wot-design-uni/commit/930e59a9b09aee535ec4c316e44ed3c0e31be628))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  提供托管在Giteee上的文档网站 ([6d62e9e](https://github.com/Moonofweisheng/wot-design-uni/commit/6d62e9e7ddda0bd9f51f2ad9e2893f1ed3709c63))
+
+### [0.2.10](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.9...v0.2.10) (2024-01-08)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 col-picker 暗黑模式下标题文字颜色不清楚的问题 ([217ffb7](https://github.com/Moonofweisheng/wot-design-uni/commit/217ffb7dacb66b2017145c6e43fc8c873a6e9dd2))
+* 🐛 修复 steps 组件自定义图标显示异常的问题 ([0300f63](https://github.com/Moonofweisheng/wot-design-uni/commit/0300f63f35a5afcd278aba3b4ab721f498716d94))
+* 🐛 修复支付宝小程序暗黑模式下 Input、Textarea 组件显示异常的问题 ([8a9c344](https://github.com/Moonofweisheng/wot-design-uni/commit/8a9c344872bfcd81a73f71520f51b6b849f516d5))
+
+### [0.2.9](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.8...v0.2.9) (2024-01-07)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 col-picker 组件首次打开指示线位置异常的问题 ([323fb00](https://github.com/Moonofweisheng/wot-design-uni/commit/323fb00942b7032b678d92ab03360dc7bb8faae8))
+
+### [0.2.8](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.7...v0.2.8) (2024-01-06)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  展示netlify支持 ([410b180](https://github.com/Moonofweisheng/wot-design-uni/commit/410b180ec9c660ab9c49d6eb203d53c35919c512))
+
+### [0.2.7](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.5...v0.2.7) (2024-01-06)
+
+
+### ✨ Features | 新功能
+
+* ✨ 优化provide/inject的使用方式 ([892f467](https://github.com/Moonofweisheng/wot-design-uni/commit/892f4675a848ee3d4c965c36d5c4034aa5806b6d))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  文档网站增加自定义footer ([dd8bc00](https://github.com/Moonofweisheng/wot-design-uni/commit/dd8bc003eedcdc43cdd60bb896c897d108dd4a51))
+* ✏️  修复vitepress自定义footer展示错误的问题 ([c0701d5](https://github.com/Moonofweisheng/wot-design-uni/commit/c0701d584e5d9b84e6d913dd23666b80d803407b))
+
+### [0.2.6](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.5...v0.2.6) (2024-01-06)
+
+
+### ✨ Features | 新功能
+
+* ✨ 优化provide/inject的使用方式 ([892f467](https://github.com/Moonofweisheng/wot-design-uni/commit/892f4675a848ee3d4c965c36d5c4034aa5806b6d))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  文档网站增加自定义footer ([dd8bc00](https://github.com/Moonofweisheng/wot-design-uni/commit/dd8bc003eedcdc43cdd60bb896c897d108dd4a51))
+
+### [0.2.5](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.4...v0.2.5) (2023-12-28)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Form 导入FormRules、ErrorMessage时未指定为type的问题 ([c88c84e](https://github.com/Moonofweisheng/wot-design-uni/commit/c88c84e8b71fc2404643a623c28f4953ffe36e71))
+* 🐛 修复 SwipeAction 组件在H5端导致页面无法上下滚动的问题 ([1f68ce1](https://github.com/Moonofweisheng/wot-design-uni/commit/1f68ce13c8109dd92ca4bf055f66aa8dff24c83d)), closes [#149](https://github.com/Moonofweisheng/wot-design-uni/issues/149)
+
+### [0.2.4](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.3...v0.2.4) (2023-12-27)
+
+### [0.2.3](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.2...v0.2.3) (2023-12-27)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复动态表单演示页面标题错误的问题 ([7c65359](https://github.com/Moonofweisheng/wot-design-uni/commit/7c65359c88614ae53c4800d0946d8e09ef547a26))
+
+### [0.2.2](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.1...v0.2.2) (2023-12-26)
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 移除 Swiper 的list中不必填的属性 ([672f680](https://github.com/Moonofweisheng/wot-design-uni/commit/672f680051009edd23a67d4e32722839f519d9ba))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  修复 Textarea 文档示例错误的问题 ([7da3a4c](https://github.com/Moonofweisheng/wot-design-uni/commit/7da3a4cdfe35f87193f57139de0819130424d6ea))
+* ✏️  优化 Form 相关组件的文档介绍 ([6a0a7a7](https://github.com/Moonofweisheng/wot-design-uni/commit/6a0a7a730fcd8904609f8a48339e1079baf3e9be))
+
+### [0.2.1](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.2.0...v0.2.1) (2023-12-25)
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  PassowrdInput 密码输入框组件增加文档标题 ([cccc4cc](https://github.com/Moonofweisheng/wot-design-uni/commit/cccc4cc0d4952f594e5387bad32a7248009ebd9e))
+
+## [0.2.0](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.70...v0.2.0) (2023-12-24)
+
+
+### ✨ Features | 新功能
+
+* ✨ 新增 Form 表单组件 ([c8086d6](https://github.com/Moonofweisheng/wot-design-uni/commit/c8086d624c01bfbae3b9dfc324d33d6bfe46e041))
+* ✨ 新增 PasswordInput 密码输入框 ([b8c68f9](https://github.com/Moonofweisheng/wot-design-uni/commit/b8c68f92f7ddbf3ae2a58bf36593a0cd0340f225))
+* ✨ 新增 textarea 文本域组件 ([ed56bcd](https://github.com/Moonofweisheng/wot-design-uni/commit/ed56bcdb0337c198e8834182d47d1cd83513091d))
+* ✨ 增加父子组件 Provide/Inject 的hooks ([eb971d4](https://github.com/Moonofweisheng/wot-design-uni/commit/eb971d4e86733b0337de0c63f26b373424a842f0))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 🐛 修复 Input 组件在支付宝平台存在一个默认padding的问题 ([921c906](https://github.com/Moonofweisheng/wot-design-uni/commit/921c90606e05ea1b29cdee39cde7858907b2cd4d))
+
+
+### ✏️ Documentation | 文档
+
+* ✏️  调整主题定制相关文档 ([2d5b1af](https://github.com/Moonofweisheng/wot-design-uni/commit/2d5b1af2787d33ec24eb6e6ab9db6ff941d80c2b))
+* ✏️  增加 textarea 文本域组件功能的迁移说明 ([61ebc7d](https://github.com/Moonofweisheng/wot-design-uni/commit/61ebc7db1e1db3e8634a87c24fae0869f4b6f17b))
+* ✏️  PasswordInput 密码输入框文档增加版本介绍 ([56ccf60](https://github.com/Moonofweisheng/wot-design-uni/commit/56ccf6005e502237e1ff45b5b52e852b402a10c9))
+
 ### [0.1.70](https://github.com/Moonofweisheng/wot-design-uni/compare/v0.1.69...v0.1.70) (2023-12-23)
 
 

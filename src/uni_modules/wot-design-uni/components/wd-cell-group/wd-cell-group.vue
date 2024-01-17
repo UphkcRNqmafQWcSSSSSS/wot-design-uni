@@ -1,12 +1,3 @@
-<!--
- * @Author: weisheng
- * @Date: 2023-08-01 11:12:05
- * @LastEditTime: 2023-08-15 16:12:36
- * @LastEditors: weisheng
- * @Description: 
- * @FilePath: \wot-design-uni\src\uni_modules\wot-design-uni\components\wd-cell-group\wd-cell-group.vue
- * 记得注释
--->
 <template>
   <view :class="['wd-cell-group', border ? 'is-border' : '', customClass]">
     <view v-if="title || value || useSlot" class="wd-cell-group__title">
@@ -39,7 +30,8 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { getCurrentInstance, provide, ref } from 'vue'
+import { useChildren } from '../composables/useChildren'
+import { CELL_GROUP_KEY } from './types'
 
 interface Props {
   customClass?: string
@@ -54,10 +46,9 @@ const props = withDefaults(defineProps<Props>(), {
   customClass: ''
 })
 
-const cellList = ref<any>([]) // cell列表
-provide('cell-list', cellList)
-const { proxy } = getCurrentInstance() as any
-provide('cell-group', proxy)
+const { linkChildren } = useChildren(CELL_GROUP_KEY)
+
+linkChildren({ props })
 </script>
 
 <style lang="scss" scoped>

@@ -1,13 +1,12 @@
 /*
  * @Author: weisheng
  * @Date: 2023-09-25 17:28:12
- * @LastEditTime: 2023-12-06 16:42:32
+ * @LastEditTime: 2024-01-09 12:48:02
  * @LastEditors: weisheng
  * @Description:
  * @FilePath: \wot-design-uni\src\uni_modules\wot-design-uni\global.d.ts
  * 记得注释
  */
-// For this project development
 import '@vue/runtime-core'
 
 declare module '@vue/runtime-core' {
@@ -44,7 +43,7 @@ declare module '@vue/runtime-core' {
     WdLoading: typeof import('./components/wd-loading/wd-loading.vue')['default']
     WdLoadmore: typeof import('./components/wd-loadmore/wd-loadmore.vue')['default']
     WdMessageBox: typeof import('./components/wd-message-box/wd-message-box.vue')['default']
-    WdModal: typeof import('./components/wd-overlay/wd-overlay.vue')['default']
+    WdOverlay: typeof import('./components/wd-overlay/wd-overlay.vue')['default']
     WdNoticeBar: typeof import('./components/wd-notice-bar/wd-notice-bar.vue')['default']
     WdPagination: typeof import('./components/wd-pagination/wd-pagination.vue')['default']
     WdPicker: typeof import('./components/wd-picker/wd-picker.vue')['default']
@@ -93,6 +92,9 @@ declare module '@vue/runtime-core' {
     WdCountDown: typeof import('./components/wd-count-down/wd-count-down.vue')['default']
     WdNumberKeyboard: typeof import('./components/wd-number-keyboard/wd-number-keyboard.vue')['default']
     WdGap: typeof import('./components/wd-gap/wd-gap.vue')['default']
+    WdPasswordInput: typeof import('./components/wd-password-input/wd-password-input.vue')['default']
+    WdForm: typeof import('./components/wd-form/wd-form.vue')['default']
+    WdTextarea: typeof import('./components/wd-textarea/wd-textarea.vue')['default']
   }
 }
 

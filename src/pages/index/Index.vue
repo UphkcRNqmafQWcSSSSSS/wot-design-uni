@@ -152,6 +152,10 @@ const list = ref([
         name: 'Input 输入框'
       },
       {
+        id: 'textarea',
+        name: 'Textarea 文本域'
+      },
+      {
         id: 'inputNumber',
         name: 'InputNumber 计数器'
       },
@@ -189,11 +193,15 @@ const list = ref([
       },
       {
         id: 'form',
-        name: 'Form 表单组件组合'
+        name: 'Form 表单'
       },
       {
         id: 'upload',
         name: 'Upload 上传'
+      },
+      {
+        id: 'passwordInput',
+        name: 'PasswordInput 密码输入框'
       }
     ]
   },
