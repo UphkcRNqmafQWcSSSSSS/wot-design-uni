@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-input-number ${customClass} ${disabled ? 'is-disabled' : ''} ${withoutInput ? 'is-without-input' : ''}`">
+  <view :class="`wd-input-number ${customClass} ${disabled ? 'is-disabled' : ''} ${withoutInput ? 'is-without-input' : ''}`" :style="customStyle">
     <view :class="`wd-input-number__action ${minDisabled || disableMinus ? 'is-disabled' : ''}`" @click="sub">
       <wd-icon name="decrease" custom-class="wd-input-number__action-icon"></wd-icon>
     </view>
@@ -36,42 +36,11 @@ export default {
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-import { debounce, getType } from '../common/util'
+import { debounce, isDef, isEqual } from '../common/util'
+import { inputNumberProps } from './types'
 
-interface Props {
-  customClass?: string
-  modelValue: number | string
-  min?: number
-  max?: number
-  step?: number
-  stepStrictly?: boolean
-  precision?: number
-  disabled?: boolean
-  disableInput?: boolean
-  disableMinus?: boolean
-  disablePlus?: boolean
-  withoutInput?: boolean
-  inputWidth?: string | number
-  allowNull?: boolean
-  placeholder?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  min: 1,
-  max: Number.MAX_SAFE_INTEGER,
-  step: 1,
-  stepStrictly: false,
-  precision: 0,
-  disabled: false,
-  disableInput: false,
-  disableMinus: false,
-  disablePlus: false,
-  withoutInput: false,
-  inputWidth: 36,
-  allowNull: false,
-  placeholder: ''
-})
+const props = defineProps(inputNumberProps)
+const emit = defineEmits(['focus', 'blur', 'change', 'update:modelValue'])
 
 const minDisabled = ref<boolean>(false)
 const maxDisabled = ref<boolean>(false)
@@ -103,27 +72,27 @@ watch(
   { immediate: true, deep: true }
 )
 
-const emit = defineEmits(['focus', 'blur', 'change', 'update:modelValue'])
-
 function updateBoundary() {
   debounce(() => {
     const value = formatValue(inputValue.value)
-    setValue(value)
+    if (!isEqual(inputValue.value, value)) {
+      setValue(value)
+    }
     splitDisabled(value)
   }, 30)()
 }
 
-function splitDisabled(value) {
+function splitDisabled(value: number | string) {
   const { disabled, min, max, step } = props
-  minDisabled.value = disabled || value <= min || changeStep(value, -step) < min
-  maxDisabled.value = disabled || value >= max || changeStep(value, step) > max
+  minDisabled.value = disabled || Number(value) <= min || changeStep(value, -step) < min
+  maxDisabled.value = disabled || Number(value) >= max || changeStep(value, step) > max
 }
 
 function toPrecision(value: number) {
   return Number(parseFloat(`${Math.round(value * Math.pow(10, props.precision)) / Math.pow(10, props.precision)}`).toFixed(props.precision))
 }
 
-function getPrecision(value) {
+function getPrecision(value?: number) {
   if (value === undefined) return 0
   const valueString = value.toString()
   const dotPosition = valueString.indexOf('.')
@@ -134,16 +103,14 @@ function getPrecision(value) {
   return precision
 }
 
-function toStrictlyStep(value) {
+function toStrictlyStep(value: number | string) {
   const stepPrecision = getPrecision(props.step)
   const precisionFactory = Math.pow(10, stepPrecision)
-  return (Math.round(value / props.step) * precisionFactory * props.step) / precisionFactory
+  return (Math.round(Number(value) / props.step) * precisionFactory * props.step) / precisionFactory
 }
 
 function setValue(value: string | number, change: boolean = true) {
-  const type = getType(value)
-
-  if (props.allowNull && (type === 'null' || type === 'undefined' || value === '')) {
+  if (props.allowNull && (!isDef(value) || value === '')) {
     dispatchChangeEvent(value, change)
     return
   }
@@ -185,33 +152,36 @@ function add() {
   dispatchChangeEvent(newValue)
 }
 
-function handleInput(event) {
+function handleInput(event: any) {
   const value = event.detail.value || ''
   dispatchChangeEvent(value)
 }
 
-function handleFocus(event) {
+function handleFocus(event: any) {
   emit('focus', event.detail)
 }
 
 function handleBlur() {
   const value = formatValue(inputValue.value)
-  setValue(value)
+  if (!isEqual(inputValue.value, value)) {
+    setValue(value)
+  }
   emit('blur', {
     value
   })
 }
 
 function dispatchChangeEvent(value: string | number, change: boolean = true) {
+  if (isEqual(inputValue.value, value)) {
+    return
+  }
   inputValue.value = value
-  change && emit('change', { value })
   change && emit('update:modelValue', inputValue.value)
+  change && emit('change', { value })
 }
 
 function formatValue(value: string | number) {
-  const type = getType(value)
-
-  if (props.allowNull && (type === 'null' || type === 'undefined' || value === '')) {
+  if (props.allowNull && (!isDef(value) || value === '')) {
     return ''
   }
 
@@ -229,7 +199,7 @@ function formatValue(value: string | number) {
     value = value.toFixed(props.precision)
   }
 
-  return value
+  return Number(value)
 }
 </script>
 

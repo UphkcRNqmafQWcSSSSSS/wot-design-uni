@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-sort-button ${line ? 'wd-sort-button--line' : ''} ${customClass}`" @click="handleClick">
+  <view :class="`wd-sort-button ${line ? 'wd-sort-button--line' : ''} ${customClass}`" :style="customStyle" @click="handleClick">
     <view class="wd-sort-button__wrapper">
       <view :class="`wd-sort-button__left ${modelValue !== 0 ? 'is-active' : ''}`">
         {{ title }}
@@ -24,23 +24,9 @@ export default {
 </script>
 
 <script lang="ts" setup>
-interface Props {
-  customClass?: string
-  title?: string
-  modelValue: number
-  allowReset?: boolean
-  descFirst?: boolean
-  line?: boolean
-}
+import { sortButtonProps } from './types'
 
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  title: '',
-  modelValue: 0,
-  allowReset: false,
-  descFirst: false,
-  line: true
-})
+const props = defineProps(sortButtonProps)
 
 const emit = defineEmits(['change', 'update:modelValue'])
 
@@ -71,10 +57,10 @@ function handleClick() {
       }
     }
   }
+  emit('update:modelValue', value)
   emit('change', {
     value
   })
-  emit('update:modelValue', value)
 }
 </script>
 <style lang="scss" scoped>

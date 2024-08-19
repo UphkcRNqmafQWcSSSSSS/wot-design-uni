@@ -1,3 +1,12 @@
+<!--
+ * @Author: weisheng
+ * @Date: 2023-10-17 17:20:31
+ * @LastEditTime: 2024-03-04 12:48:00
+ * @LastEditors: weisheng
+ * @Description: 
+ * @FilePath: \wot-design-uni\src\pages\navbar\Index.vue
+ * 记得注释
+-->
 <template>
   <wd-toast></wd-toast>
   <page-wraper>
@@ -16,7 +25,10 @@
     </demo-block>
 
     <demo-block title="使用插槽" transparent>
-      <wd-navbar title="标题" left-text="返回" left-arrow>
+      <wd-navbar title="标题" @click-left="handleClickLeft">
+        <template #left>
+          <wd-icon name="arrow-left" size="24px" class="wd-navbar__arrow" />
+        </template>
         <template #right>
           <wd-icon name="search" size="18" />
         </template>
@@ -44,6 +56,7 @@
         </template>
       </wd-navbar>
     </demo-block>
+    <view style="height: 500rpx"></view>
   </page-wraper>
 </template>
 <script lang="ts" setup>

@@ -17,31 +17,12 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { watch, computed } from 'vue'
+import { watch, computed, onMounted } from 'vue'
 import { parseFormat } from './utils'
 import { useCountDown } from '../composables/useCountDown'
+import { countDownProps, type CountDownExpose } from './types'
 
-interface Props {
-  // 倒计时时长，单位毫秒
-  time: number
-  // 是否开启毫秒
-  millisecond?: boolean
-  // 格式化时间
-  format?: string
-  // 是否自动开始
-  autoStart?: boolean
-  // 自定义样式类
-  customClass?: string
-  // 自定义样式
-  customStyle?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  format: 'HH:mm:ss',
-  autoStart: true,
-  millisecond: false,
-  customClass: ''
-})
+const props = defineProps(countDownProps)
 
 const emit = defineEmits(['change', 'finish'])
 
@@ -56,15 +37,18 @@ const timeText = computed(() => parseFormat(props.format, current.value))
 
 const resetTime = () => {
   reset(props.time)
-
   if (props.autoStart) {
     start()
   }
 }
 
-watch(() => props.time, resetTime, { immediate: true })
+watch(() => props.time, resetTime, { immediate: false })
 
-defineExpose({
+onMounted(() => {
+  resetTime()
+})
+
+defineExpose<CountDownExpose>({
   start,
   pause,
   reset: resetTime

@@ -1,10 +1,14 @@
 <template>
-  <view class="wd-tabbar-item" :style="customStyle" @click="handleClick">
-    <wd-badge :modelValue="value" v-bind="badgeProps" :is-dot="isDot" :max="max">
+  <view :class="`wd-tabbar-item ${customClass}`" :style="customStyle" @click="handleClick">
+    <wd-badge v-bind="customBadgeProps">
       <view class="wd-tabbar-item__body">
         <slot name="icon" :active="active"></slot>
         <template v-if="!$slots.icon && icon">
-          <wd-icon :name="icon" size="20px" :custom-style="textStyle" :custom-class="active ? 'is-active' : 'is-inactive'"></wd-icon>
+          <wd-icon
+            :name="icon"
+            :custom-style="textStyle"
+            :custom-class="`wd-tabbar-item__body-icon ${active ? 'is-active' : 'is-inactive'}`"
+          ></wd-icon>
         </template>
         <text v-if="title" :style="textStyle" :class="`wd-tabbar-item__body-title ${active ? 'is-active' : 'is-inactive'}`">
           {{ title }}
@@ -25,52 +29,33 @@ export default {
 </script>
 <script lang="ts" setup>
 import { type CSSProperties, computed } from 'vue'
-import { isDef, objToStyle } from '../common/util'
+import { deepAssign, isDef, isUndefined, objToStyle, omitBy } from '../common/util'
 import { useParent } from '../composables/useParent'
 import { TABBAR_KEY } from '../wd-tabbar/types'
+import { tabbarItemProps } from './types'
+import type { BadgeProps } from '../wd-badge/types'
 
-type BadgeType = 'primary' | 'success' | 'warning' | 'danger' | 'info'
-interface BadgeProps {
-  modelValue?: number | string | null
-  bgColor?: string
-  max?: number
-  isDot?: boolean
-  hidden?: boolean
-  type?: BadgeType
-  top?: number
-  right?: number
-  customClass?: string
-  customStyle?: string
-}
-
-interface Props {
-  // 自定义样式类
-  customClass?: string
-  // 自定义样式
-  customStyle?: string
-  // 标签页的标题
-  title?: string
-  // 唯一标识符
-  name?: string | number
-  // 图标
-  icon?: string
-  // 徽标显示值
-  value?: number | string | null
-  // 是否点状徽标
-  isDot?: boolean
-  // 徽标最大值
-  max?: number
-  // 徽标属性，透传给 Badge 组件
-  badgeProps?: BadgeProps
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  max: 99,
-  customClass: '',
-  customStyle: ''
-})
+const props = defineProps(tabbarItemProps)
 
 const { parent: tabbar, index } = useParent(TABBAR_KEY)
+
+const customBadgeProps = computed(() => {
+  const badgeProps: Partial<BadgeProps> = deepAssign(
+    isDef(props.badgeProps) ? omitBy(props.badgeProps, isUndefined) : {},
+    omitBy(
+      {
+        max: props.max,
+        isDot: props.isDot,
+        modelValue: props.value
+      },
+      isUndefined
+    )
+  )
+  if (!isDef(badgeProps.max)) {
+    badgeProps.max = 99
+  }
+  return badgeProps
+})
 
 const textStyle = computed(() => {
   const style: CSSProperties = {}

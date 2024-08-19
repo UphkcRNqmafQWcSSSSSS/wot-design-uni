@@ -141,35 +141,22 @@ function changeSearchType({ item, index }) {
 <wd-search placeholder="请输入订单号/订单名称" cancel-txt="搜索" />
 ```
 
-<!-- 通过设置 `use-action-slot` 来自定义输入框左边内容，设置`use-action-slot` 使用自定义内容替换取消按钮。
-
-```html
-<wd-search use-label-slot use-action-slot>
-  <template #label>
-    <view style="line-height: 14px;margin-right: 10px;">左侧</view>
-  </template>
-  <template #action>
-    <view style="padding: 5px 10px;color: #ff0000;">右侧</view>
-  </template>
-</wd-search>
-``` -->
 
 ## Attributes
 
-| 参数             | 说明                                  | 类型            | 可选值 | 默认值 | 最低版本 |
-| ---------------- | ------------------------------------- | --------------- | ------ | ------ | -------- |
-| placeholder      | 搜索框占位文本                        | string          | -      | 搜索   | -        |
-| placeholder-left | placeholder 居左边                    | boolean         | -      | false  | -        |
-| cancel-txt       | 搜索框右侧文本                        | string          | -      | 取消   | -        |
-| light            | 搜索框亮色（白色）                    | boolean         | -      | false  | -        |
-| hide-cancel      | 是否隐藏右侧文本                      | boolean         | -      | false  | -        |
-| disabled         | 是否禁用搜索框                        | boolean         | -      | false  | -        |
-| maxlength        | 原生属性，设置最大长度。-1 表示无限制 | string / number | -      | -1     | -        |
-| v-model          | 输入框内容，双向绑定                  | string          | -      | -      | -        |
-| use-suffix-slot  | 是否使用输入框右侧插槽                | boolean         | -      | false  | -        |
-| focus            | 是否自动聚焦                      | boolean         | -      | false  | 0.1.63        |
-| focusWhenClear   | 是否在点击清除按钮时聚焦输入框       | boolean         | -      | false  | 0.1.63        |
-| name             | form 表单中的字段名                   | string          | -      | -      | -        |
+| 参数                | 说明                                                                                      | 类型            | 可选值 | 默认值 | 最低版本 |
+| ------------------- | ----------------------------------------------------------------------------------------- | --------------- | ------ | ------ | -------- |
+| placeholder         | 搜索框占位文本                                                                            | string          | -      | 搜索   | -        |
+| placeholder-left    | placeholder 居左边                                                                        | boolean         | -      | false  | -        |
+| cancel-txt          | 搜索框右侧文本                                                                            | string          | -      | 取消   | -        |
+| light               | 搜索框亮色（白色）                                                                        | boolean         | -      | false  | -        |
+| hide-cancel         | 是否隐藏右侧文本                                                                          | boolean         | -      | false  | -        |
+| disabled            | 是否禁用搜索框                                                                            | boolean         | -      | false  | -        |
+| maxlength           | 原生属性，设置最大长度。-1 表示无限制                                                     | string / number | -      | -1     | -        |
+| v-model             | 输入框内容，双向绑定                                                                      | string          | -      | -      | -        |
+| ~~use-suffix-slot~~ | ~~是否使用输入框右侧插槽~~**（已废弃，将在下一个 minor 版本被移除，直接使用插槽即可）** | boolean         | -      | false  | -        |
+| focus               | 是否自动聚焦                                                                              | boolean         | -      | false  | 0.1.63   |
+| focusWhenClear      | 是否在点击清除按钮时聚焦输入框                                                            | boolean         | -      | false  | 0.1.63   |
 
 ## Events
 
@@ -187,7 +174,7 @@ function changeSearchType({ item, index }) {
 | name   | 说明                 | 最低版本 |
 | ------ | -------------------- | -------- |
 | prefix | 输入框左侧自定义内容 | -        |
-| suffix | 输入框左侧自定义内容 | -        |
+| suffix | 输入框右侧自定义内容 | -        |
 
 ## 外部样式类
 

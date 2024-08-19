@@ -15,10 +15,11 @@
       @close="close"
       @click-modal="clickModal"
       :custom-class="`wd-curtain ${customClass}`"
+      :custom-style="customStyle"
     >
       <view class="wd-curtain__content">
         <image :src="src" class="wd-curtain__content-img" :style="imgStyle" @click="clickImage" @error="imgErr" @load="imgLoad"></image>
-        <wd-icon name="close-outline" size="24px" :custom-class="`wd-curtain__content-close ${closePosition}`" @click="close" />
+        <wd-icon name="close-outline" :custom-class="`wd-curtain__content-close ${closePosition}`" @click="close" />
       </view>
     </wd-popup>
   </view>
@@ -37,25 +38,24 @@ export default {
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-type ClosePosition = 'inset' | 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
-interface Props {
-  customClass?: string
-  value: boolean
-  closePosition?: ClosePosition
-  src?: string
-  to?: string
-  width?: number
-  closeOnClickModal?: boolean
-  hideWhenClose?: boolean
-}
+import { curtainProps } from './types'
 
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  value: false,
-  closePosition: 'inset',
-  closeOnClickModal: false,
-  hideWhenClose: true
-})
+const props = defineProps(curtainProps)
+
+const emit = defineEmits([
+  'beforeenter',
+  'enter',
+  'afterenter',
+  'beforeleave',
+  'leave',
+  'afterleave',
+  'close',
+  'closed',
+  'click-modal',
+  'load',
+  'error',
+  'click'
+])
 
 const show = ref<boolean>(false)
 const imgSucc = ref<boolean>(true)
@@ -83,21 +83,6 @@ watch(
     immediate: true
   }
 )
-
-const emit = defineEmits([
-  'beforeenter',
-  'enter',
-  'afterenter',
-  'beforeleave',
-  'leave',
-  'afterleave',
-  'close',
-  'closed',
-  'click-modal',
-  'load',
-  'error',
-  'click'
-])
 
 function computedShowImg() {
   if (props.value && imgSucc.value) {
@@ -150,7 +135,7 @@ function clickModal() {
   emit('click-modal')
 }
 
-function imgLoad(event) {
+function imgLoad(event: any) {
   const { height, width } = event.detail
   imgScale.value = width / height
   imgSucc.value = true

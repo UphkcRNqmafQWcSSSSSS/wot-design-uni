@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-checkbox-group ${shape === 'button' && cell ? 'is-button' : ''} ${customClass}`">
+  <view :class="`wd-checkbox-group ${shape === 'button' && cell ? 'is-button' : ''} ${customClass}`" :style="customStyle">
     <slot />
   </view>
 </template>
@@ -18,34 +18,10 @@ export default {
 import { watch } from 'vue'
 import { checkNumRange, deepClone } from '../common/util'
 import { useChildren } from '../composables/useChildren'
-import { CHECKBOX_GROUP_KEY } from './types'
+import { CHECKBOX_GROUP_KEY, checkboxGroupProps } from './types'
 
-type checkShape = 'circle' | 'square' | 'button'
-interface Props {
-  customClass?: string
-  modelValue: Array<string | number | boolean>
-  cell?: boolean
-  shape?: checkShape
-  checkedColor?: string
-  disabled?: boolean
-  min?: number
-  max?: number
-  inline?: boolean
-  size?: string
-  name?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  modelValue: () => [],
-  cell: false,
-  shape: 'circle',
-  checkedColor: '#4D80F0',
-  disabled: false,
-  min: 0,
-  max: 0,
-  inline: false
-})
+const props = defineProps(checkboxGroupProps)
+const emit = defineEmits(['change', 'update:modelValue'])
 
 const { linkChildren } = useChildren(CHECKBOX_GROUP_KEY)
 
@@ -96,8 +72,6 @@ watch(
   },
   { deep: true, immediate: true }
 )
-
-const emit = defineEmits(['change', 'update:modelValue'])
 
 /**
  * @description 子节点通知父节点修改子节点选中状态

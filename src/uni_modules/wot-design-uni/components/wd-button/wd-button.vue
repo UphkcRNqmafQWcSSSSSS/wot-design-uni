@@ -1,6 +1,7 @@
 <template>
   <button
-    hover-class="wd-button--active"
+    :id="buttonId"
+    :hover-class="`${disabled || loading ? '' : 'wd-button--active'}`"
     :style="customStyle"
     :class="[
       'wd-button',
@@ -9,14 +10,14 @@
       plain ? 'is-plain' : '',
       disabled ? 'is-disabled' : '',
       round ? 'is-round' : '',
-      suck ? 'is-suck' : '',
+      hairline ? 'is-hairline' : '',
       block ? 'is-block' : '',
       loading ? 'is-loading' : '',
       customClass
     ]"
     :hover-start-time="hoverStartTime"
     :hover-stay-time="hoverStayTime"
-    :open-type="openType"
+    :open-type="disabled || loading ? '' : openType"
     :send-message-title="sendMessageTitle"
     :send-message-path="sendMessagePath"
     :send-message-img="sendMessageImg"
@@ -25,7 +26,6 @@
     :session-from="sessionFrom"
     :lang="lang"
     :hover-stop-propagation="hoverStopPropagation"
-    :form-type="formType"
     @click="handleClick"
     @getuserinfo="handleGetuserinfo"
     @contact="handleConcat"
@@ -33,11 +33,13 @@
     @error="handleError"
     @launchapp="handleLaunchapp"
     @opensetting="handleOpensetting"
+    @chooseavatar="handleChooseavatar"
+    @agreeprivacyauthorization="handleAgreePrivacyAuthorization"
   >
     <view v-if="loading" class="wd-button__loading">
       <view class="wd-button__loading-svg" :style="loadingStyle"></view>
     </view>
-    <wd-icon v-if="icon" custom-class="wd-button__icon" :name="icon"></wd-icon>
+    <wd-icon v-else-if="icon" custom-class="wd-button__icon" :name="icon" :classPrefix="classPrefix"></wd-icon>
     <view class="wd-button__text"><slot /></view>
   </button>
 </template>
@@ -57,6 +59,7 @@ export default {
 import { computed, watch } from 'vue'
 import { ref } from 'vue'
 import base64 from '../common/base64'
+import { buttonProps } from './types'
 
 const loadingIcon = (color = '#4D80F0', reverse = true) => {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42"><defs><linearGradient x1="100%" y1="0%" x2="0%" y2="0%" id="a"><stop stop-color="${
@@ -67,49 +70,26 @@ const loadingIcon = (color = '#4D80F0', reverse = true) => {
     reverse ? '#fff' : color
   }"/><path d="M4.599 21c0 9.044 7.332 16.376 16.376 16.376 9.045 0 16.376-7.332 16.376-16.376" stroke="url(#a)" stroke-width="3.5" stroke-linecap="round"/></g></svg>`
 }
-type ButtonType = 'primary' | 'success' | 'info' | 'warning' | 'error' | 'default' | 'text' | 'icon'
-type ButtonSize = 'small' | 'medium' | 'large'
-
-interface Props {
-  plain?: boolean
-  disabled?: boolean
-  round?: boolean
-  suck?: boolean
-  block?: boolean
-  type?: ButtonType
-  size?: ButtonSize
-  icon?: string
-  loading?: boolean
-  loadingColor?: string
-  openType?: string
-  formType?: string
-  hoverStopPropagation?: boolean
-  lang?: string
-  sessionFrom?: string
-  sendMessageTitle?: string
-  sendMessagePath?: string
-  sendMessageImg?: string
-  appParameter?: string
-  showMessageCard?: boolean
-  customClass?: string
-  customStyle?: string
-}
-const props = withDefaults(defineProps<Props>(), {
-  type: 'primary',
-  size: 'medium',
-  round: true,
-  plain: false,
-  loading: false,
-  suck: false,
-  block: false,
-  disabled: false,
-  customClass: '',
-  customStyle: ''
-})
+const props = defineProps(buttonProps)
+const emit = defineEmits([
+  'click',
+  'getuserinfo',
+  'contact',
+  'getphonenumber',
+  'error',
+  'launchapp',
+  'opensetting',
+  'chooseavatar',
+  'agreeprivacyauthorization'
+])
 
 const hoverStartTime = ref<number>(20)
 const hoverStayTime = ref<number>(70)
 const loadingIconSvg = ref<string>('')
+
+const loadingStyle = computed(() => {
+  return `background-image: url(${loadingIconSvg.value});`
+})
 
 watch(
   () => props.loading,
@@ -119,40 +99,42 @@ watch(
   { deep: true, immediate: true }
 )
 
-const loadingStyle = computed(() => {
-  return `background-image: url(${loadingIconSvg.value});`
-})
-
-const emit = defineEmits(['click', 'getuserinfo', 'contact', 'getphonenumber', 'error', 'launchapp', 'opensetting'])
-
-function handleClick(event) {
+function handleClick(event: any) {
   if (!props.disabled && !props.loading) {
-    emit('click', event.detail)
+    emit('click', event)
   }
 }
 
-function handleGetuserinfo(event) {
+function handleGetuserinfo(event: any) {
   emit('getuserinfo', event.detail)
 }
 
-function handleConcat(event) {
+function handleConcat(event: any) {
   emit('contact', event.detail)
 }
 
-function handleGetphonenumber(event) {
+function handleGetphonenumber(event: any) {
   emit('getphonenumber', event.detail)
 }
 
-function handleError(event) {
+function handleError(event: any) {
   emit('error', event.detail)
 }
 
-function handleLaunchapp(event) {
+function handleLaunchapp(event: any) {
   emit('launchapp', event.detail)
 }
 
-function handleOpensetting(event) {
+function handleOpensetting(event: any) {
   emit('opensetting', event.detail)
+}
+
+function handleChooseavatar(event: any) {
+  emit('chooseavatar', event.detail)
+}
+
+function handleAgreePrivacyAuthorization(event: any) {
+  emit('agreeprivacyauthorization', event.detail)
 }
 function buildLoadingSvg() {
   const { loadingColor, type, plain } = props

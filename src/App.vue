@@ -1,12 +1,3 @@
-<!--
- * @Author: weisheng
- * @Date: 2023-03-09 19:23:03
- * @LastEditTime: 2023-08-16 00:02:08
- * @LastEditors: weisheng
- * @Description: 
- * @FilePath: \wot-design-uni\src\App.vue
- * 记得注释
--->
 <script setup lang="ts">
 import { onLaunch, onShow, onHide, onThemeChange } from '@dcloudio/uni-app'
 import { useDark } from './store'
@@ -42,6 +33,8 @@ onHide(() => {
 })
 </script>
 <style lang="scss">
+@import '@/iconfont/index.css';
+
 ::-webkit-scrollbar {
   width: 0;
   height: 0;

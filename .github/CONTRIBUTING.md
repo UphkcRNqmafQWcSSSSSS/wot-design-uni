@@ -10,6 +10,7 @@
 
 - 遇到问题时，请先确认这个问题是否已经在 issue 中有记录或者已被修复。
 - 提 issue 时，请用简短的语言描述遇到的问题，并添加出现问题时的环境和复现步骤。
+- 如果在提问前，无法确认怎样的一个问题是好的、更容易被回复的问题，可以读一读[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)。
 
 ## 参与开发
 
@@ -33,6 +34,17 @@ git clone https://gitee.com/fant-mini/wot-design-uni.git
 
 - 确保代码可以通过仓库的 `ESLint` 校验。
 - 确保代码格式是规范的，使用 `prettier` 进行代码格式化。
+
+### 关于新功能
+
+新功能需要标注最低版本号，如何确定版本号呢？当然没那么复杂啦！只需要各位贡献者在`/docs/*.md`内需要显示最低版本号的地方写上`$LOWEST_VERSION$`占位符即可；当下一次发版时，脚手架将会自动确定版本号并替换全部`/docs/*.md`中的`$LOWEST_VERSION$`占位符
+
+```
+| 参数  | 说明            | 类型     | 可选值    | 默认值    | 最低版本           |
+| ----- | --------------- | ------ | --------- | --------- | ---------------- |
+| text  | 设置通知栏文案  | `string` | -         | -         | $LOWEST_VERSION$ |
+```
+
 
 ## Commit
 

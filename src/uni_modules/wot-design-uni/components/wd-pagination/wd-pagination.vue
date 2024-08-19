@@ -1,12 +1,11 @@
 <template>
-  <view :class="`wd-pager ${customClass}`" v-if="!(hideIfOnePage && totalPageNum === 1)">
+  <view :class="`wd-pager ${customClass}`" :style="customStyle" v-if="!(hideIfOnePage && totalPageNum === 1)">
     <view class="wd-pager__content">
       <wd-button :plain="modelValue > 1" type="info" size="small" :disabled="modelValue <= 1" custom-class="wd-pager__nav" @click="sub">
-        <text v-if="!showIcon">{{ prevText }}</text>
+        <text v-if="!showIcon">{{ prevText || translate('prev') }}</text>
         <wd-icon
           v-else
-          size="14px"
-          :custom-class="`wd-pager__left ${modelValue <= 1 ? 'wd-pager__nav--disabled' : 'wd-pager__nav--active'}`"
+          :custom-class="`wd-pager__left wd-pager__icon ${modelValue <= 1 ? 'wd-pager__nav--disabled' : 'wd-pager__nav--active'}`"
           name="arrow-right"
         ></wd-icon>
       </wd-button>
@@ -23,19 +22,18 @@
         custom-class="wd-pager__nav"
         @click="add"
       >
-        <text v-if="!showIcon">{{ nextText }}</text>
+        <text v-if="!showIcon">{{ nextText || translate('next') }}</text>
         <wd-icon
           v-else
-          size="14px"
-          :custom-class="modelValue >= totalPageNum ? 'wd-pager__nav--disabled' : 'wd-pager__nav--active'"
+          :custom-class="`wd-pager__icon ${modelValue >= totalPageNum ? 'wd-pager__nav--disabled' : 'wd-pager__nav--active'}`"
           name="arrow-right"
         ></wd-icon>
       </wd-button>
     </view>
     <view class="wd-pager__message" v-if="showMessage">
-      <text>当前页：{{ modelValue }}，</text>
-      <text v-if="total">当前数据：{{ total }}，</text>
-      <text>分页大小：{{ pageSize }}</text>
+      <text>{{ translate('page', modelValue) }}，</text>
+      <text v-if="total">{{ translate('total', total) }}，</text>
+      <text>{{ translate('size', pageSize) }}</text>
     </view>
   </view>
 </template>
@@ -53,35 +51,15 @@ export default {
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
+import { useTranslate } from '../composables/useTranslate'
+import { paginationProps } from './types'
 
-interface Props {
-  customClass?: string
-  modelValue: number // 当前页
-  totalPage?: number
-  showIcon?: boolean // 是否展示分页为Icon图标
-  showMessage?: boolean
-  total?: number
-  pageSize?: number
-  prevText?: string
-  nextText?: string
-  hideIfOnePage?: boolean
-}
+const { translate } = useTranslate('pagination')
 
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  totalPage: 1,
-  showIcon: false, // 是否展示分页为Icon图标
-  showMessage: false,
-  total: 0,
-  pageSize: 10, // 分页大小
-  prevText: '上一页',
-  nextText: '下一页',
-  hideIfOnePage: true
-})
+const props = defineProps(paginationProps)
+const emit = defineEmits(['change', 'update:modelValue'])
 
 const totalPageNum = ref<number>(0) // 总页数
-
-const emit = defineEmits(['change', 'update:modelValue'])
 
 watch(
   () => props.totalPage,

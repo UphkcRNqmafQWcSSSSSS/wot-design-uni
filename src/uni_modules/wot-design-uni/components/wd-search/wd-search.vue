@@ -6,15 +6,15 @@
       <slot name="prefix"></slot>
       <view class="wd-search__field">
         <view v-if="!placeholderLeft" :style="coverStyle" class="wd-search__cover" @click="closeCover">
-          <wd-icon name="search" size="18px" custom-class="wd-search__search-icon"></wd-icon>
-          <text class="wd-search__placeholder-txt">{{ placeholder || '搜索' }}</text>
+          <wd-icon name="search" custom-class="wd-search__search-icon"></wd-icon>
+          <text class="wd-search__placeholder-txt">{{ placeholder || translate('search') }}</text>
         </view>
         <!--icon:search-->
-        <wd-icon v-if="showInput || str || placeholderLeft" name="search" size="18px" custom-class="wd-search__search-left-icon"></wd-icon>
+        <wd-icon v-if="showInput || str || placeholderLeft" name="search" custom-class="wd-search__search-left-icon"></wd-icon>
         <!--搜索框-->
         <input
           v-if="showInput || str || placeholderLeft"
-          :placeholder="placeholder || '搜索'"
+          :placeholder="placeholder || translate('search')"
           placeholder-class="wd-search__placeholder-txt"
           confirm-type="search"
           v-model="str"
@@ -28,18 +28,17 @@
           :focus="isFocused"
         />
         <!--icon:clear-->
-        <wd-icon v-if="str" custom-class="wd-search__clear wd-search__clear-icon" name="error-fill" size="16px" @click="clearSearch" />
+        <wd-icon v-if="str" custom-class="wd-search__clear wd-search__clear-icon" name="error-fill" @click="clearSearch" />
       </view>
     </view>
     <!--the button behind input,care for hideCancel without displaying-->
-    <block v-if="!hideCancel">
-      <!--有插槽就不用默认的按钮了-->
-      <slot v-if="userSuffixSlot" name="suffix"></slot>
+
+    <slot v-if="!hideCancel" name="suffix">
       <!--默认button-->
-      <view v-else class="wd-search__cancel" @click="handleCancel">
-        {{ cancelTxt || '取消' }}
+      <view class="wd-search__cancel" @click="handleCancel">
+        {{ cancelTxt || translate('cancel') }}
       </view>
-    </block>
+    </slot>
   </view>
 </template>
 
@@ -57,38 +56,13 @@ export default {
 <script lang="ts" setup>
 import { type CSSProperties, computed, onMounted, ref, watch } from 'vue'
 import { objToStyle, requestAnimationFrame } from '../common/util'
+import { useTranslate } from '../composables/useTranslate'
+import { searchProps } from './types'
 
-interface Props {
-  userSuffixSlot?: boolean
-  placeholder?: string
-  cancelTxt?: string
-  light?: boolean
-  hideCancel?: boolean
-  disabled?: boolean
-  maxlength?: number | string
-  modelValue?: string
-  placeholderLeft?: boolean
-  focus?: boolean
-  focusWhenClear?: boolean
-  customClass?: string
-  customStyle?: string
-}
+const props = defineProps(searchProps)
+const emit = defineEmits(['update:modelValue', 'change', 'clear', 'search', 'focus', 'blur', 'cancel'])
 
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: '',
-  customClass: '',
-  customStyle: '',
-  userSuffixSlot: false,
-  placeholder: '搜索',
-  cancelTxt: '取消',
-  light: false,
-  focus: false,
-  focusWhenClear: false,
-  hideCancel: false,
-  disabled: false,
-  maxlength: -1,
-  placeholderLeft: false
-})
+const { translate } = useTranslate('search')
 
 const isFocused = ref<boolean>(false) // 是否聚焦中
 const showInput = ref<boolean>(false) // 是否显示输入框 用于实现聚焦的hack
@@ -134,8 +108,6 @@ const coverStyle = computed(() => {
 
   return objToStyle(coverStyle)
 })
-
-const emit = defineEmits(['update:modelValue', 'change', 'clear', 'search', 'focus', 'blur', 'cancel'])
 
 function hackFocus(focus: boolean) {
   showInput.value = focus
@@ -185,18 +157,18 @@ function clearSearch() {
         showPlaceHolder.value = true
         hackFocus(false)
       }
-      emit('clear')
       emit('change', {
         value: ''
       })
       emit('update:modelValue', '')
+      emit('clear')
     })
 }
 /**
  * @description 点击搜索按钮时的handle
  * @param value
  */
-function search({ detail: { value } }) {
+function search({ detail: { value } }: any) {
   // 组件触发search事件
   emit('search', {
     value

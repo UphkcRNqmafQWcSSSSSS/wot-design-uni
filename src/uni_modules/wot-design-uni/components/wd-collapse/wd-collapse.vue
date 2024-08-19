@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-collapse ${viewmore ? 'is-viewmore' : ''} ${customClass}`">
+  <view :class="`wd-collapse ${viewmore ? 'is-viewmore' : ''} ${customClass}`" :style="customStyle">
     <!-- 普通或手风琴 -->
     <block v-if="!viewmore">
       <slot></slot>
@@ -19,7 +19,7 @@
         </view>
         <!-- 显示展开或折叠按钮 -->
         <block v-else>
-          <span class="wd-collapse__more-txt">{{ !modelValue ? '展开' : '折叠' }}</span>
+          <span class="wd-collapse__more-txt">{{ !modelValue ? translate('expand') : translate('retract') }}</span>
           <view :class="`wd-collapse__arrow ${modelValue ? 'is-retract' : ''}`">
             <wd-icon name="arrow-down"></wd-icon>
           </view>
@@ -42,36 +42,20 @@ export default {
 
 <script lang="ts" setup>
 import { onBeforeMount, ref, watch } from 'vue'
-import { COLLAPSE_KEY, type CollapseToggleAllOptions } from './types'
+import { COLLAPSE_KEY, collapseProps, type CollapseExpose, type CollapseToggleAllOptions } from './types'
 import { useChildren } from '../composables/useChildren'
 import { isArray, isDef } from '../common/util'
+import { useTranslate } from '../composables/useTranslate'
 
-interface Props {
-  customClass?: string
-  customMoreSlotClass?: string
-  modelValue: string | Array<string> | boolean
-  accordion?: boolean
-  viewmore?: boolean
-  useMoreSlot?: boolean
-  lineNum?: number
-}
+const props = defineProps(collapseProps)
+const emit = defineEmits(['change', 'update:modelValue'])
 
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customMoreSlotClass: '',
-  accordion: false,
-  viewmore: false,
-  useMoreSlot: false,
-  lineNum: 2
-})
-
+const { translate } = useTranslate('collapse')
 const contentLineNum = ref<number>(0) // 查看更多的折叠面板，收起时的显示行数
 
 const { linkChildren, children } = useChildren(COLLAPSE_KEY)
 
 linkChildren({ props, toggle })
-
-const emit = defineEmits(['change', 'update:modelValue'])
 
 watch(
   () => props.modelValue,
@@ -120,6 +104,10 @@ function toggle(name: string, expanded: boolean) {
   }
 }
 
+/**
+ * 切换所有面板展开状态，传 true 为全部展开，false 为全部收起，不传参为全部切换
+ * @param options 面板状态
+ */
 const toggleAll = (options: boolean | CollapseToggleAllOptions = {}) => {
   if (props.accordion) {
     return
@@ -131,13 +119,13 @@ const toggleAll = (options: boolean | CollapseToggleAllOptions = {}) => {
   const { expanded, skipDisabled } = options
   const names: string[] = []
 
-  children.forEach((item: any, index: number) => {
+  children.forEach((item, index: number) => {
     if (item.disabled && skipDisabled) {
-      if (item.$.exposed.expanded.value) {
+      if (item.$.exposed!.getExpanded()) {
         names.push(item.name || index)
       }
     } else {
-      if (isDef(expanded) ? expanded : !item.$.exposed.expanded.value) {
+      if (isDef(expanded) ? expanded : !item.$.exposed!.getExpanded()) {
         names.push(item.name || index)
       }
     }
@@ -155,7 +143,7 @@ function handleMore() {
   })
 }
 
-defineExpose({
+defineExpose<CollapseExpose>({
   toggleAll
 })
 </script>

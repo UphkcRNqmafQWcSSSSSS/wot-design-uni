@@ -1,4 +1,4 @@
-# 捐赠作者
+# 🥤一杯咖啡
 
 如果您认为本项目对你的工作起到了帮助，可以通过以下方式捐助组件库的研发工作，使本项目持续发展下去，捐赠后你的头像、昵称和主页将会被展示在 `wot design uni` 文档的捐赠榜单上。
 
@@ -10,7 +10,7 @@
 
 ### 爱发电捐赠
 
-<a href="https://afdian.net/a/weisheng233">https://afdian.net/a/weisheng233</a>
+<a href="https://afdian.com/a/weisheng233">https://afdian.com/a/weisheng233</a>
 
 
 ### 扫码捐赠

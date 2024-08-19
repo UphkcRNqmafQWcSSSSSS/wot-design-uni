@@ -1,5 +1,5 @@
 <template>
-  <view :class="['wd-card', type == 'rectangle' ? 'is-rectangle' : '', customClass]">
+  <view :class="['wd-card', type == 'rectangle' ? 'is-rectangle' : '', customClass]" :style="customStyle">
     <view :class="['wd-card__title-content', customTitleClass]">
       <view class="wd-card__title">
         <text v-if="title">{{ title }}</text>
@@ -27,22 +27,9 @@ export default {
 </script>
 
 <script lang="ts" setup>
-interface Props {
-  title?: string
-  type?: string
-  customClass?: string
-  customTitleClass?: string
-  customContentClass?: string
-  customFooterClass?: string
-}
+import { cardProps } from './types'
 
-const props = withDefaults(defineProps<Props>(), {
-  type: '',
-  customClass: '',
-  customTitleClass: '',
-  customContentClass: '',
-  customFooterClass: ''
-})
+defineProps(cardProps)
 </script>
 
 <style lang="scss" scoped>

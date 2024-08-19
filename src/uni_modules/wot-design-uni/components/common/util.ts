@@ -1,5 +1,6 @@
-/* eslint-disable no-prototype-builtins */
-import debounce from './lodash/debounce'
+import { AbortablePromise } from './AbortablePromise'
+
+type NotUndefined<T> = T extends undefined ? never : T
 
 /**
  * 生成uuid
@@ -21,7 +22,7 @@ function s4() {
  * @return {string} num+px
  */
 export function addUnit(num: number | string) {
-  return Number.isNaN(Number(num)) ? num : `${num}px`
+  return Number.isNaN(Number(num)) ? `${num}` : `${num}px`
 }
 
 /**
@@ -77,8 +78,6 @@ export const defaultFunction = <T>(value: T): T => value
  * @return {Boolean} 是否不为空
  */
 export const isDef = <T>(value: T): value is NonNullable<T> => value !== undefined && value !== null
-
-export { debounce }
 
 /**
  * @description 防止数字小于零
@@ -231,15 +230,17 @@ export const context = {
   id: 1000
 }
 
+export type RectResultType<T extends boolean> = T extends true ? UniApp.NodeInfo[] : UniApp.NodeInfo
+
 /**
  * 获取节点信息
- * @param selector 节点 #id,.class
+ * @param selector 节点选择器 #id,.class
  * @param all 是否返回所有 selector 对应的节点
  * @param scope 作用域（支付宝小程序无效）
- * @returns
+ * @returns 节点信息或节点信息数组
  */
-export function getRect(selector: string, all: boolean = false, scope?: any) {
-  return new Promise<UniApp.NodeInfo | UniApp.NodeInfo[]>((resolve) => {
+export function getRect<T extends boolean>(selector: string, all: T, scope?: any): Promise<RectResultType<T>> {
+  return new Promise<RectResultType<T>>((resolve, reject) => {
     let query: UniNamespace.SelectorQuery | null = null
     if (scope) {
       query = uni.createSelectorQuery().in(scope)
@@ -248,11 +249,12 @@ export function getRect(selector: string, all: boolean = false, scope?: any) {
     }
     query[all ? 'selectAll' : 'select'](selector)
       .boundingClientRect((rect) => {
-        if (all && Array.isArray(rect) && rect.length) {
-          resolve(rect)
-        }
-        if (!all && rect) {
-          resolve(rect)
+        if (all && isArray(rect) && rect.length > 0) {
+          resolve(rect as RectResultType<T>)
+        } else if (!all && rect) {
+          resolve(rect as RectResultType<T>)
+        } else {
+          reject(new Error('No nodes found'))
         }
       })
       .exec()
@@ -273,6 +275,15 @@ export function kebabCase(word: string): string {
     .toLowerCase()
 
   return newWord
+}
+
+/**
+ * 将短横线链接转换为驼峰命名
+ * @param word 需要转换的短横线链接
+ * @returns 转换后的驼峰命名字符串
+ */
+export function camelCase(word: string): string {
+  return word.replace(/-(\w)/g, (_, c) => c.toUpperCase())
 }
 
 /**
@@ -323,7 +334,7 @@ export function isNumber(value: any): value is number {
  */
 export function isPromise(value: unknown): value is Promise<any> {
   // 先将 value 断言为 object 类型
-  if (isObj(value)) {
+  if (isObj(value) && isDef(value)) {
     // 然后进一步检查 value 是否具有 then 和 catch 方法，并且它们是函数类型
     return isFunction((value as Promise<any>).then) && isFunction((value as Promise<any>).catch)
   }
@@ -337,6 +348,14 @@ export function isPromise(value: unknown): value is Promise<any> {
  */
 export function isBoolean(value: any): value is boolean {
   return typeof value === 'boolean'
+}
+
+export function isUndefined(value: any): value is undefined {
+  return typeof value === 'undefined'
+}
+
+export function isNotUndefined<T>(value: T): value is NotUndefined<T> {
+  return !isUndefined(value)
 }
 
 /**
@@ -370,7 +389,7 @@ export function isBase64Image(url: string) {
  * @param {object | object[]} styles 外部传入的样式对象或数组
  * @returns {string} 格式化后的 CSS 样式字符串
  */
-export function objToStyle(styles: object | object[]): string {
+export function objToStyle(styles: Record<string, any> | Record<string, any>[]): string {
   // 如果 styles 是数组类型
   if (isArray(styles)) {
     // 使用过滤函数去除空值和 null 值的元素
@@ -409,13 +428,27 @@ export function objToStyle(styles: object | object[]): string {
   return ''
 }
 
-export const requestAnimationFrame = (cb = () => void 0) => {
-  return new Promise((resolve, reject) => {
+export const requestAnimationFrame = (cb = () => {}) => {
+  return new AbortablePromise((resolve) => {
     const timer = setInterval(() => {
       clearInterval(timer)
       resolve(true)
       cb()
     }, 1000 / 30)
+  })
+}
+
+/**
+ * 暂停指定时间函数
+ * @param ms 延迟时间
+ * @returns
+ */
+export const pause = (ms: number) => {
+  return new AbortablePromise((resolve) => {
+    const timer = setTimeout(() => {
+      clearTimeout(timer)
+      resolve(true)
+    }, ms)
   })
 }
 
@@ -432,7 +465,7 @@ export function deepClone<T>(obj: T, cache: Map<any, any> = new Map()): T {
   }
 
   // 处理特殊对象类型：日期、正则表达式、错误对象
-  if (obj instanceof Date) {
+  if (isDate(obj)) {
     return new Date(obj.getTime()) as any
   }
   if (obj instanceof RegExp) {
@@ -482,12 +515,32 @@ export function deepMerge<T extends Record<string, any>>(target: T, source: Reco
 
   // 遍历源对象的属性
   for (const prop in source) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!source.hasOwnProperty(prop))
       continue
       // 使用类型断言，告诉 TypeScript 这是有效的属性
     ;(target as Record<string, any>)[prop] = source[prop]
   }
 
+  return target
+}
+
+/**
+ * 深度合并两个对象。
+ * @param target
+ * @param source
+ * @returns
+ */
+export function deepAssign(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+  Object.keys(source).forEach((key) => {
+    const targetValue = target[key]
+    const newObjValue = source[key]
+    if (isObj(targetValue) && isObj(newObjValue)) {
+      deepAssign(targetValue, newObjValue)
+    } else {
+      target[key] = newObjValue
+    }
+  })
   return target
 }
 
@@ -510,10 +563,66 @@ export function buildUrlWithParams(baseUrl: string, params: Record<string, strin
   return `${baseUrl}${separator}${queryString}`
 }
 
+type DebounceOptions = {
+  leading?: boolean // 是否在延迟时间开始时调用函数
+  trailing?: boolean // 是否在延迟时间结束时调用函数
+}
+
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number, options: DebounceOptions = {}): T {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  let lastArgs: any[] | undefined
+  let lastThis: any
+  let result: ReturnType<T> | undefined
+  const leading = isDef(options.leading) ? options.leading : false
+  const trailing = isDef(options.trailing) ? options.trailing : true
+
+  function invokeFunc() {
+    if (lastArgs !== undefined) {
+      result = func.apply(lastThis, lastArgs)
+      lastArgs = undefined
+    }
+  }
+
+  function startTimer() {
+    timeoutId = setTimeout(() => {
+      timeoutId = null
+      if (trailing) {
+        invokeFunc()
+      }
+    }, wait)
+  }
+
+  function cancelTimer() {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+  }
+
+  function debounced(this: any, ...args: Parameters<T>): ReturnType<T> | undefined {
+    lastArgs = args
+    lastThis = this
+
+    if (timeoutId === null) {
+      if (leading) {
+        invokeFunc()
+      }
+      startTimer()
+    } else if (trailing) {
+      cancelTimer()
+      startTimer()
+    }
+
+    return result
+  }
+
+  return debounced as T
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function throttle(func: Function, wait: number): Function {
-  let timeout: NodeJS.Timeout | null
-  let previous = 0
+  let timeout: ReturnType<typeof setTimeout> | null = null
+  let previous: number = 0
 
   const throttled = function (this: any, ...args: any[]) {
     const now = Date.now()
@@ -552,4 +661,62 @@ export const getPropByPath = (obj: any, path: string): any => {
   } catch (error) {
     return undefined
   }
+}
+
+/**
+ * 检查一个值是否为Date类型
+ * @param val 要检查的值
+ * @returns 如果值是Date类型，则返回true，否则返回false
+ */
+export const isDate = (val: unknown): val is Date => Object.prototype.toString.call(val) === '[object Date]' && !Number.isNaN((val as Date).getTime())
+
+/**
+ * 检查提供的URL是否为视频链接。
+ * @param url 需要检查的URL字符串。
+ * @returns 返回一个布尔值，如果URL是视频链接则为true，否则为false。
+ */
+export function isVideoUrl(url: string): boolean {
+  // 使用正则表达式匹配视频文件类型的URL
+  const videoRegex = /\.(mp4|mpg|mpeg|dat|asf|avi|rm|rmvb|mov|wmv|flv|mkv|video)/i
+  return videoRegex.test(url)
+}
+
+/**
+ * 检查提供的URL是否为图片URL。
+ * @param url 待检查的URL字符串。
+ * @returns 返回一个布尔值，如果URL是图片格式，则为true；否则为false。
+ */
+export function isImageUrl(url: string): boolean {
+  // 使用正则表达式匹配图片URL
+  const imageRegex = /\.(jpeg|jpg|gif|png|svg|webp|jfif|bmp|dpg|image)/i
+  return imageRegex.test(url)
+}
+
+/**
+ * 判断环境是否是H5
+ */
+export const isH5 = process.env.UNI_PLATFORM === 'h5'
+
+/**
+ * 剔除对象中的某些属性
+ * @param obj
+ * @param predicate
+ * @returns
+ */
+export function omitBy<O extends Record<string, any>>(obj: O, predicate: (value: any, key: keyof O) => boolean): Partial<O> {
+  const newObj = deepClone(obj)
+  Object.keys(newObj).forEach((key) => predicate(newObj[key], key) && delete newObj[key]) // 遍历对象的键，删除值为不满足predicate的字段
+  return newObj
+}
+
+/**
+ * 缓动函数，用于在动画或过渡效果中根据时间参数计算当前值
+ * @param t 当前时间，通常是从动画开始经过的时间
+ * @param b 初始值，动画属性的初始值
+ * @param c 变化量，动画属性的目标值与初始值的差值
+ * @param d 持续时间，动画持续的总时间长度
+ * @returns 计算出的当前值
+ */
+export function easingFn(t: number = 0, b: number = 0, c: number = 0, d: number = 0): number {
+  return (c * (-Math.pow(2, (-10 * t) / d) + 1) * 1024) / 1023 + b
 }

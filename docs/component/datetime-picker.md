@@ -58,6 +58,17 @@ const value = ref<number>(Date.now())
 const value = ref<number>(Date.now())
 ```
 
+## year 类型
+
+`year` 类型只展示年。
+
+```html
+<wd-datetime-picker type="year" v-model="value" label="年" />
+```
+```typescript
+const value = ref<number>(Date.now())
+```
+
 ## time 类型
 
 `time` 类型只展示时分，绑定值为 `HH:mm` 格式。
@@ -250,7 +261,7 @@ const displayFormatTabLabel = (items) => {
 |-----|------|-----|-------|-------|---------|
 | v-model | 选中项，当 type 为 time 时，类型为字符串；当 type 为 Array 时，类型为范围选择；否则为 Date | string / date / array | - | - | - |
 | default-value | 默认日期，类型保持与 value 一致，打开面板时面板自动选到默认日期 | string / date / array | - | - | - |
-| type | 选择器类型 | string | date / year-month / time | datetime | - |
+| type | 选择器类型 | string | date / year-month / time / year | datetime | - |
 | loading | 加载中 | boolean | - | false | - |
 | loading-color | 加载的颜色，只能使用十六进制的色值写法，且不能使用缩写 | string | - | #4D80F0 | - |
 | columns-height | picker内部滚筒高 | number | - | 231 | - |
@@ -265,8 +276,8 @@ const displayFormatTabLabel = (items) => {
 | formatter | 自定义弹出层选项文案的格式化函数，返回一个字符串 | function | - | - | - |
 | filter | 自定义过滤选项的函数，返回列的选项数组 | function | - | - | - |
 | display-format-tab-label | 在区域选择模式下，自定义展示tab标签文案的格式化函数，返回一个字符串 | function | - | - | - |
-| minDate | 最小日期 | date | - | 当前日期 - 10年 | - |
-| maxDate | 最大日期 | date | - | 当前日志 + 10年 | - |
+| minDate | 最小日期，13 位的时间戳    | `timestamp` | - | 当前日期 - 10年 | - |
+| maxDate | 最大日期，13 位的时间戳    | `timestamp` | - | 当前日期 + 10年 | - |
 | minHour | 最小小时，time类型时生效 | number | - | 0 | - |
 | maxHour | 最大小时，time类型时生效 | number | - | 23 | - |
 | minMinute | 最小分钟，time类型时生效 | number | - | 0 | - |
@@ -279,13 +290,13 @@ const displayFormatTabLabel = (items) => {
 | use-label-slot | label 使用插槽 | boolean | - | false | - |
 | use-default-slot | 使用默认插槽 | boolean | - | false | - |
 | before-confirm | 确定前校验函数，接收 (value, resolve, picker) 参数，通过 resolve 继续执行 picker，resolve 接收1个boolean参数 | function | - | - | - |
-| name | form 表单中的字段名 | string | - | - | - |
 | close-on-click-modal | 点击遮罩是否关闭 | boolean | - | true | - |
 | z-index | 弹窗层级 | number | - | 15 | - |
 | safe-area-inset-bottom | 弹出面板是否设置底部安全距离（iphone X 类型的机型） | boolean | - | true | - |
 | ellipsis | 是否超出隐藏 | boolean | - | false | - |
 | prop | 表单域 `model` 字段名，在使用表单校验功能的情况下，该属性是必填的 | string | - | - | - |
 | rules | 表单验证规则，结合`wd-form`组件使用	 | `FormItemRule []`	 | - | `[]` | - |
+| immediate-change | 是否在手指松开时立即触发picker-view的 change 事件。若不开启则会在滚动动画结束后触发 change 事件，1.2.25版本起提供，仅微信小程序和支付宝小程序支持。 | boolean | - | false | 1.2.25 |
 
 ### FormItemRule 数据结构
 
@@ -323,5 +334,6 @@ const displayFormatTabLabel = (items) => {
 | 类名 | 说明 | 最低版本 |
 |-----|------|--------|
 | custom-view-class | pickerView 外部自定义样式 | - |
+| custom-cell-class | pickerView cell 外部自定义样式 | 1.3.8 |
 | custom-label-class | label 外部自定义样式 | - |
 | custom-value-class | value 外部自定义样式 | - |

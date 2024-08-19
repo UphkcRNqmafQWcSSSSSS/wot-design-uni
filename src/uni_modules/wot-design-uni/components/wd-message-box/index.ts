@@ -1,10 +1,10 @@
 /*
  * @Author: weisheng
  * @Date: 2022-12-14 17:33:21
- * @LastEditTime: 2023-09-07 00:29:51
+ * @LastEditTime: 2024-08-17 18:18:16
  * @LastEditors: weisheng
  * @Description:
- * @FilePath: \wot-design-uni\src\uni_modules\wot-design-uni\components\wd-message-box\index.ts
+ * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-message-box/index.ts
  * 记得注释
  */
 import { provide, ref } from 'vue'
@@ -24,13 +24,10 @@ export const defaultOptions: MessageOptions = {
   showCancelButton: false,
   show: false,
   closeOnClickModal: true,
-  confirmButtonText: '确定',
-  cancelButtonText: '取消',
   msg: '',
   type: 'alert',
   inputType: 'text',
   inputValue: '',
-  inputPlaceholder: '请输入',
   inputValidate: null,
   showErr: false,
   zIndex: 99,
@@ -44,7 +41,7 @@ export function useMessage(selector: string = ''): Message {
   provide(messageOptionKey, messageOption)
 
   const createMethod = (type: MessageType) => {
-    // 优先级：options->toastOptions->defaultOptions
+    // 优先级：options->MessageOptions->defaultOptions
     return (options: MessageOptions | string) => {
       const messageOptions = deepMerge({ type: type }, typeof options === 'string' ? { title: options } : options) as MessageOptions
       if (messageOptions.type === 'confirm' || messageOptions.type === 'prompt') {
@@ -80,7 +77,7 @@ export function useMessage(selector: string = ''): Message {
   const prompt = createMethod('prompt')
 
   const close = () => {
-    messageOption.value = { ...defaultOptions }
+    messageOption.value.show = false
   }
   return {
     show,

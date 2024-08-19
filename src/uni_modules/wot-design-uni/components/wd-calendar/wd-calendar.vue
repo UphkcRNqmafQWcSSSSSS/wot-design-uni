@@ -21,7 +21,7 @@
             <view
               :class="`wd-calendar__value ${ellipsis ? 'is-ellipsis' : ''} ${customValueClass} ${showValue ? '' : 'wd-calendar__value--placeholder'}`"
             >
-              {{ showValue || placeholder || '请选择' }}
+              {{ showValue || placeholder || translate('placeholder') }}
             </view>
             <wd-icon v-if="!disabled && !readonly" custom-class="wd-calendar__arrow" name="arrow-right" />
           </view>
@@ -38,12 +38,12 @@
       @close="close"
     >
       <view class="wd-calendar__header">
-        <view v-if="!showTypeSwitch && shortcuts.length === 0" class="wd-calendar__title">{{ title || '选择日期' }}</view>
+        <view v-if="!showTypeSwitch && shortcuts.length === 0" class="wd-calendar__title">{{ title || translate('title') }}</view>
         <view v-if="showTypeSwitch" class="wd-calendar__tabs">
           <wd-tabs ref="calendarTabs" v-model="currentTab" @change="handleTypeChange">
-            <wd-tab title="日" name="日" />
-            <wd-tab title="周" name="周" />
-            <wd-tab title="月" name="月" />
+            <wd-tab :title="translate('day')" :name="translate('day')" />
+            <wd-tab :title="translate('week')" :name="translate('week')" />
+            <wd-tab :title="translate('month')" :name="translate('month')" />
           </wd-tabs>
         </view>
         <view v-if="shortcuts.length > 0" class="wd-calendar__shortcuts">
@@ -66,11 +66,14 @@
         :class="`wd-calendar__view  ${currentType.indexOf('range') > -1 ? 'is-range' : ''} ${showConfirm ? 'is-show-confirm' : ''}`"
       >
         <view v-if="range(type)" :class="`wd-calendar__range-label ${type === 'monthrange' ? 'is-monthrange' : ''}`">
-          <view :class="`wd-calendar__range-label-item ${!calendarValue || !calendarValue[0] ? 'is-placeholder' : ''}`" style="text-align: right">
+          <view
+            :class="`wd-calendar__range-label-item ${!calendarValue || !isArray(calendarValue) || !calendarValue[0] ? 'is-placeholder' : ''}`"
+            style="text-align: right"
+          >
             {{ rangeLabel[0] }}
           </view>
           <view class="wd-calendar__range-sperator">/</view>
-          <view :class="`wd-calendar__range-label-item ${!calendarValue || !calendarValue[1] ? 'is-placeholder' : ''}`">
+          <view :class="`wd-calendar__range-label-item ${!calendarValue || !isArray(calendarValue) || !calendarValue[1] ? 'is-placeholder' : ''}`">
             {{ rangeLabel[1] }}
           </view>
         </view>
@@ -90,11 +93,12 @@
           :time-filter="timeFilter"
           :hide-second="hideSecond"
           :show-panel-title="!range(type)"
+          :immediate-change="immediateChange"
           @change="handleChange"
         />
       </view>
       <view v-if="showConfirm" class="wd-calendar__confirm">
-        <wd-button block :disabled="confirmBtnDisabled" @click="handleConfirm">{{ confirmText || '确定' }}</wd-button>
+        <wd-button block :disabled="confirmBtnDisabled" @click="handleConfirm">{{ confirmText || translate('confirm') }}</wd-button>
       </view>
     </wd-action-sheet>
   </view>
@@ -114,177 +118,119 @@ export default {
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import { dayjs } from '../common/dayjs'
-import { deepClone, isArray, isEqual, padZero } from '../common/util'
+import { deepClone, isArray, isEqual, padZero, requestAnimationFrame } from '../common/util'
 import { getWeekNumber, isRange } from '../wd-calendar-view/utils'
 import { useCell } from '../composables/useCell'
 import { FORM_KEY, type FormItemRule } from '../wd-form/types'
 import { useParent } from '../composables/useParent'
+import { useTranslate } from '../composables/useTranslate'
+import { calendarProps, type CalendarExpose } from './types'
+import type { CalendarType } from '../wd-calendar-view/types'
+const { translate } = useTranslate('calendar')
 
-const defaultDisplayFormat = (value, type) => {
+const defaultDisplayFormat = (value: number | number[], type: CalendarType): string => {
   switch (type) {
     case 'date':
-      return dayjs(value).format('YYYY-MM-DD')
+      return dayjs(value as number).format('YYYY-MM-DD')
     case 'dates':
-      return value
+      return (value as number[])
         .map((item) => {
           return dayjs(item).format('YYYY-MM-DD')
         })
         .join(', ')
     case 'daterange':
-      return `${value[0] ? dayjs(value[0]).format('YYYY-MM-DD') : '开始时间'} 至 ${value[1] ? dayjs(value[1]).format('YYYY-MM-DD') : '结束时间'}`
-    case 'datetime':
-      return dayjs(value).format('YYYY-MM-DD HH:mm:ss')
-    case 'datetimerange':
-      return `${value[0] ? dayjs(value[0]).format('YY年MM月DD日 HH:mm:ss') : '开始时间'} 至\n${
-        value[1] ? dayjs(value[1]).format('YY年MM月DD日 HH:mm:ss') : '结束时间'
+      return `${(value as number[])[0] ? dayjs((value as number[])[0]).format('YYYY-MM-DD') : translate('startTime')} ${translate('to')} ${
+        (value as number[])[1] ? dayjs((value as number[])[1]).format('YYYY-MM-DD') : translate('endTime')
       }`
+    case 'datetime':
+      return dayjs(value as number).format('YYYY-MM-DD HH:mm:ss')
+    case 'datetimerange':
+      return `${(value as number[])[0] ? dayjs((value as number[])[0]).format(translate('timeFormat')) : translate('startTime')} ${translate(
+        'to'
+      )}\n${(value as number[])[1] ? dayjs((value as number[])[1]).format(translate('timeFormat')) : translate('endTime')}`
     case 'week': {
-      const year = new Date(value).getFullYear()
-      const week = getWeekNumber(value)
-      return `${year} 第 ${padZero(week)} 周`
+      const year = new Date(value as number).getFullYear()
+      const week = getWeekNumber(value as number)
+      return translate('weekFormat', year, padZero(week))
     }
     case 'weekrange': {
-      const year1 = new Date(value[0]).getFullYear()
-      const week1 = getWeekNumber(value[0])
-      const year2 = new Date(value[1]).getFullYear()
-      const week2 = getWeekNumber(value[1])
-      return `${value[0] ? `${year1} 第 ${padZero(week1)} 周` : '开始周'} - ${value[1] ? `${year2} 第 ${padZero(week2)} 周` : '结束周'}`
+      const year1 = new Date((value as number[])[0]).getFullYear()
+      const week1 = getWeekNumber((value as number[])[0])
+      const year2 = new Date((value as number[])[1]).getFullYear()
+      const week2 = getWeekNumber((value as number[])[1])
+      return `${(value as number[])[0] ? translate('weekFormat', year1, padZero(week1)) : translate('startWeek')} - ${
+        (value as number[])[1] ? translate('weekFormat', year2, padZero(week2)) : translate('endWeek')
+      }`
     }
     case 'month':
-      return dayjs(value).format('YYYY / MM')
+      return dayjs(value as number).format('YYYY / MM')
     case 'monthrange':
-      return `${value[0] ? dayjs(value[0]).format('YYYY / MM') : '开始月'} 至 ${value[1] ? dayjs(value[1]).format('YYYY / MM') : '结束月'}`
+      return `${(value as number[])[0] ? dayjs((value as number[])[0]).format('YYYY / MM') : translate('startMonth')} ${translate('to')} ${
+        (value as number[])[1] ? dayjs((value as number[])[1]).format('YYYY / MM') : translate('endMonth')
+      }`
   }
 }
 
-const formatRange = (value, rangeType, type) => {
+const formatRange = (value: number, rangeType: 'start' | 'end', type: CalendarType) => {
   switch (type) {
     case 'daterange':
       if (!value) {
-        return rangeType === 'end' ? '结束时间' : '开始时间'
+        return rangeType === 'end' ? translate('endTime') : translate('startTime')
       }
-      return dayjs(value).format('YYYY年MM月DD日')
+      return dayjs(value).format(translate('dateFormat'))
     case 'datetimerange':
       if (!value) {
-        return rangeType === 'end' ? '结束时间' : '开始时间'
+        return rangeType === 'end' ? translate('endTime') : translate('startTime')
       }
-      return dayjs(value).format('YY年MM月DD日 HH:mm:ss')
+      return dayjs(value).format(translate('timeFormat'))
     case 'weekrange': {
       if (!value) {
-        return rangeType === 'end' ? '结束周' : '开始周'
+        return rangeType === 'end' ? translate('endWeek') : translate('startWeek')
       }
       const date = new Date(value)
       const year = date.getFullYear()
       const week = getWeekNumber(value)
-      return year + '年第' + week + '周'
+      return translate('weekFormat', year, padZero(week))
     }
     case 'monthrange':
       if (!value) {
-        return rangeType === 'end' ? '结束月' : '开始月'
+        return rangeType === 'end' ? translate('endMonth') : translate('startMonth')
       }
-      return dayjs(value).format('YYYY年MM月')
+      return dayjs(value).format(translate('monthFormat'))
   }
 }
 
-type CalendarType = 'date' | 'dates' | 'datetime' | 'week' | 'month' | 'daterange' | 'datetimerange' | 'weekrange' | 'monthrange'
-
-interface Props {
-  customClass?: string
-  customViewClass?: string
-  customLabelClass?: string
-  customValueClass?: string
-  modelValue: null | number | Array<number>
-  type?: CalendarType
-  minDate?: number
-  maxDate?: number
-  firstDayOfWeek?: number
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  formatter?: Function
-  maxRange?: number
-  rangePrompt?: string
-  allowSameDay?: boolean
-  defaultTime?: string | Array<string>
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  timeFilter?: Function
-  hideSecond?: boolean
-  label?: string
-  labelWidth?: string
-  useLabelSlot?: boolean
-  useDefaultSlot?: boolean
-  disabled?: boolean
-  readonly?: boolean
-  placeholder?: string
-  title?: string
-  alignRight?: boolean
-  error?: boolean
-  required?: boolean
-  size?: string
-  center?: boolean
-  closeOnClickModal?: boolean
-  zIndex?: number
-  showConfirm?: boolean
-  confirmText?: string
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  displayFormat?: Function
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  innerDisplayFormat?: Function
-  ellipsis?: boolean
-  showTypeSwitch?: boolean
-  shortcuts?: Array<Record<string, any>>
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  onShortcutsClick?: Function
-  safeAreaInsetBottom?: boolean
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  beforeConfirm?: Function
-  prop?: string
-  rules?: FormItemRule[]
-}
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customViewClass: '',
-  customLabelClass: '',
-  customValueClass: '',
-  type: 'date',
-  minDate: new Date(new Date().getFullYear(), new Date().getMonth() - 6, new Date().getDate()).getTime(),
-  maxDate: new Date(new Date().getFullYear(), new Date().getMonth() + 6, new Date().getDate(), 23, 59, 59).getTime(),
-  firstDayOfWeek: 0,
-  allowSameDay: false,
-  hideSecond: false,
-  useLabelSlot: false,
-  useDefaultSlot: false,
-  disabled: false,
-  readonly: false,
-  alignRight: false,
-  error: false,
-  required: false,
-  center: false,
-  closeOnClickModal: true,
-  zIndex: 15,
-  showConfirm: true,
-  ellipsis: false,
-  showTypeSwitch: false,
-  shortcuts: () => [],
-  safeAreaInsetBottom: true,
-  rules: () => []
-})
+const props = defineProps(calendarProps)
+const emit = defineEmits(['cancel', 'change', 'update:modelValue', 'confirm'])
 
 const pickerShow = ref<boolean>(false)
 const calendarValue = ref<null | number | number[]>(null)
 const lastCalendarValue = ref<null | number | number[]>(null)
 const panelHeight = ref<number>(338)
 const confirmBtnDisabled = ref<boolean>(true)
-const showValue = ref<string>('')
 const currentTab = ref<number>(0)
 const lastTab = ref<number>(0)
 const currentType = ref<CalendarType>('date')
-const lastCurrentType = ref<CalendarType>('date')
+const lastCurrentType = ref<CalendarType>()
 const inited = ref<boolean>(false)
-const rangeLabel = ref<Array<string>>([])
-
 const cell = useCell()
-
 const calendarView = ref()
 const calendarTabs = ref()
+
+const rangeLabel = computed(() => {
+  const [start, end] = deepClone(isArray(calendarValue.value) ? calendarValue.value : [])
+  return [start, end].map((item, index) => {
+    return (props.innerDisplayFormat || formatRange)(item, index === 0 ? 'start' : 'end', currentType.value)
+  })
+})
+
+const showValue = computed(() => {
+  if ((!isArray(props.modelValue) && props.modelValue) || (isArray(props.modelValue) && props.modelValue.length)) {
+    return (props.displayFormat || defaultDisplayFormat)(props.modelValue, lastCurrentType.value || currentType.value)
+  } else {
+    return ''
+  }
+})
 
 watch(
   () => props.modelValue,
@@ -292,11 +238,6 @@ watch(
     if (isEqual(val, oldVal)) return
     calendarValue.value = deepClone(val)
     confirmBtnDisabled.value = getConfirmBtnStatus(val)
-    setShowValue()
-
-    if (props.type.indexOf('range') > -1) {
-      setInnerLabel()
-    }
   },
   {
     immediate: true
@@ -315,12 +256,6 @@ watch(
     }
     panelHeight.value = props.showConfirm ? 338 : 400
     currentType.value = deepClone(newValue)
-
-    setShowValue()
-
-    if (props.type.indexOf('range') > -1) {
-      setInnerLabel()
-    }
   },
   {
     deep: true,
@@ -365,12 +300,10 @@ const isRequired = computed(() => {
 })
 
 const range = computed(() => {
-  return (type) => {
+  return (type: CalendarType) => {
     return isRange(type)
   }
 })
-
-const emit = defineEmits(['cancel', 'change', 'update:modelValue', 'confirm'])
 
 function scrollIntoView() {
   calendarView.value && calendarView.value && calendarView.value.$.exposed.scrollIntoView()
@@ -386,7 +319,9 @@ function open() {
   lastCalendarValue.value = deepClone(calendarValue.value)
   lastTab.value = currentTab.value
   lastCurrentType.value = currentType.value
-  scrollIntoView()
+  requestAnimationFrame(() => {
+    scrollIntoView()
+  })
 
   setTimeout(() => {
     if (props.showTypeSwitch) {
@@ -398,16 +333,15 @@ function open() {
 // 对外暴露方法
 function close() {
   pickerShow.value = false
-  scrollIntoView()
   setTimeout(() => {
     calendarValue.value = deepClone(lastCalendarValue.value)
     currentTab.value = lastTab.value
-    currentType.value = lastCurrentType.value
+    currentType.value = lastCurrentType.value || 'date'
     confirmBtnDisabled.value = getConfirmBtnStatus(lastCalendarValue.value)
   }, 250)
   emit('cancel')
 }
-function handleTypeChange({ index }) {
+function handleTypeChange({ index }: { index: number }) {
   const tabs = ['date', 'week', 'month']
   const rangeTabs = ['daterange', 'weekrange', 'monthrange']
   const type = props.type.indexOf('range') > -1 ? rangeTabs[index] : tabs[index]
@@ -415,12 +349,12 @@ function handleTypeChange({ index }) {
   currentTab.value = index
   currentType.value = type as CalendarType
 }
-function getConfirmBtnStatus(value) {
+function getConfirmBtnStatus(value: number | number[] | null) {
   let confirmBtnDisabled = false
   // 范围选择未选择满，或者多日期选择未选择日期，按钮置灰不可点击
   if (
-    (props.type.indexOf('range') > -1 && (!value[0] || !value[1] || !value)) ||
-    (props.type === 'dates' && (value.length === 0 || !value)) ||
+    (props.type.indexOf('range') > -1 && (!isArray(value) || !value[0] || !value[1] || !value)) ||
+    (props.type === 'dates' && (!isArray(value) || value.length === 0 || !value)) ||
     !value
   ) {
     confirmBtnDisabled = true
@@ -428,17 +362,13 @@ function getConfirmBtnStatus(value) {
 
   return confirmBtnDisabled
 }
-function handleChange({ value }) {
+function handleChange({ value }: { value: number | number[] | null }) {
   calendarValue.value = deepClone(value)
   confirmBtnDisabled.value = getConfirmBtnStatus(value)
 
   emit('change', {
     value
   })
-
-  if (props.type.indexOf('range') > -1) {
-    setInnerLabel()
-  }
 
   if (!props.showConfirm && !confirmBtnDisabled.value) {
     handleConfirm()
@@ -448,7 +378,7 @@ function handleConfirm() {
   if (props.beforeConfirm) {
     props.beforeConfirm({
       value: calendarValue.value,
-      resolve: (isPass) => {
+      resolve: (isPass: boolean) => {
         isPass && onConfirm()
       }
     })
@@ -458,26 +388,14 @@ function handleConfirm() {
 }
 function onConfirm() {
   pickerShow.value = false
+  lastCurrentType.value = currentType.value
   emit('update:modelValue', calendarValue.value)
   emit('confirm', {
     value: calendarValue.value
   })
-  setShowValue()
 }
-function setInnerLabel() {
-  const [start, end] = deepClone(isArray(calendarValue.value) ? calendarValue.value : [])
-  rangeLabel.value = [start, end].map((item, index) => {
-    return (props.innerDisplayFormat || formatRange)(item, index === 0 ? 'start' : 'end', currentType.value)
-  })
-}
-function setShowValue() {
-  if ((!(calendarValue.value instanceof Array) && calendarValue.value) || (calendarValue.value instanceof Array && calendarValue.value.length)) {
-    showValue.value = (props.displayFormat || defaultDisplayFormat)(calendarValue.value, currentType.value)
-  } else {
-    showValue.value = ''
-  }
-}
-function handleShortcutClick(index) {
+
+function handleShortcutClick(index: number) {
   if (props.onShortcutsClick && typeof props.onShortcutsClick === 'function') {
     calendarValue.value = deepClone(
       props.onShortcutsClick({
@@ -486,16 +404,17 @@ function handleShortcutClick(index) {
       })
     )
     confirmBtnDisabled.value = getConfirmBtnStatus(calendarValue.value)
-
-    if (props.type.indexOf('range') > -1) {
-      setInnerLabel()
-    }
   }
 
   if (!props.showConfirm) {
     handleConfirm()
   }
 }
+
+defineExpose<CalendarExpose>({
+  close,
+  open
+})
 </script>
 
 <style lang="scss" scoped>

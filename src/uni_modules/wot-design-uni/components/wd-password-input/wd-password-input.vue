@@ -1,5 +1,5 @@
 <template>
-  <view class="wd-password-input">
+  <view :class="`wd-password-input ${customClass}`" :style="customStyle">
     <view @touchstart="onTouchStart" class="wd-password-input__security">
       <view
         v-for="(_, index) in length"
@@ -33,26 +33,9 @@ export default {
 
 <script lang="ts" setup>
 import { addUnit } from '../common/util'
+import { passwordInputProps } from './types'
 
-interface Props {
-  modelValue: string
-  mask?: boolean
-  info?: string
-  errorInfo?: string
-  gutter?: number | string
-  length?: number
-  focused: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: '',
-  mask: true,
-  info: '',
-  errorInfo: '',
-  gutter: 0,
-  length: 6,
-  focused: true
-})
+defineProps(passwordInputProps)
 
 const emit = defineEmits(['focus'])
 

@@ -1,19 +1,25 @@
 <template>
-  <view :style="customStyle" :class="`wd-drop-menu ${customClass}`" @click.stop="noop">
-    <view class="wd-drop-menu__list">
-      <view
-        v-for="(child, index) in children"
-        :key="index"
-        @click="toggle(child)"
-        :class="`wd-drop-menu__item ${child.disabled ? 'is-disabled' : ''} ${currentUid === child.$.uid ? 'is-active' : ''}`"
-      >
-        <view class="wd-drop-menu__item-title">
-          <view class="wd-drop-menu__item-title-text">{{ getDisplayTitle(child) }}</view>
-          <wd-icon name="arrow-down" size="14px" custom-class="wd-drop-menu__arrow" />
+  <view :style="customStyle" :class="`wd-drop-menu ${customClass}`" @click.stop="noop" :id="dropMenuId">
+    <!-- #ifdef MP-DINGTALK -->
+    <view :id="dropMenuId">
+      <!-- #endif -->
+      <view class="wd-drop-menu__list">
+        <view
+          v-for="(child, index) in children"
+          :key="index"
+          @click="toggle(child)"
+          :class="`wd-drop-menu__item ${child.disabled ? 'is-disabled' : ''} ${child.$.exposed!.getShowPop() ? 'is-active' : ''}`"
+        >
+          <view class="wd-drop-menu__item-title">
+            <view class="wd-drop-menu__item-title-text">{{ getDisplayTitle(child) }}</view>
+            <wd-icon :name="child.icon" :size="child.iconSize" custom-class="wd-drop-menu__arrow" />
+          </view>
         </view>
       </view>
+      <slot />
+      <!-- #ifdef MP-DINGTALK -->
     </view>
-    <slot />
+    <!-- #endif -->
   </view>
 </template>
 <script lang="ts">
@@ -31,34 +37,13 @@ export default {
 import { getCurrentInstance, inject, onBeforeMount, ref, watch } from 'vue'
 import { closeOther } from '../common/clickoutside'
 import { type Queue, queueKey } from '../composables/useQueue'
-import { getRect } from '../common/util'
+import { getRect, uuid } from '../common/util'
 import { useChildren } from '../composables/useChildren'
-import { DROP_MENU_KEY } from './types'
+import { DROP_MENU_KEY, dropMenuProps } from './types'
 
-type DropDirction = 'up' | 'down'
-interface Props {
-  customClass?: string
-  customStyle?: string
-  zIndex?: number
-  direction?: DropDirction
-  modal?: boolean
-  closeOnClickModal?: boolean
-  duration?: number
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customStyle: '',
-  zIndex: 12,
-  direction: 'down',
-  modal: true,
-  closeOnClickModal: true,
-  duration: 200
-})
+const props = defineProps(dropMenuProps)
 const queue = inject<Queue | null>(queueKey, null)
-
-// -1表示折叠
-const currentUid = ref<number | null>(null)
+const dropMenuId = ref<string>(`dropMenuId${uuid()}`)
 const offset = ref<number>(0)
 const windowHeight = ref<number>(0)
 
@@ -71,7 +56,7 @@ linkChildren({ props, fold, offset })
 watch(
   () => props.direction,
   (newValue) => {
-    if (newValue !== 'up' && newValue !== 'down') {
+    if (!['up', 'down'].includes(newValue)) {
       // eslint-disable-next-line quotes
       console.error("[wot design] warning(wd-drop-menu): direction must be 'up' or 'down'")
     }
@@ -113,34 +98,20 @@ function toggle(child: any) {
     fold(child)
   }
 }
+
 /**
  * 控制菜单内容是否展开
  */
-function fold(child?: any) {
-  currentUid.value = child ? child.$.uid : null
-  if (!child) {
-    children.forEach((item) => {
-      item.$.exposed!.setShowPop(false)
-    })
-    return
-  }
-  getRect('.wd-drop-menu', false, proxy).then((rect: any) => {
+function fold(child: any) {
+  getRect(`#${dropMenuId.value}`, false, proxy).then((rect) => {
     if (!rect) return
     const { top, bottom } = rect
-
     if (props.direction === 'down') {
-      offset.value = bottom
+      offset.value = Number(bottom)
     } else {
-      offset.value = windowHeight.value - top
+      offset.value = windowHeight.value - Number(top)
     }
-    // 选中当前关掉其他的
-    children.forEach((item) => {
-      if (child.$.uid === item.$.uid) {
-        item.$.exposed!.open()
-      } else {
-        item.$.exposed!.setShowPop(false)
-      }
-    })
+    child.$.exposed!.toggle()
   })
 }
 </script>

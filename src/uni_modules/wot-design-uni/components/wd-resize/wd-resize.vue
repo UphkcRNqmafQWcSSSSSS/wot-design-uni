@@ -1,7 +1,7 @@
 <template>
   <view :class="`wd-resize ${customClass}`" :style="rootStyle">
     <!--插槽需要脱离父容器文档流，防止父容器固宽固高，进而导致插槽大小被被父容器限制-->
-    <view :class="`wd-resize__container ${customContainerClass}`">
+    <view :id="resizeId" :class="`wd-resize__container ${customContainerClass}`">
       <!--被监听的插槽-->
       <slot />
       <!--监听插槽变大-->
@@ -43,19 +43,11 @@ export default {
 
 <script lang="ts" setup>
 import { computed, getCurrentInstance, onMounted, ref } from 'vue'
-import { addUnit, objToStyle } from '../common/util'
+import { addUnit, objToStyle, uuid } from '../common/util'
+import { resizeProps } from './types'
 
-interface Props {
-  customClass?: string
-  customContainerClass?: string
-  customStyle?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customStyle: '',
-  customClass: '',
-  customContainerClass: ''
-})
+const props = defineProps(resizeProps)
+const emit = defineEmits(['resize'])
 
 const expandScrollTop = ref<number>(0)
 const shrinkScrollTop = ref<number>(0)
@@ -75,16 +67,11 @@ const rootStyle = computed(() => {
 let onScrollHandler = () => {}
 const { proxy } = getCurrentInstance() as any
 
-const emit = defineEmits(['resize'])
+const resizeId = ref<string>(`resize${uuid()}`)
 
 onMounted(() => {
-  const query = uni
-    .createSelectorQuery()
-    // #ifndef MP-ALIPAY
-    .in(proxy)
-    // #endif
-    .select('.wd-resize__container')
-    .boundingClientRect()
+  // 初始化数据获取
+  const query = uni.createSelectorQuery().in(proxy).select(`#${resizeId.value}`).boundingClientRect()
   query.exec(([res]) => {
     // 闭包记录容器高度
     let lastHeight = res.height
@@ -94,13 +81,7 @@ onMounted(() => {
     width.value = lastWidth
     // 监听滚动事件
     onScrollHandler = () => {
-      const query = uni
-        .createSelectorQuery()
-        // #ifndef MP-ALIPAY
-        .in(proxy)
-        // #endif
-        .select('.wd-resize__container')
-        .boundingClientRect()
+      const query = uni.createSelectorQuery().in(proxy).select(`#${resizeId.value}`).boundingClientRect()
       query.exec(([res]) => {
         // 前两次滚动事件被触发，说明 created 的修改已渲染，通知用户代码当前容器大小
         if (scrollEventCount.value++ === 0) {
@@ -130,7 +111,7 @@ onMounted(() => {
           emitStack.push(1)
         }
         if (emitStack.length !== 0) {
-          const result = {}
+          const result: Record<string, any> = {}
           ;['bottom', 'top', 'left', 'right', 'height', 'width'].forEach((propName) => {
             result[propName] = res[propName]
           })
@@ -151,7 +132,7 @@ onMounted(() => {
   })
 })
 
-function scrollToBottom({ lastWidth, lastHeight }) {
+function scrollToBottom({ lastWidth, lastHeight }: { lastWidth: number; lastHeight: number }) {
   expandScrollTop.value = 100000 + lastHeight
   shrinkScrollTop.value = 3 * height.value + lastHeight
   expandScrollLeft.value = 100000 + lastWidth

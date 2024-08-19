@@ -6,6 +6,7 @@
         <wd-datetime-picker label="日期选择" v-model="value1" @confirm="handleConfirm1" />
         <wd-datetime-picker label="年月日" v-model="value2" type="date" @confirm="handleConfirm2" />
         <wd-datetime-picker label="年月" v-model="value3" type="year-month" @confirm="handleConfirm3" />
+        <wd-datetime-picker label="年" v-model="value16" type="year" @confirm="handleConfirm16" />
         <wd-datetime-picker label="时分" v-model="value4" type="time" @confirm="handleConfirm4" />
         <wd-datetime-picker label="展示格式" v-model="value5" :display-format="displayFormat" @confirm="handleConfirm5" />
         <wd-datetime-picker label="内部格式" v-model="value6" :formatter="formatter" @confirm="handleConfirm6" />
@@ -14,6 +15,7 @@
         <wd-datetime-picker label="错误" v-model="value9" error @confirm="handleConfirm9" />
         <wd-datetime-picker label="必填" v-model="value10" required @confirm="handleConfirm10" />
         <wd-datetime-picker label="默认日期" v-model="value2" :default-value="value2" />
+        <wd-datetime-picker label="时间范围一年" :minDate="minDate" :maxDate="maxDate" v-model="value17" @confirm="handleConfirm1" />
       </wd-cell-group>
     </demo-block>
     <demo-block title="label 不传" transparent>
@@ -35,9 +37,14 @@
 </template>
 <script lang="ts" setup>
 import { useToast } from '@/uni_modules/wot-design-uni'
+import type { DatetimePickerViewFilter, DatetimePickerViewFormatter } from '@/uni_modules/wot-design-uni/components/wd-datetime-picker-view/types'
+import type {
+  DatetimePickerDisplayFormat,
+  DatetimePickerDisplayFormatTabLabel,
+  DatetimePickerInstance
+} from '@/uni_modules/wot-design-uni/components/wd-datetime-picker/types'
 import { ref } from 'vue'
 
-const type = ref<string>('date')
 const value1 = ref<string>('')
 const value2 = ref<number>(Date.now())
 const value3 = ref<number>(Date.now())
@@ -53,9 +60,13 @@ const value12 = ref<string>('')
 const value13 = ref<number>(Date.now())
 const value14 = ref<any[]>(['', ''])
 const value15 = ref<any[]>(['', Date.now()])
-const defaultValue = ref<any[]>([Date.now() - 24 * 60 * 60 * 1000, Date.now()])
-const showstart = ref<boolean>(false)
-const formatter = (type, value) => {
+const value16 = ref(Date.now())
+const value17 = ref(Date.now())
+
+const minDate = ref<number>(Date.now())
+const maxDate = ref<number>(new Date(new Date().getFullYear() + 1, new Date().getMonth(), new Date().getDate()).getTime())
+
+const formatter: DatetimePickerViewFormatter = (type, value) => {
   switch (type) {
     case 'year':
       return value + '年'
@@ -71,21 +82,21 @@ const formatter = (type, value) => {
       return value
   }
 }
-const filter = (type, values) => {
+const filter: DatetimePickerViewFilter = (type, values) => {
   if (type === 'minute') {
     return values.filter((value) => value % 5 === 0)
   }
   return values
 }
-const displayFormat = (items) => {
+const displayFormat: DatetimePickerDisplayFormat = (items) => {
   return `${items[0].label}年${items[1].label}月${items[2].label}日 ${items[3].label}:${items[4].label}`
 }
 const toast = useToast()
-const beforeConfirm = (value, resolve, picker) => {
+const beforeConfirm = (value: number | string | (number | string)[], resolve: (isPass: boolean) => void, picker: DatetimePickerInstance) => {
   picker.setLoading(true)
   setTimeout(() => {
     picker.setLoading(false)
-    if (value > Date.now()) {
+    if ((value as number) > Date.now()) {
       resolve(false)
       toast.error('不能选择大于今天的日期')
     } else {
@@ -93,55 +104,58 @@ const beforeConfirm = (value, resolve, picker) => {
     }
   }, 2000)
 }
-const displayFormatTabLabel = (items) => {
+const displayFormatTabLabel: DatetimePickerDisplayFormatTabLabel = (items) => {
   return `${items[0].label}年${items[1].label}月${items[2].label}日 ${items[3].label}:${items[4].label}`
 }
 
 /** picker触发confirm事件，同步触发confirm事件 */
-function handleConfirm1({ value }) {
+function handleConfirm1({ value }: any) {
   console.log(new Date(value))
 }
-function handleConfirm2({ value }) {
+function handleConfirm2({ value }: any) {
   console.log(value)
 }
-function handleConfirm3({ value }) {
+function handleConfirm3({ value }: any) {
   console.log(value)
 }
-function handleConfirm4({ value }) {
+function handleConfirm4({ value }: any) {
   console.log(value)
 }
-function handleConfirm5({ value }) {
+function handleConfirm5({ value }: any) {
   console.log(value)
 }
-function handleConfirm6({ value }) {
+function handleConfirm6({ value }: any) {
   console.log(value)
 }
-function handleConfirm7({ value }) {
+function handleConfirm7({ value }: any) {
   console.log(value)
 }
 
-function handleConfirm8({ value }) {
+function handleConfirm8({ value }: any) {
   console.log(value)
 }
-function handleConfirm9({ value }) {
+function handleConfirm9({ value }: any) {
   console.log(value)
 }
-function handleConfirm10({ value }) {
+function handleConfirm10({ value }: any) {
   console.log(value)
 }
-function handleConfirm11({ value }) {
+function handleConfirm11({ value }: any) {
   console.log(value)
 }
-function handleConfirm12({ value }) {
+function handleConfirm12({ value }: any) {
   console.log(value)
 }
-function handleConfirm13({ value }) {
+function handleConfirm13({ value }: any) {
   console.log(value)
 }
-function handleConfirm14({ value }) {
+function handleConfirm14({ value }: any) {
   console.log(value)
 }
-function handleConfirm15({ value }) {
+function handleConfirm15({ value }: any) {
+  console.log(value)
+}
+function handleConfirm16({ value }: any) {
   console.log(value)
 }
 /** picker触发cancel事件，同步触发cancel事件 */

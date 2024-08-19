@@ -29,44 +29,22 @@ export default {
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { isObj, requestAnimationFrame } from '../common/util'
-import type { PopupType } from './type'
+import { popupProps } from './types'
 
-interface Props {
-  transition?: string
-  closable?: boolean
-  position?: PopupType
-  closeOnClickModal?: boolean
-  duration?: number | boolean
-  modal?: boolean
-  zIndex?: number
-  hideWhenClose?: boolean
-  modalStyle?: string
-  safeAreaInsetBottom?: boolean
-  modelValue: boolean
-  customStyle?: string
-  lazyRender?: boolean
-  lockScroll?: boolean
-  customClass?: string
-}
+const props = defineProps(popupProps)
+const emit = defineEmits([
+  'update:modelValue',
+  'before-enter',
+  'enter',
+  'before-leave',
+  'leave',
+  'after-leave',
+  'after-enter',
+  'click-modal',
+  'close'
+])
 
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customStyle: '',
-  modalStyle: '',
-  position: 'center',
-  closeOnClickModal: true,
-  modal: true,
-  closable: false,
-  duration: 300,
-  zIndex: 10,
-  hideWhenClose: true,
-  lazyRender: true,
-  lockScroll: true,
-  safeAreaInsetBottom: false,
-  modelValue: false
-})
-
-const getClassNames = (name) => {
+const getClassNames = (name?: string) => {
   if (!name) {
     return {
       enter: 'enter-class enter-active-class',
@@ -100,18 +78,6 @@ const classes = ref<string>('')
 const safeBottom = ref<number>(0)
 
 const name = ref<string>('') // 动画名
-
-const emit = defineEmits([
-  'update:modelValue',
-  'before-enter',
-  'enter',
-  'before-leave',
-  'leave',
-  'after-leave',
-  'after-enter',
-  'click-modal',
-  'close'
-])
 
 const style = computed(() => {
   return `z-index: ${props.zIndex}; padding-bottom: ${safeBottom.value}px; -webkit-transition-duration: ${

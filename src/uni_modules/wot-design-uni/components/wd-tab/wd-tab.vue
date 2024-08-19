@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-tab ${customClass}`">
+  <view :class="`wd-tab ${customClass}`" :style="customStyle">
     <view v-if="painted" class="wd-tab__body" :style="isShow ? '' : 'display: none;'">
       <slot />
     </view>
@@ -17,25 +17,13 @@ export default {
 </script>
 <script lang="ts" setup>
 import { getCurrentInstance, ref, watch } from 'vue'
-import { getType, isDef } from '../common/util'
+import { isDef, isNumber, isString } from '../common/util'
 import { useParent } from '../composables/useParent'
 import { TABS_KEY } from '../wd-tabs/types'
 import { computed } from 'vue'
+import { tabProps } from './types'
 
-interface Props {
-  customClass?: string
-  // 唯一标识符
-  name?: string | number
-  // tab的label
-  title?: string
-  // tab禁用，无法点击
-  disabled?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  disabled: false
-})
+const props = defineProps(tabProps)
 
 const painted = ref<boolean>(false) // 初始状态tab不会渲染，必须通过tabs来设置painted使tab渲染
 const isShow = ref<boolean>(false)
@@ -50,7 +38,7 @@ const activeIndex = computed(() => {
 watch(
   () => props.name,
   (newValue) => {
-    if (newValue && getType(newValue) !== 'number' && getType(newValue) !== 'string') {
+    if (isDef(newValue) && !isNumber(newValue) && !isString(newValue)) {
       console.error('[wot design] error(wd-tab): the type of name should be number or string')
       return
     }
@@ -80,7 +68,7 @@ watch(
  * @description 检测tab绑定的name是否和其它tab的name冲突
  * @param {Object} self 自身
  */
-function checkName(self) {
+function checkName(self: any) {
   const { name: myName } = props
   if (myName === undefined || myName === null || myName === '') {
     return

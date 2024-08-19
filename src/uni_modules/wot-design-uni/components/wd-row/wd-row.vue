@@ -17,17 +17,9 @@ export default {
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import { useChildren } from '../composables/useChildren'
-import { ROW_KEY } from './types'
+import { ROW_KEY, rowProps } from './types'
 
-interface Props {
-  customClass?: string
-  gutter?: number
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  gutter: 0
-})
+const props = defineProps(rowProps)
 const { linkChildren } = useChildren(ROW_KEY)
 
 linkChildren({ props })
@@ -51,8 +43,8 @@ function setGutter() {
     console.error('[wot design] warning(wd-row): attribute gutter must be greater than or equal to 0')
   }
   const margin = `${gutter / 2}px`
-  const customStyle = gutter ? `margin-left: -${margin}; margin-right: -${margin};` : ''
-  style.value = customStyle
+  const gutterStyle = gutter ? `margin-left: -${margin}; margin-right: -${margin};` : ''
+  style.value = `${gutterStyle}${props.customStyle}`
 }
 </script>
 <style lang="scss" scoped>

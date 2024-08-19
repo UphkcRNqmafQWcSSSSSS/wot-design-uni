@@ -3,11 +3,12 @@
     :class="`wd-picker ${disabled ? 'is-disabled' : ''} ${size ? 'is-' + size : ''}  ${cell.border.value ? 'is-border' : ''} ${
       alignRight ? 'is-align-right' : ''
     } ${error ? 'is-error' : ''} ${customClass}`"
+    :style="customStyle"
   >
     <!--文案-->
     <view class="wd-picker__field" @click="showPopup">
       <slot v-if="useDefaultSlot"></slot>
-      <view v-else class="wd-picker__cell">
+      <view v-else :class="['wd-picker__cell', customCellClass]">
         <view
           v-if="label || useLabelSlot"
           :class="`wd-picker__label ${customLabelClass} ${isRequired ? 'is-required' : ''}`"
@@ -19,13 +20,22 @@
         <view class="wd-picker__body">
           <view class="wd-picker__value-wraper">
             <view :class="`wd-picker__value ${customValueClass}`">
-              <view v-if="region">
-                <text :class="showValue[0] ? '' : 'wd-picker__placeholder'">{{ showValue[0] ? showValue[0] : placeholder }}</text>
-                至
-                <text :class="showValue[1] ? '' : 'wd-picker__placeholder'">{{ showValue[1] ? showValue[1] : placeholder }}</text>
-              </view>
+              <template v-if="region">
+                <view v-if="isArray(showValue)">
+                  <text :class="showValue[0] ? '' : 'wd-picker__placeholder'">
+                    {{ showValue[0] ? showValue[0] : placeholder || translate('placeholder') }}
+                  </text>
+                  {{ translate('to') }}
+                  <text :class="showValue[1] ? '' : 'wd-picker__placeholder'">
+                    {{ showValue[1] ? showValue[1] : placeholder || translate('placeholder') }}
+                  </text>
+                </view>
+                <view v-else class="wd-picker__placeholder">
+                  {{ placeholder || translate('placeholder') }}
+                </view>
+              </template>
               <view v-else :class="showValue ? '' : 'wd-picker__placeholder'">
-                {{ showValue ? showValue : placeholder }}
+                {{ showValue ? showValue : placeholder || translate('placeholder') }}
               </view>
             </view>
             <wd-icon v-if="!disabled && !readonly" custom-class="wd-picker__arrow" name="arrow-right" />
@@ -50,23 +60,23 @@
         <view class="wd-picker__toolbar" @touchmove="noop">
           <!--取消按钮-->
           <view class="wd-picker__action wd-picker__action--cancel" @click="onCancel">
-            {{ cancelButtonText }}
+            {{ cancelButtonText || translate('cancel') }}
           </view>
           <!--标题-->
           <view v-if="title" class="wd-picker__title">{{ title }}</view>
           <!--确定按钮-->
           <view :class="`wd-picker__action ${loading || isLoading ? 'is-loading' : ''}`" @click="onConfirm">
-            {{ confirmButtonText }}
+            {{ confirmButtonText || translate('confirm') }}
           </view>
         </view>
         <!-- 区域选择tab展示 -->
         <view v-if="region" class="wd-picker__region-tabs">
           <view :class="`wd-picker__region ${showStart ? 'is-active' : ''} `" @click="tabChange">
-            <view>开始时间</view>
+            <view>{{ translate('start') }}</view>
             <view class="wd-picker__region-time">{{ showTabLabel[0] }}</view>
           </view>
           <view :class="`wd-picker__region ${showStart ? '' : 'is-active'}`" @click="tabChange">
-            <view>结束时间</view>
+            <view>{{ translate('end') }}</view>
             <view class="wd-picker__region-time">{{ showTabLabel[1] }}</view>
           </view>
         </view>
@@ -84,7 +94,7 @@
             :label-key="labelKey"
             :formatter="formatter"
             :filter="filter"
-            :column-formatter="getType(modelValue) === 'array' ? customColumnFormatter : undefined"
+            :column-formatter="isArray(modelValue) ? customColumnFormatter : undefined"
             :max-hour="maxHour"
             :min-hour="minHour"
             :max-date="maxDate"
@@ -92,6 +102,7 @@
             :max-minute="maxMinute"
             :min-minute="minMinute"
             :start-symbol="true"
+            :immediate-change="immediateChange"
             @change="onChangeStart"
             @pickstart="onPickStart"
             @pickend="onPickEnd"
@@ -110,7 +121,7 @@
             :label-key="labelKey"
             :formatter="formatter"
             :filter="filter"
-            :column-formatter="getType(modelValue) === 'array' ? customColumnFormatter : undefined"
+            :column-formatter="isArray(modelValue) ? customColumnFormatter : undefined"
             :max-hour="maxHour"
             :min-hour="minHour"
             :max-date="maxDate"
@@ -118,6 +129,7 @@
             :max-minute="maxMinute"
             :min-minute="minMinute"
             :start-symbol="false"
+            :immediate-change="immediateChange"
             @change="onChangeEnd"
             @pickstart="onPickStart"
             @pickend="onPickEnd"
@@ -141,149 +153,34 @@ export default {
 
 <script lang="ts" setup>
 import { computed, getCurrentInstance, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue'
-import { deepClone, getType, isArray, isDef, isEqual, padZero } from '../common/util'
+import { deepClone, isArray, isDef, isEqual, isFunction, padZero } from '../common/util'
 import { useCell } from '../composables/useCell'
-import { type DateTimeType, getPickerValue } from '../wd-datetime-picker-view/type'
+import {
+  getPickerValue,
+  type DatetimePickerViewInstance,
+  type DatetimePickerViewColumnFormatter,
+  type DatetimePickerViewColumnType
+} from '../wd-datetime-picker-view/types'
 import { FORM_KEY, type FormItemRule } from '../wd-form/types'
 import { useParent } from '../composables/useParent'
-interface Props {
-  customClass?: string
-  customViewClass?: string
-  customLabelClass?: string
-  customValueClass?: string
-  // 选择器左侧文案
-  label?: string
-  // 选择器占位符
-  placeholder?: string
-  // 禁用
-  disabled?: boolean
-  // 只读
-  readonly?: boolean
-  loading?: boolean
-  loadingColor?: string
-  /* popup */
-  // 弹出层标题
-  title?: string
-  // 取消按钮文案
-  cancelButtonText?: string
-  // 确认按钮文案
-  confirmButtonText?: string
-  // 是否必填
-  required?: boolean
-  size?: string
-  labelWidth?: string
-  useDefaultSlot?: boolean
-  useLabelSlot?: boolean
-  error?: boolean
-  alignRight?: boolean
-  closeOnClickModal?: boolean
-  safeAreaInsetBottom?: boolean
-  ellipsis?: boolean
-  // 选项总高度
-  columnsHeight?: number
-  // 选项对象中，value对应的 key
-  valueKey?: string
-  // 选项对象中，展示的文本对应的 key
-  labelKey?: string
-  // 选中项，当 type 为 time 时，类型为字符串，否则为 时间戳
-  modelValue: string | number | Date | Array<string | number | Date>
-  // 时间选择器的类型
-  type?: DateTimeType
-  // 最小日期 20(x-10)年1月1日
-  minDate?: number
-  // 最大日期 20(x+10)年1月1日
-  maxDate?: number
-  // 最小小时
-  minHour?: number
-  // 最大小时
-  maxHour?: number
-  // 最小分钟
-  minMinute?: number
-  // 最大分钟
-  maxMinute?: number
-  // 自定义过滤选项的函数，返回列的选项数组
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  filter?: Function
-  // 自定义弹出层选项文案的格式化函数，返回一个字符串
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  formatter?: Function
-  // 自定义展示文案的格式化函数，返回一个字符串
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  displayFormat?: Function
-  // 自定义展示文案的格式化函数，返回一个字符串
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  beforeConfirm?: Function
-  // 自定义展示文案的格式化函数，返回一个字符串
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  displayFormatTabLabel?: Function
-  defaultValue?: string | number | Date | Array<string | number | Date>
-  zIndex?: number
-  prop?: string
-  rules?: FormItemRule[]
-}
+import { useTranslate } from '../composables/useTranslate'
+import { datetimePickerProps, type DatetimePickerExpose } from './types'
 
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customViewClass: '',
-  customLabelClass: '',
-  customValueClass: '',
-  // 选择器占位符
-  placeholder: '请选择',
-  // 禁用
-  disabled: false,
-  // 只读
-  readonly: false,
-  loading: false,
-  loadingColor: '#4D80F0',
-  /* popup */
-  // 取消按钮文案
-  cancelButtonText: '取消',
-  // 确认按钮文案
-  confirmButtonText: '完成',
-  // 是否必填
-  required: false,
-  labelWidth: '33%',
-  useDefaultSlot: false,
-  useLabelSlot: false,
-  error: false,
-  alignRight: false,
-  closeOnClickModal: true,
-  safeAreaInsetBottom: true,
-  ellipsis: false,
-  // 选项总高度
-  columnsHeight: 217,
-  // 选项对象中，value对应的 key
-  valueKey: 'value',
-  // 选项对象中，展示的文本对应的 key
-  labelKey: 'label',
+const props = defineProps(datetimePickerProps)
+const emit = defineEmits(['change', 'open', 'toggle', 'cancel', 'confirm', 'update:modelValue'])
 
-  // 时间选择器的类型
-  type: 'datetime',
-  // 最小日期 20(x-10)年1月1日
-  minDate: new Date(new Date().getFullYear() - 10, 0, 1).getTime(),
-  // 最大日期 20(x+10)年1月1日
-  maxDate: new Date(new Date().getFullYear() + 10, 11, 31).getTime(),
-  // 最小小时
-  minHour: 0,
-  // 最大小时
-  maxHour: 23,
-  // 最小分钟
-  minMinute: 0,
-  // 最大分钟
-  maxMinute: 59,
-  zIndex: 15,
-  rules: () => []
-})
-const datetimePickerView = ref()
-const datetimePickerView1 = ref()
+const { translate } = useTranslate('datetime-picker')
 
-const showValue = ref<string | Date | Array<string | Date>>([])
+const datetimePickerView = ref<DatetimePickerViewInstance>()
+const datetimePickerView1 = ref<DatetimePickerViewInstance>()
+
+const showValue = ref<string | Date | Array<string | Date>>('')
 const popupShow = ref<boolean>(false)
 const showStart = ref<boolean>(true)
 const region = ref<boolean>(false)
 const showTabLabel = ref<string[]>([])
-const innerValue = ref<string>('')
-const endInnerValue = ref<string>('')
+const innerValue = ref<string | number>('')
+const endInnerValue = ref<string | number>('')
 
 const isPicking = ref<boolean>(false) // 判断pickview是否还在滑动中
 const hasConfirmed = ref<boolean>(false) // 判断用户是否点击了确认按钮
@@ -298,7 +195,7 @@ watch(
   (val, oldVal) => {
     if (isEqual(val, oldVal)) return
 
-    if (getType(val) === 'array') {
+    if (isArray(val)) {
       region.value = true
       innerValue.value = deepClone(getDefaultInnerValue(true))
       endInnerValue.value = deepClone(getDefaultInnerValue(true, true))
@@ -319,7 +216,7 @@ watch(
 watch(
   () => props.displayFormat,
   (fn) => {
-    if (fn && getType(fn) !== 'function') {
+    if (fn && !isFunction(fn)) {
       console.error('The type of displayFormat must be Function')
     }
   },
@@ -331,7 +228,7 @@ watch(
 watch(
   () => props.filter,
   (fn) => {
-    if (fn && getType(fn) !== 'function') {
+    if (fn && !isFunction(fn)) {
       console.error('The type of filter must be Function')
     }
   },
@@ -343,7 +240,7 @@ watch(
 watch(
   () => props.formatter,
   (fn) => {
-    if (fn && getType(fn) !== 'function') {
+    if (fn && !isFunction(fn)) {
       console.error('The type of formatter must be Function')
     }
   },
@@ -355,7 +252,7 @@ watch(
 watch(
   () => props.beforeConfirm,
   (fn) => {
-    if (fn && getType(fn) !== 'function') {
+    if (fn && !isFunction(fn)) {
       console.error('The type of beforeConfirm must be Function')
     }
   },
@@ -367,7 +264,7 @@ watch(
 watch(
   () => props.displayFormatTabLabel,
   (fn) => {
-    if (fn && getType(fn) !== 'function') {
+    if (fn && !isFunction(fn)) {
       console.error('The type of displayFormatTabLabel must be Function')
     }
   },
@@ -380,7 +277,7 @@ watch(
 watch(
   () => props.defaultValue,
   (val) => {
-    if (getType(val) === 'array' || region.value) {
+    if (isArray(val) || region.value) {
       innerValue.value = deepClone(getDefaultInnerValue(true))
       endInnerValue.value = deepClone(getDefaultInnerValue(true, true))
     } else {
@@ -418,22 +315,21 @@ const isRequired = computed(() => {
   return props.required || props.rules.some((rule) => rule.required) || formRequired
 })
 
-const emit = defineEmits(['change', 'open', 'toggle', 'cancel', 'confirm', 'update:modelValue'])
-
 /**
  * @description 自定义列项筛选规则，对每列单项进行禁用校验，最终返回传入PickerView的columns数组
  * @param {Component} picker datetimePickerView对象
  * @return {Array} columns
  */
-const customColumnFormatter = (picker) => {
+const customColumnFormatter: DatetimePickerViewColumnFormatter = (picker) => {
   if (!picker) {
-    return
+    return []
   }
   const { type } = props
   const { startSymbol, formatter } = picker
   // 校准上下方picker的value值，与内部innerValue对应
   const start = picker.correctValue(innerValue.value)
   const end = picker.correctValue(endInnerValue.value)
+
   /**
    * 如果是上方picekr 那么将下方picker的值作为下边界
    * 如果是下方picekr 那么将上方picker的值作为上边界
@@ -443,25 +339,22 @@ const customColumnFormatter = (picker) => {
   // 获取当前picekr中的源列数组
   const columns = picker.getOriginColumns()
 
-  const mapColumns = (columns) => {
-    // 此时index是最外层知道当前的索引即可得到当前是哪个时间段
-    return columns.map((column, cIndex) => {
-      return column.values.map((value, index) => {
-        const disabled = columnDisabledRules(startSymbol, columns, cIndex, value, currentValue, boundary)
-        return {
-          label: formatter ? formatter(column.type, padZero(value)) : padZero(value),
-          value,
-          disabled
-        }
-      })
+  // 此时index是最外层知道当前的索引即可得到当前是哪个时间段
+  return columns.map((column, cIndex) => {
+    return column.values.map((value) => {
+      const disabled = columnDisabledRules(startSymbol, columns, cIndex, value, currentValue, boundary)
+      return {
+        label: formatter ? formatter(column.type, padZero(value)) : padZero(value),
+        value,
+        disabled
+      }
     })
-  }
-  return mapColumns(columns)
+  })
 }
 
 onBeforeMount(() => {
   const { modelValue: value } = props
-  if (getType(value) === 'array') {
+  if (isArray(value)) {
     region.value = true
     innerValue.value = deepClone(getDefaultInnerValue(true))
     endInnerValue.value = deepClone(getDefaultInnerValue(true, true))
@@ -495,17 +388,21 @@ function getSelects(picker: 'before' | 'after') {
 
 function noop() {}
 
-function getDefaultInnerValue(isRegion?: boolean, isEnd?: boolean) {
+function getDefaultInnerValue(isRegion?: boolean, isEnd?: boolean): string | number {
   const { modelValue: value, defaultValue } = props
 
   if (isRegion) {
     if (isEnd) {
-      return value[1] || (defaultValue && isArray(defaultValue) ? defaultValue[1] : '')
+      return (
+        (isArray(value) ? (value[1] as string) : '') || (defaultValue && isArray(defaultValue) ? (defaultValue[1] as string) : '') || props.maxDate
+      )
     } else {
-      return value[0] || (defaultValue && isArray(defaultValue) ? defaultValue[0] : '')
+      return (
+        (isArray(value) ? (value[0] as string) : '') || (defaultValue && isArray(defaultValue) ? (defaultValue[0] as string) : '') || props.minDate
+      )
     }
   } else {
-    return isDef(value || defaultValue) ? value || defaultValue : ''
+    return isDef(value || defaultValue) ? (value as string) || (defaultValue as string) : ''
   }
 }
 
@@ -545,7 +442,7 @@ function tabChange() {
   showStart.value = !showStart.value
   // 列项刷新多级联动挂载到datetimepickerView
   const picker = showStart.value ? datetimePickerView.value : datetimePickerView1.value
-  picker.setColumns(picker.updateColumns())
+  picker!.setColumns(picker!.updateColumns())
 
   emit('toggle', showStart.value ? innerValue.value : endInnerValue.value)
 }
@@ -553,7 +450,7 @@ function tabChange() {
 /**
  * @description datetimePickerView change 事件
  */
-function onChangeStart({ value }) {
+function onChangeStart({ value }: { value: number | string }) {
   innerValue.value = deepClone(value)
   if (region.value) {
     showTabLabel.value = [setTabLabel(), deepClone(showTabLabel.value[1])]
@@ -563,7 +460,6 @@ function onChangeStart({ value }) {
     datetimePickerView.value && datetimePickerView.value.setColumns(datetimePickerView.value.updateColumns())
     datetimePickerView1.value && datetimePickerView1.value.setColumns(datetimePickerView1.value.updateColumns())
   } else {
-    // emit('update:modelValue', innerValue.value)
     emit('change', {
       value: innerValue.value
     })
@@ -573,11 +469,9 @@ function onChangeStart({ value }) {
 /**
  * @description 区域选择 下方 datetimePickerView change 事件
  */
-function onChangeEnd({ value }) {
+function onChangeEnd({ value }: { value: number | string }) {
   endInnerValue.value = deepClone(value)
-
   showTabLabel.value = [deepClone(showTabLabel.value[0]), setTabLabel(1)]
-  // emit('update:modelValue', [innerValue.value, value])
   emit('change', {
     value: [innerValue.value, value]
   })
@@ -663,17 +557,17 @@ function handleConfirm() {
  */
 function setTabLabel(index: number = 0) {
   if (region.value) {
-    let items = []
+    let items: Record<string, any>[] = []
     if (index === 0) {
-      items =
-        (datetimePickerView.value && datetimePickerView.value.getSelects && datetimePickerView.value.getSelects()) ||
-        (innerValue.value && getSelects('before'))
+      items = ((datetimePickerView.value ? datetimePickerView.value!.getSelects() : undefined) ||
+        (innerValue.value && getSelects('before'))) as Record<string, any>[]
     } else {
-      items =
-        (datetimePickerView1.value && datetimePickerView1.value.getSelects && datetimePickerView1.value.getSelects()) ||
-        (endInnerValue.value && getSelects('after'))
+      items = ((datetimePickerView1.value ? datetimePickerView1.value!.getSelects() : undefined) ||
+        (endInnerValue.value && getSelects('after'))) as Record<string, any>[]
     }
     return defaultDisplayFormat(items, true)
+  } else {
+    return ''
   }
 }
 
@@ -694,14 +588,17 @@ function setShowValue(tab: boolean = false, isConfirm: boolean = false, beforeMo
 
     showValue.value = tab
       ? showValue.value
-      : [props.modelValue[0] || isConfirm ? defaultDisplayFormat(items) : '', props.modelValue[1] || isConfirm ? defaultDisplayFormat(endItems) : '']
-    showTabLabel.value = [defaultDisplayFormat(items, true), defaultDisplayFormat(endItems, true)]
+      : [
+          (props.modelValue as (string | number)[])[0] || isConfirm ? defaultDisplayFormat(items as Record<string, any>[]) : '',
+          (props.modelValue as (string | number)[])[1] || isConfirm ? defaultDisplayFormat(endItems as Record<string, any>[]) : ''
+        ]
+    showTabLabel.value = [defaultDisplayFormat(items as Record<string, any>[], true), defaultDisplayFormat(endItems as Record<string, any>[], true)]
   } else {
     const items = beforeMount
       ? (innerValue.value && getSelects('before')) || []
       : (datetimePickerView.value && datetimePickerView.value.getSelects && datetimePickerView.value.getSelects()) || []
 
-    showValue.value = deepClone(props.modelValue || isConfirm ? defaultDisplayFormat(items) : '')
+    showValue.value = deepClone(props.modelValue || isConfirm ? defaultDisplayFormat(items as Record<string, any>[]) : '')
   }
 }
 
@@ -711,7 +608,7 @@ function setShowValue(tab: boolean = false, isConfirm: boolean = false, beforeMo
  * @param {Boolean} tabLabel 当前返回的是否是展示tab上的标签
  * @return {String} showValue / showTabLabel
  */
-function defaultDisplayFormat(items, tabLabel = false) {
+function defaultDisplayFormat(items: Record<string, any>[], tabLabel: boolean = false) {
   if (items.length === 0) return ''
 
   if (tabLabel && props.displayFormatTabLabel) {
@@ -729,21 +626,23 @@ function defaultDisplayFormat(items, tabLabel = false) {
      * 在初始展示时，需要使用模拟 nextTick 来等待内部 pickerView 渲染后labels才可得到format后的labels
      * 但使用模拟nextTick会造成页面延迟展示问题，对用户感知来讲不友好，因此不适用该方法
      */
-    const map = (items) => {
-      const typeMaps = {
-        datetime: ['year', 'month', 'date', 'hour', 'minute'],
-        date: ['year', 'month', 'date'],
-        time: ['hour', 'minute'],
-        'year-month': ['year', 'month']
-      }
-      return items.map((item, index) => {
+    const typeMaps = {
+      year: ['year'],
+      datetime: ['year', 'month', 'date', 'hour', 'minute'],
+      date: ['year', 'month', 'date'],
+      time: ['hour', 'minute'],
+      'year-month': ['year', 'month']
+    }
+    return items
+      .map((item, index) => {
         return props.formatter!(typeMaps[props.type][index], item.value)
       })
-    }
-    return map(items).join('')
+      .join('')
   }
 
   switch (props.type) {
+    case 'year':
+      return items[0].label
     case 'date':
       return `${items[0].label}-${items[1].label}-${items[2].label}`
     case 'year-month':
@@ -757,7 +656,7 @@ function defaultDisplayFormat(items, tabLabel = false) {
 
 /**
  * @description 区域选择time禁用规则，根据传入的位置标志以及日期类型 返回该节点是否禁用
- * @param {String} isStart 时间段类型 true：start | false：end
+ * @param {Boolean} isStart 时间段类型 true：start | false：end
  * @param {Array} column 当前遍历到的列数组
  * @param {Number} cindex 外层column的索引（对应每一个类型）
  * @param {Number / String} value 遍历到的当前值
@@ -765,7 +664,17 @@ function defaultDisplayFormat(items, tabLabel = false) {
  * @param {Array} boundary 当前变量的限制值，决定禁用的边界值
  * @return {Boolean} disabled
  */
-function columnDisabledRules(isStart, columns, cIndex, value, currentValue, boundary) {
+function columnDisabledRules(
+  isStart: boolean,
+  columns: {
+    type: DatetimePickerViewColumnType
+    values: number[]
+  }[],
+  cIndex: number,
+  value: number,
+  currentValue: number[],
+  boundary: number[]
+) {
   const { type } = props
   // 0年 1月 2日 3時 4分
   // startPicker 除最小值外 还需要有一个时间限制, endPicker 时间选择后, startPicker 的 添加一个时间限制boundary min->boundary
@@ -804,6 +713,12 @@ function columnDisabledRules(isStart, columns, cIndex, value, currentValue, boun
     if (column.type === 'month' && currentValue[0] === year) {
       return isStart ? value > month : value < month
     }
+  } else if (type === 'year') {
+    const year = boundary[0]
+
+    if (column.type === 'year') {
+      return isStart ? value > year : value < year
+    }
   } else if (type === 'date') {
     const year = boundary[0]
     const month = boundary[1]
@@ -833,11 +748,11 @@ function columnDisabledRules(isStart, columns, cIndex, value, currentValue, boun
   return false
 }
 
-function setLoading(loading) {
+function setLoading(loading: boolean) {
   isLoading.value = loading
 }
 
-defineExpose({
+defineExpose<DatetimePickerExpose>({
   open,
   close,
   setLoading

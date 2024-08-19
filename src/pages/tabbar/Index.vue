@@ -1,5 +1,5 @@
 <template>
-  <page-wraper>
+  <page-wraper :safeAreaInsetBottom="false">
     <wd-toast></wd-toast>
     <demo-block hor="0" title="基础用法" transparent>
       <wd-tabbar bordered @change="handleChange" v-model="tabbar0">
@@ -40,7 +40,7 @@
         <wd-tabbar-item :value="2" title="首页" icon="home"></wd-tabbar-item>
         <wd-tabbar-item :value="2" icon="cart" title="分类">
           <template #icon>
-            <wd-img round height="40rpx" width="40rpx" src="https://img.yzcdn.cn/vant/cat.jpeg"></wd-img>
+            <wd-img round height="40rpx" width="40rpx" src="https://registry.npmmirror.com/wot-design-uni-assets/*/files/panda.jpg"></wd-img>
           </template>
         </wd-tabbar-item>
         <wd-tabbar-item :value="3" title="我的" icon="user"></wd-tabbar-item>
@@ -67,7 +67,7 @@
     </demo-block>
 
     <demo-block hor="0" title="固定底部" transparent>
-      <wd-tabbar fixed v-model="tabbar7" @change="handleChange" bordered safeAreaInsetBottom placeholder>
+      <wd-tabbar fixed shape="round" v-model="tabbar7" @change="handleChange" bordered safeAreaInsetBottom placeholder>
         <wd-tabbar-item :value="2" is-dot title="首页" icon="home"></wd-tabbar-item>
         <wd-tabbar-item title="分类" icon="cart"></wd-tabbar-item>
         <wd-tabbar-item title="我的" icon="user"></wd-tabbar-item>

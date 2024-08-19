@@ -1,6 +1,6 @@
 <template>
-  <view :class="`wd-popover ${customClass}`" id="popover" @click.stop="popover.noop">
-    <!-- TODO 插槽情况监听会有问题 待调整， 用于为渲染获取宽高的元素 -->
+  <view :class="`wd-popover ${customClass}`" :style="customStyle" id="popover" @click.stop="popover.noop">
+    <!-- 使用插槽时无法获取正确宽高 -->
     <view class="wd-popover__pos wd-popover__hidden" id="pos">
       <view :class="`wd-popover__container ${customPop}`">
         <view v-if="!useContentSlot && mode === 'normal'" class="wd-popover__inner">
@@ -14,7 +14,7 @@
         </view>
       </view>
     </view>
-    <wd-transition custom-class="wd-popover__pos" :custom-style="popover.popStyle.value" :show="modelValue" name="fade" :duration="200">
+    <wd-transition custom-class="wd-popover__pos" :custom-style="popover.popStyle.value" :show="showPopover" name="fade" :duration="200">
       <view :class="`wd-popover__container ${customPop}`">
         <view
           v-if="props.visibleArrow"
@@ -61,78 +61,51 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { getCurrentInstance, inject, onBeforeMount, onBeforeUnmount, onMounted, watch } from 'vue'
+import { getCurrentInstance, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { usePopover } from '../composables/usePopover'
 import { closeOther, pushToQueue, removeFromQueue } from '../common/clickoutside'
 import { type Queue, queueKey } from '../composables/useQueue'
+import { popoverProps, type PopoverExpose } from './types'
+import { isArray } from '../common/util'
 
-type PlacementType =
-  | 'top'
-  | 'top-start'
-  | 'top-end'
-  | 'bottom'
-  | 'bottom-start'
-  | 'bottom-end'
-  | 'left'
-  | 'left-start'
-  | 'left-end'
-  | 'right'
-  | 'right-start'
-  | 'right-end'
-
-type PopoverMode = 'menu' | 'normal'
-
-interface Props {
-  customArrow?: string
-  customPop?: string
-  customClass?: string
-  // 是否显示 popover 箭头
-  visibleArrow?: boolean
-  // 显示内容
-  content?: string | Record<string, any>[]
-  placement?: PlacementType
-  offset?: number
-  useContentSlot?: boolean
-  disabled?: boolean
-  showClose?: boolean
-  modelValue: boolean
-  mode?: PopoverMode
-}
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customPop: '',
-  customArrow: '',
-  visibleArrow: true,
-  placement: 'bottom',
-  content: '',
-  offset: 0,
-  useContentSlot: false,
-  disabled: false,
-  showClose: false,
-  modelValue: false,
-  mode: 'normal'
-})
+const props = defineProps(popoverProps)
+const emit = defineEmits(['update:modelValue', 'menuclick', 'change', 'open', 'close'])
 
 const queue = inject<Queue | null>(queueKey, null)
-
 const selector: string = 'popover'
-const emit = defineEmits(['update:modelValue', 'menuclick', 'change', 'open', 'close'])
 const { proxy } = getCurrentInstance() as any
+const popover = usePopover()
+
+const showPopover = ref<boolean>(false) // 控制popover显隐
 
 watch(
   () => props.content,
   (newVal) => {
     const { mode } = props
-    if (selector === 'popover' && mode === 'normal' && typeof newVal !== 'string') {
+    if (mode === 'normal' && typeof newVal !== 'string') {
       console.error('The value type must be a string type in normal mode')
-    } else if (selector === 'popover' && mode === 'menu' && popover.checkType(newVal) !== 'Array') {
+    } else if (mode === 'menu' && !isArray(newVal)) {
       console.error('The value type must be a Array type in menu mode')
     }
   }
 )
 
 watch(
+  () => props.placement,
+  () => {
+    popover.init(props.placement, props.visibleArrow, selector)
+  }
+)
+
+watch(
   () => props.modelValue,
+  (newValue) => {
+    showPopover.value = newValue
+  }
+)
+
+watch(
+  () => showPopover.value,
   (newValue) => {
     if (newValue) {
       popover.control(props.placement, props.offset)
@@ -158,7 +131,7 @@ onBeforeMount(() => {
   } else {
     pushToQueue(proxy)
   }
-  popover.showStyle.value = props.modelValue ? 'opacity: 1;' : 'opacity: 0;'
+  popover.showStyle.value = showPopover.value ? 'opacity: 1;' : 'opacity: 0;'
 })
 
 onBeforeUnmount(() => {
@@ -169,30 +142,33 @@ onBeforeUnmount(() => {
   }
 })
 
-const popover = usePopover()
-
 function menuClick(index: number) {
-  emit('update:modelValue', false)
+  updateModelValue(false)
   emit('menuclick', {
-    item: props.content[index],
+    item: (props.content as Array<Record<string, any>>)[index],
     index
   })
 }
 
 function toggle() {
   if (props.disabled) return
-  emit('update:modelValue', !props.modelValue)
+  updateModelValue(!showPopover.value)
 }
 
 function open() {
-  emit('update:modelValue', true)
+  updateModelValue(true)
 }
 
 function close() {
-  emit('update:modelValue', false)
+  updateModelValue(false)
 }
 
-defineExpose({
+function updateModelValue(value: boolean) {
+  showPopover.value = value
+  emit('update:modelValue', value)
+}
+
+defineExpose<PopoverExpose>({
   open,
   close
 })

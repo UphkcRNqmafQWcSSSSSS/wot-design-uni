@@ -1,5 +1,14 @@
+/*
+ * @Author: weisheng
+ * @Date: 2024-03-29 13:29:57
+ * @LastEditTime: 2024-07-18 23:16:16
+ * @LastEditors: weisheng
+ * @Description:
+ * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-toast/index.ts
+ * 记得注释
+ */
 import { provide, ref } from 'vue'
-import type { Toast, ToastOptions } from './type'
+import type { Toast, ToastOptions } from './types'
 import { deepMerge } from '../common/util'
 
 /**
@@ -16,16 +25,13 @@ export const defaultOptions: ToastOptions = {
   loadingType: 'outline',
   loadingColor: '#4D80F0',
   iconColor: '#4D80F0',
-  iconSize: 42,
-  loadingSize: 42,
-  customIcon: false,
   position: 'middle',
   show: false,
   zIndex: 100
 }
 
 export function useToast(selector: string = ''): Toast {
-  let timer: NodeJS.Timeout | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
   const toastOption = ref<ToastOptions>(defaultOptions) // Toast选项
   const toastOptionKey = selector ? toastDefaultOptionKey + selector : toastDefaultOptionKey
   provide(toastOptionKey, toastOption)
@@ -43,8 +49,8 @@ export function useToast(selector: string = ''): Toast {
       show: true
     }) as ToastOptions
     // 开始渲染，并在 duration ms之后执行清除
+    timer && clearTimeout(timer)
     if (toastOption.value.duration && toastOption.value.duration > 0) {
-      timer && clearTimeout(timer)
       timer = setTimeout(() => {
         timer && clearTimeout(timer)
         close()
@@ -54,7 +60,8 @@ export function useToast(selector: string = ''): Toast {
 
   const loading = createMethod({
     iconName: 'loading',
-    duration: 0
+    duration: 0,
+    cover: true
   })
   const success = createMethod({
     iconName: 'success',

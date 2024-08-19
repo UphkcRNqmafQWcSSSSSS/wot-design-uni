@@ -4,7 +4,7 @@
     <page-wraper>
       <demo-block title="大型分段器" transparent>
         <view class="section">
-          <wd-segmented :options="list" v-model:value="current" size="large"></wd-segmented>
+          <wd-segmented :options="list" v-model:value="current" size="large" @change="handleChange"></wd-segmented>
         </view>
       </demo-block>
       <demo-block title="默认分段器" transparent>
@@ -33,10 +33,11 @@
 
       <demo-block title="自定义渲染分段器标签" transparent>
         <view class="section">
-          <wd-segmented :options="list1" v-model:value="current4" :vibrate-short="true">
+          <wd-segmented :options="list1" v-model:value="current4" :vibrate-short="true" @change="handleChange">
             <template #label="{ option }">
               <view class="section-slot">
-                <wd-img round width="32px" height="32px" :src="option.payload.avatar" />
+                <image style="border-radius: 50%; width: 32px; height: 32px" :src="option.payload.avatar" />
+
                 <view class="name">
                   {{ option.value }}
                 </view>
@@ -49,6 +50,7 @@
   </view>
 </template>
 <script lang="ts" setup>
+import type { SegmentedOption } from '@/uni_modules/wot-design-uni/components/wd-segmented/types'
 import { ref } from 'vue'
 
 const list = ref<string[]>(['评论', '点赞', '贡献', '打赏'])
@@ -58,28 +60,28 @@ const list1 = ref([
     value: '李雷',
     disabled: false,
     payload: {
-      avatar: 'https://unpkg.com/wot-design-uni-assets/redpanda.jpg'
+      avatar: 'https://registry.npmmirror.com/wot-design-uni-assets/*/files/redpanda.jpg'
     }
   },
   {
     value: '韩梅梅',
     disabled: false,
     payload: {
-      avatar: 'https://unpkg.com/wot-design-uni-assets/capybara.jpg'
+      avatar: 'https://registry.npmmirror.com/wot-design-uni-assets/*/files/capybara.jpg'
     }
   },
   {
     value: '林涛',
     disabled: true,
     payload: {
-      avatar: 'https://unpkg.com/wot-design-uni-assets/panda.jpg'
+      avatar: 'https://registry.npmmirror.com/wot-design-uni-assets/*/files/panda.jpg'
     }
   },
   {
     value: 'Tom',
     disabled: false,
     payload: {
-      avatar: 'https://unpkg.com/wot-design-uni-assets/meng.jpg'
+      avatar: 'https://registry.npmmirror.com/wot-design-uni-assets/*/files/meng.jpg'
     }
   }
 ])
@@ -95,6 +97,10 @@ const current3 = ref('打赏')
 const current4 = ref('韩梅梅')
 
 const current5 = ref('评论')
+
+function handleChange(option: SegmentedOption) {
+  console.log(option)
+}
 </script>
 <style lang="scss" scoped>
 .section {

@@ -22,7 +22,7 @@
         <view style="padding: 0 15px; margin: 10px 0; font-size: 13px">自定义左侧插槽</view>
         <wd-search v-model="value3">
           <template #prefix>
-            <wd-popover v-model="showPopover" mode="menu" :content="menu" @menuclick="changeSearchType">
+            <wd-popover mode="menu" :content="menu" @menuclick="changeSearchType">
               <view class="search-type">
                 <text>{{ searchType }}</text>
                 <wd-icon class="icon-arrow" name="fill-arrow-down"></wd-icon>
@@ -52,13 +52,10 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useToast, useQueue } from '@/uni_modules/wot-design-uni'
+import { useQueue } from '@/uni_modules/wot-design-uni'
 
 const { closeOutside } = useQueue()
 
-const toast = useToast()
-
-const showPopover = ref<boolean>(false)
 const value1 = ref<string>('')
 const value2 = ref<string>('初始文案')
 const value3 = ref<string>('')
@@ -78,7 +75,7 @@ const menu = ref([
   }
 ])
 
-function search(e) {
+function search(e: any) {
   uni.showToast({ title: '搜索' + e.value })
 }
 function clear() {
@@ -87,10 +84,10 @@ function clear() {
 function cancel() {
   uni.showToast({ title: '取消' })
 }
-function change(e) {
+function change(e: any) {
   console.log(e.value)
 }
-function changeSearchType({ item, index }) {
+function changeSearchType({ item, index }: any) {
   // this.setData({
   //   searchType: e.detail.item.content
   // })

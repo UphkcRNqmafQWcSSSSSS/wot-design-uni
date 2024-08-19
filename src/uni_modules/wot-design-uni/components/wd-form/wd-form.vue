@@ -1,6 +1,7 @@
 <template>
   <view :class="`wd-form ${customClass}`" :style="customStyle">
     <slot></slot>
+    <wd-toast v-if="props.errorType === 'toast'" selector="wd-form-toast" />
   </view>
 </template>
 
@@ -19,22 +20,11 @@ export default {
 import { reactive, watch } from 'vue'
 import { deepClone, getPropByPath, isDef, isPromise } from '../common/util'
 import { useChildren } from '../composables/useChildren'
-import { type FormRules, FORM_KEY, type ErrorMessage } from './types'
+import { useToast } from '../wd-toast'
+import { type FormRules, FORM_KEY, type ErrorMessage, formProps, type FormExpose } from './types'
 
-interface Props {
-  // 表单数据对象
-  model: Record<string, any>
-  // 表单验证规则
-  rules?: FormRules
-  customClass?: string
-  customStyle?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  rules: () => ({}),
-  customClass: '',
-  customStyle: ''
-})
+const toast = useToast('wd-form-toast')
+const props = defineProps(formProps)
 
 const { children, linkChildren } = useChildren(FORM_KEY)
 let errorMessages = reactive<Record<string, string>>({})
@@ -44,7 +34,9 @@ linkChildren({ props, errorMessages: errorMessages })
 watch(
   () => props.model,
   () => {
-    clearMessage()
+    if (props.resetOnChange) {
+      clearMessage()
+    }
   },
   { immediate: true, deep: true }
 )
@@ -72,7 +64,7 @@ async function validate(prop?: string): Promise<{ valid: boolean; errors: ErrorM
           valid = false
           break
         }
-        if (rule.pattern && !rule.pattern.test(props.model[prop])) {
+        if (rule.pattern && !rule.pattern.test(value)) {
           errors.push({
             prop,
             message: rule.message
@@ -82,7 +74,7 @@ async function validate(prop?: string): Promise<{ valid: boolean; errors: ErrorM
         }
         const { validator, ...ruleWithoutValidator } = rule
         if (validator) {
-          const result = validator(props.model[prop], ruleWithoutValidator)
+          const result = validator(value, ruleWithoutValidator)
           if (isPromise(result)) {
             promises.push(
               result
@@ -129,6 +121,14 @@ async function validate(prop?: string): Promise<{ valid: boolean; errors: ErrorM
     showMessage(error)
   })
 
+  if (valid) {
+    if (prop) {
+      clearMessage(prop)
+    } else {
+      clearMessage()
+    }
+  }
+
   return {
     valid,
     errors
@@ -151,22 +151,33 @@ function getMergeRules() {
 }
 
 function showMessage(errorMsg: ErrorMessage) {
-  if (errorMsg.message) {
+  if (!errorMsg.message) return
+
+  if (props.errorType === 'toast') {
+    toast.show(errorMsg.message)
+  } else if (props.errorType === 'message') {
     errorMessages[errorMsg.prop] = errorMsg.message
   }
 }
 
-function clearMessage() {
-  Object.keys(errorMessages).forEach((key) => {
-    errorMessages[key] = ''
-  })
+function clearMessage(prop?: string) {
+  if (prop) {
+    errorMessages[prop] = ''
+  } else {
+    Object.keys(errorMessages).forEach((key) => {
+      errorMessages[key] = ''
+    })
+  }
 }
 
+/**
+ * 重置表单项的验证提示
+ */
 function reset() {
   clearMessage()
 }
 
-defineExpose({ validate, reset })
+defineExpose<FormExpose>({ validate, reset })
 </script>
 
 <style lang="scss" scoped>

@@ -3,7 +3,7 @@
     <swiper
       class="wd-swiper__track"
       :autoplay="autoplay"
-      :current="navCurrent"
+      :current="current"
       :interval="interval"
       :duration="duration"
       :circular="loop"
@@ -17,9 +17,9 @@
       @change="handleChange"
       @animationfinish="handleAnimationfinish"
     >
-      <swiper-item v-for="(item, index) in list" :key="index" class="wd-swiper__item" @click="handleClick(index)">
+      <swiper-item v-for="(item, index) in list" :key="index" class="wd-swiper__item" @click="handleClick(index, item)">
         <image
-          :src="isObj(item) ? item.value : item"
+          :src="isObj(item) ? item[valueKey] : item"
           :class="`wd-swiper__image ${customImageClass} ${getCustomImageClass(navCurrent, index, list)}`"
           :style="{ height: addUnit(height) }"
           :mode="imageMode"
@@ -46,191 +46,33 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { addUnit, isObj } from '../common/util'
-import type { DirectionType, EasingType, IndicatorPositionType, SwiperList } from './type'
-import type { SwiperIndicatorType } from '../wd-swiper-nav/type'
+import { swiperProps, type SwiperList } from './types'
+import type { SwiperNavProps } from '../wd-swiper-nav/types'
 
-interface SwiperIndicatorProps {
-  /**
-   * 当前轮播在哪一项（下标）
-   * @default 0
-   */
-  current?: number
-  /**
-   * 轮播滑动方向，包括横向滑动和纵向滑动两个方向
-   * @default horizontal
-   */
-  direction?: DirectionType
-  /**
-   * 小于这个数字不会显示导航器
-   * @default 2
-   */
-  minShowNum?: number
-  /**
-   * 页码信息展示位置
-   * @default bottom
-   */
-  indicatorPosition?: IndicatorPositionType
-  /**
-   * 是否显示两侧的控制按钮
-   * @default false
-   */
-  showControls?: boolean
-  /**
-   * 总共的项数
-   * @default 0
-   */
-  total?: number
-  /**
-   * 导航器类型，点状(dots)、点条状(dots-bar)、分式(fraction)等
-   * @default dots
-   */
-  type?: SwiperIndicatorType
-}
-
-interface Props {
-  /**
-   * 是否自动播放
-   * @default true
-   */
-  autoplay?: boolean
-  /**
-   * 当前轮播在哪一项（下标）
-   * @default 0
-   */
-  current?: number
-  /**
-   * 轮播滑动方向，包括横向滑动和纵向滑动两个方向
-   * @default horizontal
-   */
-  direction?: DirectionType
-  /**
-   * 同时显示的滑块数量
-   * @default 1
-   */
-  displayMultipleItems?: number
-  /**
-   * 滑动动画时长
-   * @default 300
-   */
-  duration?: number
-  /**
-   * 指定 swiper 切换缓动动画类型
-   * @default default
-   */
-  easingFunction?: EasingType
-  /**
-   * 轮播的高度；默认单位 `px`
-   * @default 192
-   */
-  height?: string | number
-  /**
-   * 轮播间隔时间
-   * @default 5000
-   */
-  interval?: number
-  /**
-   * 图片列表
-   */
-  list?: string[] | SwiperList[]
-  /**
-   * 是否循环播放
-   * @default true
-   */
-  loop?: boolean
-  /**
-   * 后边距，可用于露出后一项的一小部分。默认单位 `px`
-   * @default 0
-   */
-  nextMargin?: string | number
-  /**
-   * 页码信息展示位置
-   * @default bottom
-   */
-  indicatorPosition?: IndicatorPositionType
-  /**
-   * 前边距，可用于露出前一项的一小部分。默认单位 `px`
-   * @default 0
-   */
-  previousMargin?: string | number
-  /**
-   * 当 swiper-item 的个数大于等于 2，关闭 circular 并且开启 previous-margin 或 next-margin 的时候，可以指定这个边距是否应用到第一个、最后一个元素
-   * @default false
-   */
-  snapToEdge?: boolean
-  /**
-   * 指示器全部配置，true 的话使用默认配置
-   * @default true
-   */
-  indicator?: SwiperIndicatorProps | boolean
-  /**
-   * 图片裁剪、缩放的模式
-   */
-  imageMode?: number | string
-  /**
-   * 外部自定义样式
-   */
-  customStyle?: string
-  /**
-   * 外部自定义类名
-   */
-  customClass?: string
-  /**
-   * 自定义指示器类名
-   */
-  customIndicatorClass?: string
-
-  /**
-   * 自定义图片类名
-   */
-  customImageClass?: string
-
-  /**
-   * 自定义上一个图片类名
-   */
-  customPrevImageClass?: string
-
-  /**
-   * 自定义下一个图片类名
-   */
-  customNextImageClass?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customStyle: '',
-  customClass: '',
-  customIndicatorClass: '',
-  customImageClass: '',
-  customPrevImageClass: '',
-  customNextImageClass: '',
-  autoplay: true,
-  current: 0,
-  direction: 'horizontal',
-  displayMultipleItems: 1,
-  duration: 300,
-  easingFunction: 'default',
-  height: '192',
-  interval: 5000,
-  list: () => [],
-  loop: true,
-  indicator: true,
-  nextMargin: '0',
-  indicatorPosition: 'bottom',
-  previousMargin: '0',
-  snapToEdge: false,
-  imageMode: 'aspectFill'
-})
-
+const props = defineProps(swiperProps)
+const emit = defineEmits(['click', 'change', 'animationfinish', 'update:current'])
 const navCurrent = ref<number>(0) // 当前滑块
 
-onBeforeMount(() => {
-  navCurrent.value = props.current
-})
+watch(
+  () => props.current,
+  (val) => {
+    if (val < 0) {
+      props.loop ? goToEnd() : goToStart()
+    } else if (val >= props.list.length) {
+      props.loop ? goToStart() : goToEnd()
+    } else {
+      go(val)
+    }
+    emit('update:current', navCurrent.value)
+  },
+  { immediate: true }
+)
 
 const swiperIndicator = computed(() => {
   const { list, direction, indicatorPosition, indicator } = props
-  const swiperIndicator: SwiperIndicatorProps = {
+  const swiperIndicator: Partial<SwiperNavProps> = {
     current: navCurrent.value || 0,
     total: list.length || 0,
     direction: direction || 'horizontal',
@@ -244,7 +86,17 @@ const swiperIndicator = computed(() => {
   return swiperIndicator
 })
 
-const emit = defineEmits(['click', 'change', 'animationfinish'])
+function go(index: number) {
+  navCurrent.value = index
+}
+
+function goToStart() {
+  navCurrent.value = 0
+}
+
+function goToEnd() {
+  navCurrent.value = props.list.length - 1
+}
 
 /**
  * 是否为当前滑块的前一个滑块
@@ -284,6 +136,9 @@ function getCustomImageClass(current: number, index: number, list: string[] | Sw
 function handleChange(e: { detail: { current: any; source: string } }) {
   const { current, source } = e.detail
   navCurrent.value = current
+  // #ifndef MP-WEIXIN
+  emit('update:current', navCurrent.value)
+  // #endif
   emit('change', { current, source })
 }
 
@@ -292,10 +147,13 @@ function handleChange(e: { detail: { current: any; source: string } }) {
  */
 function handleAnimationfinish(e: { detail: { current: any; source: string } }) {
   const { current, source } = e.detail
-  // navCurrent.value = current
+  // #ifdef MP-WEIXIN
+  // 兼容微信swiper抖动的问题
+  emit('update:current', navCurrent.value)
+  // #endif
+
   /**
    * 滑块动画结束时触发
-   * @arg value:Object 滑块值
    */
   emit('animationfinish', { current, source })
 }
@@ -303,9 +161,10 @@ function handleAnimationfinish(e: { detail: { current: any; source: string } }) 
 /**
  * 点击滑块事件
  * @param index 点击的滑块下标
+ * @param item 点击的滑块内容
  */
-function handleClick(index: number) {
-  emit('click', { index })
+function handleClick(index: number, item: string | SwiperList) {
+  emit('click', { index, item })
 }
 
 function handleIndicatorChange(e: { dir: any; source: string }) {
@@ -328,6 +187,7 @@ function doIndicatorBtnChange(dir: string, source: string) {
 
   navCurrent.value = nextPos
   emit('change', { current: nextPos, source })
+  emit('update:current', navCurrent.value)
 }
 </script>
 

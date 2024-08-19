@@ -1,8 +1,12 @@
 <template>
   <page-wraper>
     <wd-toast></wd-toast>
+
+    <demo-block title="toggleAll" transparent>
+      <wd-button @click="collapse?.toggleAll()">toggleAll</wd-button>
+    </demo-block>
     <demo-block title="基础用法" transparent>
-      <wd-collapse v-model="value1" @change="handleChange1">
+      <wd-collapse ref="collapse" v-model="value1" @change="handleChange1">
         <wd-collapse-item
           v-for="(item, index) in itemList"
           :before-expend="index === 2 ? beforeExpend : undefined"
@@ -14,6 +18,27 @@
         </wd-collapse-item>
       </wd-collapse>
     </demo-block>
+
+    <demo-block title="自定义title" transparent>
+      <wd-collapse v-model="value7">
+        <wd-collapse-item name="item1">
+          <template #title="{ expanded }">
+            <text style="color: red">通过 slot 自定义标题</text>
+            <text>{{ expanded ? '我展开了' : '我已收起' }}</text>
+          </template>
+          {{ desc7 }}
+        </wd-collapse-item>
+        <wd-collapse-item name="item2" disabled>
+          <template #title="{ expanded, disabled }">
+            <text v-if="disabled">被禁用</text>
+            <text style="color: red" v-else>通过 slot 自定义 title</text>
+            <text>{{ expanded ? '我展开了' : '我已收起' }}</text>
+          </template>
+          {{ desc7 }}
+        </wd-collapse-item>
+      </wd-collapse>
+    </demo-block>
+
     <demo-block title="手风琴" transparent>
       <wd-collapse v-model="value2" :accordion="accordion" @change="handleChange2">
         <wd-collapse-item title="标签1" name="item1">这是一条简单的示例文字。</wd-collapse-item>
@@ -32,6 +57,19 @@
         <wd-collapse-item title="标签3" name="item3">这是一条简单的示例文字。</wd-collapse-item>
       </wd-collapse>
     </demo-block>
+
+    <demo-block title="嵌套" transparent>
+      <wd-collapse v-model="collapseRoot" @change="handleChange1">
+        <wd-collapse-item v-for="item in 5" :key="item" :title="`标签${item}`" :name="`${item}`">
+          <wd-collapse v-model="collapseList[item - 1]">
+            <wd-collapse-item v-for="(item, index) in itemList" :key="index" :title="item.title" :name="item.name">
+              {{ item.body }}
+            </wd-collapse-item>
+          </wd-collapse>
+        </wd-collapse-item>
+      </wd-collapse>
+    </demo-block>
+
     <demo-block title="查看更多" transparent>
       <wd-collapse viewmore v-model="value4" @change="handleChange4">
         这是一条简单的示例文字。这是一条简单的示例文字。这是一条简单的示例文字。这是一条简单的示例文字。这是一条简单的示例文字。这是一条简单的示例文字。这是一条简单的示例文字。这是一条简单的示例文字。
@@ -54,6 +92,7 @@
 </template>
 <script lang="ts" setup>
 import { useToast } from '@/uni_modules/wot-design-uni'
+import type { CollapseInstance } from '@/uni_modules/wot-design-uni/components/wd-collapse/types'
 import { ref } from 'vue'
 
 const toast = useToast()
@@ -85,40 +124,69 @@ const itemList = ref<Record<string, any>[]>([
   }
 ])
 
+const collapse = ref<CollapseInstance>()
+
 const value1 = ref<string[]>(['item1'])
 const value2 = ref<string>('item1')
 const value3 = ref<string[]>(['item1'])
 const value4 = ref<boolean>(false)
 const value5 = ref<boolean>(false)
 const value6 = ref<boolean>(false)
+const value7 = ref<string[]>(['item1'])
+const desc7 = '如订单处于暂停状态，进入“我的订单”页面，找到要取消的订单，点击“取消订单”按钮；选择订单取消原因后，点击“下一步”提交申请即可。'
 const accordion = ref<boolean>(true)
-const name = ref<string>('item1')
 
-function handleChange1({ value }) {
-  // console.log(value)
+const collapseRoot = ref<string[]>(['0'])
+const collapseList = ref<Array<string[]>>([['item1'], ['item2'], ['item3'], ['item4'], ['item5']])
+
+function handleChange1({ value }: any) {
+  console.log(value)
 }
-function handleChange2({ value }) {
-  // console.log(value)
+function handleChange2({ value }: any) {
+  console.log(value)
 }
-function handleChange3({ value }) {
-  // console.log(value)
+function handleChange3({ value }: any) {
+  console.log(value)
 }
-function handleChange4({ value }) {
-  // console.log(value)
+function handleChange4({ value }: any) {
+  console.log(value)
 }
-function handleChange5({ value }) {
-  // console.log(value)
+function handleChange5({ value }: any) {
+  console.log(value)
+}
+function handleChange6({ value }: any) {
+  console.log(value)
+}
+function handleChange7({ value }: any) {
+  console.log(value)
 }
 
-function handleChange6({ value }) {
-  // console.log(value)
+/**
+
+function handleChange1({ value }: any) {
+  console.log(value)
+}
+function handleChange2({ value }: any) {
+  console.log(value)
+}
+function handleChange3({ value }: any) {
+  console.log(value)
+}
+function handleChange4({ value }: any) {
+  console.log(value)
+}
+function handleChange5({ value }: any) {
+  console.log(value)
+}
+function handleChange6({ value }: any) {
+  console.log(value)
 }
 
 /**
  * 折叠面板展开前回调方法
  * @param e
  */
-function beforeExpend(name) {
+function beforeExpend(name: string) {
   const index = itemList.value.findIndex((item) => {
     return item.name === name
   })

@@ -1,43 +1,45 @@
 <template>
-  <view :class="rootClass">
-    <view :class="`wd-slider__label-min ${customMinClass}`" v-if="!hideMinMax">
-      {{ minValue }}
-    </view>
-    <view class="wd-slider__bar-wrapper" :style="barWrapperStyle">
-      <view class="wd-slider__bar" :style="barCustomStyle"></view>
-      <!-- 左边 -->
-      <view
-        class="wd-slider__button-wrapper"
-        :style="buttonLeftStyle"
-        @touchstart="onTouchStart"
-        @touchmove="onTouchMove"
-        @touchend="onTouchEnd"
-        @touchcancel="onTouchEnd"
-      >
-        <view class="wd-slider__label" v-if="!hideLabel">
-          {{ leftNewValue }}
-        </view>
-        <view class="wd-slider__button" />
+  <view :class="rootClass" :style="customStyle" :id="sliderId">
+    <!-- #ifdef MP-DINGTALK -->
+    <view :id="sliderId" style="flex: 1" :class="rootClass">
+      <!-- #endif -->
+      <view :class="`wd-slider__label-min ${customMinClass}`" v-if="!hideMinMax">
+        {{ minValue }}
       </view>
-      <!-- 右边 -->
-      <view
-        v-if="showRight"
-        class="wd-slider__button-wrapper"
-        :style="buttonRightStyle"
-        @touchstart="onTouchStartRight"
-        @touchmove="onTouchMoveRight"
-        @touchend="onTouchEndRight"
-        @touchcancel="onTouchEndRight"
-      >
-        <view class="wd-slider__label" v-if="!hideLabel">
-          {{ rightNewValue }}
+      <view class="wd-slider__bar-wrapper" :style="barWrapperStyle">
+        <view class="wd-slider__bar" :style="barCustomStyle"></view>
+        <!-- 左边 -->
+        <view
+          class="wd-slider__button-wrapper"
+          :style="buttonLeftStyle"
+          @touchstart="onTouchStart"
+          @touchmove="onTouchMove"
+          @touchend="onTouchEnd"
+          @touchcancel="onTouchEnd"
+        >
+          <view class="wd-slider__label" v-if="!hideLabel">{{ leftNewValue }}</view>
+          <view class="wd-slider__button" />
         </view>
-        <view class="wd-slider__button" />
+        <!-- 右边 -->
+        <view
+          v-if="showRight"
+          class="wd-slider__button-wrapper"
+          :style="buttonRightStyle"
+          @touchstart="onTouchStartRight"
+          @touchmove="onTouchMoveRight"
+          @touchend="onTouchEndRight"
+          @touchcancel="onTouchEndRight"
+        >
+          <view class="wd-slider__label" v-if="!hideLabel">{{ rightNewValue }}</view>
+          <view class="wd-slider__button" />
+        </view>
       </view>
+      <view :class="`wd-slider__label-max ${customMaxClass}`" v-if="!hideMinMax">
+        {{ maxValue }}
+      </view>
+      <!-- #ifdef MP-DINGTALK -->
     </view>
-    <view :class="`wd-slider__label-max ${customMaxClass}`" v-if="!hideMinMax">
-      {{ maxValue }}
-    </view>
+    <!-- #endif -->
   </view>
 </template>
 
@@ -54,39 +56,13 @@ export default {
 
 <script lang="ts" setup>
 import { computed, getCurrentInstance, onMounted, ref } from 'vue'
-import { getRect, isArray, isDef } from '../common/util'
+import { getRect, isArray, isDef, isNumber, uuid } from '../common/util'
 import { useTouch } from '../composables/useTouch'
 import { watch } from 'vue'
+import { sliderProps, type SliderExpose } from './types'
 
-interface Props {
-  customMinClass?: string
-  customMaxClass?: string
-  customClass?: string
-  hideMinMax?: boolean
-  hideLabel?: boolean
-  disabled?: boolean
-  inactiveColor?: string
-  activeColor?: string
-  max?: number
-  min?: number
-  step?: number
-  modelValue: number | number[]
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customMinClass: '',
-  customMaxClass: '',
-  customClass: '',
-  hideMinMax: false,
-  hideLabel: false,
-  disabled: false,
-  inactiveColor: '#e5e5e5',
-  activeColor: '',
-  max: 100,
-  min: 0,
-  step: 1,
-  modelValue: 0
-})
+const props = defineProps(sliderProps)
+const emit = defineEmits(['dragstart', 'dragmove', 'dragend', 'update:modelValue'])
 
 // 存放右滑轮中的所有属性
 const rightSlider = {
@@ -94,14 +70,13 @@ const rightSlider = {
   deltaX: 0,
   newValue: 0
 }
+const sliderId = ref<string>(`sliderId${uuid()}`)
 
 const touchLeft = useTouch()
 const touchRight = useTouch()
 
-const $slider = '.wd-slider'
 const showRight = ref<boolean>(false)
-const barStyle = ref<string>('width: 0; height: 3px')
-const barHeight = ref<string>('3px')
+const barStyle = ref<string>('')
 const leftNewValue = ref<number>(0)
 const rightNewValue = ref<number>(0)
 const rightBarPercent = ref<number>(0)
@@ -119,65 +94,63 @@ const stepValue = ref<number>(1) // 步长
 watch(
   () => props.max,
   (newValue) => {
-    if (newValue < 0) {
-      maxValue.value = 100
-      console.warn('[wot design] warning(wd-slider): max value must be greater than 0')
-    } else if (newValue <= props.min) {
+    if (newValue <= props.min) {
       maxValue.value = props.min // 交换最大值和最小值
       minValue.value = newValue
       console.warn('[wot design] warning(wd-slider): max value must be greater than min value')
     } else {
       maxValue.value = newValue // 更新最大值
     }
+    calcBarPercent()
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 watch(
   () => props.min,
   (newValue) => {
-    if (newValue < 0) {
-      minValue.value = 0
-      console.warn('[wot design] warning(wd-slider): min value must be greater than 0')
-    } else if (newValue >= props.max) {
+    if (newValue >= props.max) {
       minValue.value = props.max // 交换最小值和最大值
       maxValue.value = newValue
       console.warn('[wot design] warning(wd-slider): min value must be less than max value')
     } else {
       minValue.value = newValue // 更新最小值
     }
+    calcBarPercent()
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 watch(
   () => props.step,
   (newValue) => {
-    if (newValue <= 0) {
+    if (newValue < 1) {
       stepValue.value = 1
       console.warn('[wot design] warning(wd-slider): step must be greater than 0')
+    } else {
+      stepValue.value = Math.floor(newValue)
     }
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 watch(
   () => props.modelValue,
-  (newValue, oldValue) => {
+  (newValue) => {
     // 类型校验，支持所有值(除null、undefined。undefined建议统一写成void (0)防止全局undefined被覆盖)
     if (newValue === null || newValue === undefined) {
-      emit('update:modelValue', oldValue)
+      emit('update:modelValue', currentValue.value)
       console.warn('[wot design] warning(wd-slider): value can nott be null or undefined')
-    } else if (checkType(newValue) === 'Array' && (newValue as any).length !== 2) {
+    } else if (isArray(newValue) && newValue.length !== 2) {
       console.warn('[wot design] warning(wd-slider): value must be dyadic array')
-    } else if (checkType(newValue) !== 'Number' && checkType(newValue) !== 'Array') {
-      emit('update:modelValue', oldValue)
+    } else if (!isNumber(newValue) && !isArray(newValue)) {
+      emit('update:modelValue', currentValue.value)
       console.warn('[wot design] warning(wd-slider): value must be dyadic array Or Number')
     }
-    currentValue.value = newValue
     // 动态传值后修改
     if (isArray(newValue)) {
-      if (equal(newValue, oldValue)) return
+      if (currentValue.value && isArray(currentValue.value) && equal(newValue, currentValue.value)) return
+      currentValue.value = newValue
       showRight.value = true
       if (leftBarPercent.value <= rightBarPercent.value) {
         leftBarSlider(newValue[0])
@@ -187,7 +160,8 @@ watch(
         rightBarSlider(newValue[0])
       }
     } else {
-      if (newValue === oldValue) return
+      if (newValue === currentValue.value) return
+      currentValue.value = newValue
       leftBarSlider(newValue)
     }
   },
@@ -222,17 +196,22 @@ const buttonRightStyle = computed(() => {
 })
 
 onMounted(() => {
-  getRect($slider, false, proxy).then((data: any) => {
-    // trackWidth: 轨道全长
-    trackWidth.value = data.width
-    // trackLeft: 轨道距离左侧的距离
-    trackLeft.value = data.left
-  })
+  initSlider()
 })
 
-const emit = defineEmits(['dragstart', 'dragmove', 'dragend', 'update:modelValue'])
+/**
+ * 初始化slider宽度
+ */
+function initSlider() {
+  getRect(`#${sliderId.value}`, false, proxy).then((data) => {
+    // trackWidth: 轨道全长
+    trackWidth.value = Number(data.width)
+    // trackLeft: 轨道距离左侧的距离
+    trackLeft.value = Number(data.left)
+  })
+}
 
-function onTouchStart(event) {
+function onTouchStart(event: any) {
   const { disabled, modelValue } = props
   if (disabled) return
   touchLeft.touchStart(event)
@@ -245,13 +224,14 @@ function onTouchStart(event) {
     value: currentValue.value
   })
 }
-function onTouchMove(event) {
+function onTouchMove(event: any) {
   const { disabled } = props
   if (disabled) return
   touchLeft.touchMove(event)
   // 移动间距 deltaX 就是向左(-)向右(+)
   const diff = (touchLeft.deltaX.value / trackWidth.value) * (maxValue.value - minValue.value)
   newValue.value = startValue.value + diff
+
   // 左滑轮滑动控制
   leftBarSlider(newValue.value)
   emit('dragmove', {
@@ -265,18 +245,18 @@ function onTouchEnd() {
   })
 }
 // 右边滑轮滑动状态监听
-function onTouchStartRight(event) {
+function onTouchStartRight(event: any) {
   if (props.disabled) return
   const { modelValue } = props
   // 右滑轮移动时数据绑定
   touchRight.touchStart(event)
   // 记录开始数据值
-  rightSlider.startValue = leftBarPercent.value < rightBarPercent.value ? format(modelValue[1]) : format(modelValue[0])
+  rightSlider.startValue = leftBarPercent.value < rightBarPercent.value ? format((modelValue as number[])[1]) : format((modelValue as number[])[0])
   emit('dragstart', {
     value: currentValue.value
   })
 }
-function onTouchMoveRight(event) {
+function onTouchMoveRight(event: any) {
   if (props.disabled) return
   touchRight.touchMove(event)
   // 移动间距 deltaX 就是向左向右
@@ -318,7 +298,7 @@ function leftBarSlider(value: number) {
     emit('update:modelValue', value)
     leftNewValue.value = value
     leftBarPercent.value = percent
-    barStyle.value = `width: ${percent}%; height: ${barHeight.value};`
+    barStyle.value = `width: ${percent}%; `
   } else {
     leftNewValue.value = value
     leftBarPercent.value = percent
@@ -332,22 +312,13 @@ function styleControl() {
   const barLeft =
     leftBarPercent.value < rightBarPercent.value ? [leftBarPercent.value, rightBarPercent.value] : [rightBarPercent.value, leftBarPercent.value]
   // 通过左右滑轮的间距控制 激活条宽度 barLeft[1] - barLeft[0]
-  const barStyleTemp = `width: ${barLeft[1] - barLeft[0]}%; height: ${barHeight.value}; left: ${barLeft[0]}%`
+  const barStyleTemp = `width: ${barLeft[1] - barLeft[0]}%;  left: ${barLeft[0]}%`
   currentValue.value =
     leftNewValue.value < rightNewValue.value ? [leftNewValue.value, rightNewValue.value] : [rightNewValue.value, leftNewValue.value]
   barStyle.value = barStyleTemp
 }
-// 将pos转化为value
-function pos2Value(pos) {
-  const percent = pos / trackWidth.value
-  const value = percent * (maxValue.value - minValue.value) + minValue.value
-  const res = minValue.value + Math.floor((value - minValue.value) / stepValue.value) * stepValue.value
-  return res
-}
-function checkType(value) {
-  return Object.prototype.toString.call(value).slice(8, -1)
-}
-function equal(arr1, arr2) {
+
+function equal(arr1: number[], arr2: number[]) {
   if (!isDef(arr1) || !isDef(arr2)) {
     return false
   }
@@ -367,6 +338,20 @@ function formatPercent(value: number) {
   const percentage = ((value - minValue.value) / (maxValue.value - minValue.value)) * 100
   return percentage
 }
+// 计算滑块位置和进度长度
+function calcBarPercent() {
+  const { modelValue } = props
+  let value = !isArray(modelValue) ? format(modelValue) : leftBarPercent.value < rightBarPercent.value ? format(modelValue[0]) : format(modelValue[1])
+  value = format(value)
+  // 把 value 转换成百分比
+  const percent = formatPercent(value)
+  leftBarPercent.value = percent
+  barStyle.value = `width: ${percent}%; `
+}
+
+defineExpose<SliderExpose>({
+  initSlider
+})
 </script>
 <style lang="scss" scoped>
 @import './index.scss';

@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-rate ${customClass}`">
+  <view :class="`wd-rate ${customClass}`" :style="customStyle">
     <view
       v-for="(rate, index) in rateList"
       :key="index"
@@ -30,40 +30,13 @@ export default {
 </script>
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
+import { rateProps } from './types'
 
-interface Props {
-  customClass?: string
-  num?: number
-  modelValue: string | number | null
-  readonly?: boolean
-  size?: string
-  space?: string
-  color?: string
-  activeColor?: string | Array<string>
-  icon?: string
-  activeIcon?: string
-  disabled?: boolean
-  disabledColor?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  num: 5,
-  modelValue: null,
-  readonly: false,
-  size: '16px',
-  space: '4px',
-  color: '#E8E8E8',
-  activeColor: 'linear-gradient(180deg, rgba(255,238,0,1) 0%,rgba(250,176,21,1) 100%)',
-  icon: 'star-on',
-  activeIcon: 'star-on',
-  disabled: false,
-  disabledColor: 'linear-gradient(315deg, rgba(177,177,177,1) 0%,rgba(199,199,199,1) 100%)'
-})
+const props = defineProps(rateProps)
+const emit = defineEmits(['update:modelValue', 'change'])
 
 const rateList = ref<Array<string>>([])
 const activeValue = ref<string>('')
-const emit = defineEmits(['update:modelValue', 'change'])
 
 const iconStyle = computed(() => {
   return `background:${props.color}; -webkit-background-clip: text; color: transparent`

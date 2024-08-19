@@ -22,6 +22,13 @@
         <wd-button type="warning" plain>警告按钮</wd-button>
         <wd-button type="error" plain>危险按钮</wd-button>
       </demo-block>
+      <demo-block title="细边框幽灵按钮">
+        <wd-button plain hairline>主要按钮</wd-button>
+        <wd-button type="success" plain hairline>成功按钮</wd-button>
+        <wd-button type="info" plain hairline>信息按钮</wd-button>
+        <wd-button type="warning" plain hairline>警告按钮</wd-button>
+        <wd-button type="error" plain hairline>危险按钮</wd-button>
+      </demo-block>
       <demo-block title="幽灵按钮禁用状态">
         <wd-button plain disabled>主要按钮</wd-button>
         <wd-button type="success" plain disabled>成功按钮</wd-button>
@@ -53,6 +60,11 @@
       <demo-block title="带图标的基本按钮">
         <wd-button icon="download">下载</wd-button>
         <wd-button icon="setting">设置</wd-button>
+        <wd-button classPrefix="fish" icon="kehuishouwu">可回收</wd-button>
+        <wd-button icon="download" size="small">下载</wd-button>
+        <wd-button icon="setting" size="small">设置</wd-button>
+        <wd-button icon="download" size="large">下载</wd-button>
+        <wd-button icon="setting" size="large">设置</wd-button>
       </demo-block>
       <demo-block title="块状按钮，宽度100%">
         <wd-button block size="large">主要按钮</wd-button>
@@ -106,7 +118,7 @@
   </page-wraper>
 </template>
 <script lang="ts" setup>
-function handleGetuserinfo(event) {
+function handleGetuserinfo(event: any) {
   // TODO
   console.log(event)
 }

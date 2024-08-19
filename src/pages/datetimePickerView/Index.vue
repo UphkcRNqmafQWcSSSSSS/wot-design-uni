@@ -13,6 +13,10 @@
       <wd-datetime-picker-view type="year-month" v-model="value3" @change="onChange3" />
     </demo-block>
 
+    <demo-block title="年" transparent>
+      <wd-datetime-picker-view type="year" v-model="value7" @change="onChange7" />
+    </demo-block>
+
     <demo-block title="时分" transparent>
       <wd-datetime-picker-view type="time" v-model="value4" @change="onChange4" />
     </demo-block>
@@ -28,6 +32,7 @@
 </template>
 <script lang="ts" setup>
 import { useToast } from '@/uni_modules/wot-design-uni'
+import type { DatetimePickerViewFilter, DatetimePickerViewFormatter } from '@/uni_modules/wot-design-uni/components/wd-datetime-picker-view/types'
 import { ref } from 'vue'
 
 const value1 = ref<string>('')
@@ -36,7 +41,8 @@ const value3 = ref<number>(Date.now())
 const value4 = ref<string>('11:12')
 const value5 = ref<number>(Date.now())
 const value6 = ref<number>(Date.now())
-const formatter = (type, value) => {
+const value7 = ref<string>('')
+const formatter: DatetimePickerViewFormatter = (type, value) => {
   switch (type) {
     case 'year':
       return value + '年'
@@ -52,7 +58,7 @@ const formatter = (type, value) => {
       return value
   }
 }
-const filter = (type, values) => {
+const filter: DatetimePickerViewFilter = (type, values) => {
   if (type === 'minute') {
     return values.filter((value) => value % 5 === 0)
   }
@@ -61,23 +67,26 @@ const filter = (type, values) => {
 
 const toast = useToast()
 
-function onChange1({ value }) {
+function onChange1({ value }: any) {
   toast.show('选择了' + new Date(value))
 }
-function onChange2({ value }) {
+function onChange2({ value }: any) {
   console.log(value)
 }
-function onChange3({ value }) {
+function onChange3({ value }: any) {
   console.log(value)
 }
-function onChange4({ value }) {
+function onChange4({ value }: any) {
   console.log(value)
 }
-function onChange5({ value }) {
+function onChange5({ value }: any) {
   console.log(value)
 }
-function onChange6({ value }) {
+function onChange6({ value }: any) {
   console.log(value)
+}
+function onChange7({ value }: any) {
+  console.log(new Date(value).getFullYear())
 }
 </script>
 <style lang="scss" scoped></style>

@@ -1,6 +1,6 @@
 <frame/>
 
-#  Picker 选择器视图
+#  Picker 选择器
 
 Picker 组件为 popup 和 pickerView 的组合。
 
@@ -87,7 +87,7 @@ const columns = ref([
 
 传入 `column-change` 属性，其类型为 `function`，接收 pickerView 实例、选中项、当前修改列的下标、resolve 作为入参，根据选中项和列下标进行判断，通过 pickerView 实例暴露出来的 `setColumnData` 方法修改其他列的数据源，当修改完成后需要执行 `resolve()` 告知组件修改完成以继续执行，如果 `column-change` 包含异步操作，也可以使组件按照异步顺序进行执行。
 
-> resolve 参数为 1.4.0 添加，每次修改完后都需要调用 resolve() 通知组件。
+> 每次修改完后都需要调用 resolve() 通知组件。
 
 ```html
 <wd-picker
@@ -256,13 +256,13 @@ function handleConfirm({ value }) {
 | use-label-slot | label 使用插槽 | boolean | - | false | - |
 | use-default-slot | 使用默认插槽 | boolean | - | false | - |
 | before-confirm | 确定前校验函数，接收 (value, resolve, picker) 参数，通过 resolve 继续执行 picker，resolve 接收1个boolean参数 | function | - | - | - |
-| name | form 表单中的字段名 | string | - | - | - |
 | close-on-click-modal | 点击遮罩是否关闭 | boolean | - | true | - |
 | z-index | 弹窗层级 | number | - | 15 | - |
 | safe-area-inset-bottom | 弹出面板是否设置底部安全距离（iphone X 类型的机型） | boolean | - | true | - |
 | ellipsis | 是否超出隐藏 | boolean | - | false | - |
 | prop | 表单域 `model` 字段名，在使用表单校验功能的情况下，该属性是必填的 | string | - | - | - |
 | rules | 表单验证规则，结合`wd-form`组件使用	 | `FormItemRule []`	 | - | `[]` | - |
+| immediate-change | 是否在手指松开时立即触发picker-view的 change 事件。若不开启则会在滚动动画结束后触发 change 事件，1.2.25版本起提供，仅微信小程序和支付宝小程序支持。 | boolean | - | false | 1.2.25 |
 
 ### FormItemRule 数据结构
 

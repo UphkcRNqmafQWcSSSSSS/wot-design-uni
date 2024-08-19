@@ -1,12 +1,15 @@
 <template>
   <page-wraper>
-    <wd-toast />
     <demo-block :title="`基本用法，数值: ${value1}`">
       <wd-picker-view v-model="value1" :columns="columns1" @change="(e) => onChange(1, e)" />
     </demo-block>
 
     <demo-block :title="`禁用选项，数值: ${value2}`">
       <wd-picker-view v-model="value2" :columns="columns2" @change="(e) => onChange(2, e)" />
+    </demo-block>
+
+    <demo-block :title="`立即触发 change，数值: ${value6}`">
+      <wd-picker-view v-model="value6" :immediate-change="true" :columns="columns2" @change="(e) => onChange(2, e)" />
     </demo-block>
 
     <demo-block :title="`加载中，数值: ${value3}`">
@@ -23,11 +26,10 @@
   </page-wraper>
 </template>
 <script lang="ts" setup>
-import { useToast } from '@/uni_modules/wot-design-uni'
+import type { PickerViewColumnChange } from '@/uni_modules/wot-design-uni/components/wd-picker-view/types'
 import { ref } from 'vue'
 
-const toast = useToast()
-const district = {
+const district: Record<string, Array<{ label: string; value: string }>> = {
   0: [
     { label: '北京', value: '110000' },
     { label: '广东省', value: '440000' }
@@ -72,6 +74,8 @@ const value1 = ref<string>('选项1')
 const columns1 = ref(['选项1', '选项2', '选项3', '选项4', '选项5', '选项6', '选项7'])
 
 const value2 = ref<string>('选项1')
+const value6 = ref<string>('选项1')
+
 const columns2 = ref([
   { label: '选项1' },
   { label: '选项2' },
@@ -97,8 +101,8 @@ const columns4 = ref([
 const value5 = ref(['110000', '110100', '110102'])
 const columns5 = ref([district[0], district[district[0][0].value], district[district[district[0][0].value][0].value]])
 
-const onChangeDistrict = (picker, value, columnIndex, resolve) => {
-  const item = value[columnIndex]
+const onChangeDistrict: PickerViewColumnChange = (picker, value, columnIndex, resolve) => {
+  const item = (value as Record<string, any>[])[columnIndex]
   if (columnIndex === 0) {
     picker.setColumnData(1, district[item.value])
     picker.setColumnData(2, district[district[item.value][0].value])
@@ -108,7 +112,7 @@ const onChangeDistrict = (picker, value, columnIndex, resolve) => {
   resolve()
 }
 
-function onChange(index: number, e) {
+function onChange(index: number, e: any) {
   console.log(e)
   if (index === 1) {
     // toast.show(`当前选中项: ${value}, 下标: ${index}`)

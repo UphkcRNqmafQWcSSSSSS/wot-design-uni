@@ -1,4 +1,19 @@
+/*
+ * @Author: weisheng
+ * @Date: 2024-04-08 22:34:01
+ * @LastEditTime: 2024-04-10 12:58:10
+ * @LastEditors: weisheng
+ * @Description:
+ * @FilePath: \wot-design-uni\src\uni_modules\wot-design-uni\components\wd-message-box\types.ts
+ * 记得注释
+ */
+import { baseProps } from '../common/props'
+
 export type MessageType = 'alert' | 'confirm' | 'prompt'
+
+export type MessageBeforeConfirmOption = {
+  resolve: (isPass: boolean) => void
+}
 
 export type MessageOptions = {
   /**
@@ -50,12 +65,14 @@ export type MessageOptions = {
   /**
    * 当type为prompt时，输入框校验函数，点击确定按钮时进行校验
    */
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  inputValidate?: Function | null
+  inputValidate?: InputValidate | null
   /**
    * 当type为prompt时，输入框检验不通过时的错误提示文案
    */
   inputError?: string
+  /**
+   * 是否展示错误信息
+   */
   showErr?: boolean
   /**
    * 弹窗层级
@@ -65,9 +82,15 @@ export type MessageOptions = {
    * 弹层内容懒渲染，触发展示时才渲染内容
    */
   lazyRender?: boolean
+  /**
+   * 确认前钩子
+   */
+  beforeConfirm?: (options: MessageBeforeConfirmOption) => void
 }
 
 export type ActionType = 'confirm' | 'cancel' | 'modal'
+
+export type InputValidate = (inputValue: string | number) => boolean
 
 export interface MessageResult {
   action: ActionType
@@ -85,4 +108,9 @@ export interface Message {
   prompt(toastOptions: MessageOptions | string): Promise<MessageResult>
   // 关闭Message
   close(): void
+}
+
+export const messageBoxProps = {
+  ...baseProps,
+  selector: String
 }

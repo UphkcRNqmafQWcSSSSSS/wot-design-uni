@@ -5,19 +5,22 @@
         <view class="wd-navbar__capsule" v-if="$slots.capsule">
           <slot name="capsule" />
         </view>
+
         <view
           :class="`wd-navbar__left ${leftDisabled ? 'is-disabled' : ''}`"
-          :hover-class="leftDisabled ? '' : 'wd-navbar__left--hover'"
+          :hover-class="leftDisabled || $slots.left ? '' : 'wd-navbar__left--hover'"
           hover-stay-time="70"
           @click="handleClickLeft"
-          v-if="!$slots.capsule && ($slots.left || leftArrow || leftText)"
+          v-else-if="!$slots.left"
         >
-          <slot name="left" />
-          <block v-if="!$slots.left && (leftArrow || leftText)">
-            <wd-icon v-if="leftArrow" size="24px" name="arrow-left" custom-class="wd-navbar__arrow" />
-            <view v-if="leftText" class="wd-navbar__text">{{ leftText }}</view>
-          </block>
+          <wd-icon v-if="leftArrow" name="arrow-left" custom-class="wd-navbar__arrow" />
+          <view v-if="leftText" class="wd-navbar__text">{{ leftText }}</view>
         </view>
+
+        <view v-else :class="`wd-navbar__left ${leftDisabled ? 'is-disabled' : ''}`" @click="handleClickLeft">
+          <slot name="left" />
+        </view>
+
         <view class="wd-navbar__title">
           <slot name="title" />
           <block v-if="!$slots.title && title">{{ title }}</block>
@@ -53,49 +56,10 @@ export default {
 <script lang="ts" setup>
 import { type CSSProperties, computed, getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue'
 import { getRect, addUnit, isDef, objToStyle } from '../common/util'
+import { navbarProps } from './types'
 
-interface Props {
-  customClass?: string
-  customStyle?: string
-  // 标题文字
-  title?: string
-  // 左侧文案
-  leftText?: string
-  // 右侧文案
-  rightText?: string
-  // 是否显示左侧箭头
-  leftArrow?: boolean
-  // 是否显示下边框
-  bordered?: boolean
-  // 是否固定到顶部
-  fixed?: boolean
-  // 固定在顶部时，是否在标签位置生成一个等高的占位元素
-  placeholder?: boolean
-  // 导航栏 z-index
-  zIndex?: number
-  // 是否开启顶部安全区适配
-  safeAreaInsetTop?: boolean
-  // 是否禁用左侧按钮，禁用时透明度降低，且无法点击
-  leftDisabled?: boolean
-  // 是否禁用右侧按钮，禁用时透明度降低，且无法点击
-  rightDisabled?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customStyle: '',
-  customClass: '',
-  title: '',
-  leftText: '',
-  rightText: '',
-  leftArrow: false,
-  bordered: true,
-  fixed: false,
-  placeholder: false,
-  zIndex: 500,
-  safeAreaInsetTop: false,
-  leftDisabled: false,
-  rightDisabled: false
-})
+const props = defineProps(navbarProps)
+const emit = defineEmits(['click-left', 'click-right'])
 
 const height = ref<number | ''>('') // 占位高度
 
@@ -128,8 +92,6 @@ onMounted(() => {
   }
 })
 
-const emit = defineEmits(['click-left', 'click-right'])
-
 function handleClickLeft() {
   if (!props.leftDisabled) {
     emit('click-left')
@@ -149,8 +111,8 @@ function setPlaceholderHeight() {
     return
   }
 
-  getRect('.wd-navbar', false, proxy).then((res: any) => {
-    height.value = res.height
+  getRect('.wd-navbar', false, proxy).then((res) => {
+    height.value = res.height as number
   })
 }
 </script>

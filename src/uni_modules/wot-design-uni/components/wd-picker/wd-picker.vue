@@ -3,8 +3,8 @@
     :class="`wd-picker ${disabled ? 'is-disabled' : ''} ${size ? 'is-' + size : ''}  ${cell.border.value ? 'is-border' : ''} ${
       alignRight ? 'is-align-right' : ''
     } ${error ? 'is-error' : ''} ${customClass}`"
+    :style="customStyle"
   >
-    <!--文案-->
     <view class="wd-picker__field" @click="showPopup">
       <slot v-if="useDefaultSlot"></slot>
       <view v-else class="wd-picker__cell">
@@ -19,7 +19,7 @@
         <view class="wd-picker__body">
           <view class="wd-picker__value-wraper">
             <view :class="`wd-picker__value ${ellipsis && 'is-ellipsis'} ${customValueClass} ${showValue ? '' : 'wd-picker__placeholder'}`">
-              {{ showValue ? showValue : placeholder }}
+              {{ showValue ? showValue : placeholder || translate('placeholder') }}
             </view>
             <wd-icon v-if="!disabled && !readonly" custom-class="wd-picker__arrow" name="arrow-right" />
           </view>
@@ -27,7 +27,6 @@
         </view>
       </view>
     </view>
-    <!--弹出层，picker-view 在隐藏时修改值，会触发多次change事件，从而导致所有列选中第一项，因此picker在关闭时不隐藏 -->
     <wd-popup
       v-model="popupShow"
       position="bottom"
@@ -39,20 +38,15 @@
       custom-class="wd-picker__popup"
     >
       <view class="wd-picker__wraper">
-        <!--toolBar-->
         <view class="wd-picker__toolbar" @touchmove="noop">
-          <!--取消按钮-->
           <view class="wd-picker__action wd-picker__action--cancel" @click="onCancel">
-            {{ cancelButtonText }}
+            {{ cancelButtonText || translate('cancel') }}
           </view>
-          <!--标题-->
           <view v-if="title" class="wd-picker__title">{{ title }}</view>
-          <!--确定按钮-->
           <view :class="`wd-picker__action ${isLoading ? 'is-loading' : ''}`" @click="onConfirm">
-            {{ confirmButtonText }}
+            {{ confirmButtonText || translate('done') }}
           </view>
         </view>
-        <!--pickerView-->
         <wd-picker-view
           ref="pickerViewWd"
           :custom-class="customViewClass"
@@ -63,6 +57,7 @@
           :columns-height="columnsHeight"
           :value-key="valueKey"
           :label-key="labelKey"
+          :immediate-change="immediateChange"
           @change="pickerViewChange"
           @pickstart="onPickStart"
           @pickend="onPickEnd"
@@ -86,106 +81,19 @@ export default {
 
 <script lang="ts" setup>
 import { getCurrentInstance, onBeforeMount, ref, watch, computed, onMounted, nextTick } from 'vue'
-import { deepClone, defaultDisplayFormat, getType, isDef } from '../common/util'
+import { deepClone, defaultDisplayFormat, getType, isArray, isDef, isFunction } from '../common/util'
 import { useCell } from '../composables/useCell'
-import { type ColumnItem, formatArray } from '../wd-picker-view/type'
+import { type ColumnItem, formatArray, type PickerViewInstance } from '../wd-picker-view/types'
 import { FORM_KEY, type FormItemRule } from '../wd-form/types'
 import { useParent } from '../composables/useParent'
+import { useTranslate } from '../composables/useTranslate'
+import { pickerProps, type PickerExpose } from './types'
+const { translate } = useTranslate('picker')
 
-interface Props {
-  customClass?: string
-  customLabelClass?: string
-  customValueClass?: string
-  customViewClass?: string
-  // 选择器左侧文案
-  label?: string
-  // 选择器占位符
-  placeholder?: string
-  // 禁用
-  disabled?: boolean
-  // 只读
-  readonly?: boolean
-  loading?: boolean
-  loadingColor?: string
-  /* popup */
-  // 弹出层标题
-  title?: string
-  // 取消按钮文案
-  cancelButtonText?: string
-  // 确认按钮文案
-  confirmButtonText?: string
-  // 是否必填
-  required?: boolean
-  size?: string
-  labelWidth?: string
-  useDefaultSlot?: boolean
-  useLabelSlot?: boolean
-  error?: boolean
-  alignRight?: boolean
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  beforeConfirm?: Function
-  closeOnClickModal?: boolean
-  safeAreaInsetBottom?: boolean
-  ellipsis?: boolean
+const props = defineProps(pickerProps)
+const emit = defineEmits(['confirm', 'open', 'cancel', 'update:modelValue'])
 
-  // 选项总高度
-  columnsHeight?: number
-  // 选项对象中，value对应的 key
-  valueKey?: string
-  // 选项对象中，展示的文本对应的 key
-  labelKey?: string
-  // 初始值
-  modelValue?: string | number | Array<string | number>
-  // 选择器数据
-  columns?: Array<string | number | ColumnItem | Array<string | number | ColumnItem>>
-  // 多级联动
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  columnChange?: Function
-  // 外部展示格式化函数
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  displayFormat?: Function
-  // 自定义层级
-  zIndex?: number
-  prop?: string
-  rules?: FormItemRule[]
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: '',
-  customClass: '',
-  customViewClass: '',
-  customLabelClass: '',
-  customValueClass: '',
-  // 选择器占位符
-  placeholder: '请选择',
-  // 禁用
-  disabled: false,
-  // 只读
-  readonly: false,
-  loading: false,
-  loadingColor: '#4D80F0',
-  // 取消按钮文案
-  cancelButtonText: '取消',
-  // 确认按钮文案
-  confirmButtonText: '完成',
-  // 是否必填
-  required: false,
-  useDefaultSlot: false,
-  useLabelSlot: false,
-  error: false,
-  alignRight: false,
-  closeOnClickModal: true,
-  safeAreaInsetBottom: true,
-  ellipsis: false,
-  columnsHeight: 217,
-  valueKey: 'value',
-  labelKey: 'label',
-  columns: () => [],
-  zIndex: 15,
-  rules: () => []
-})
-
-const pickerViewWd = ref<any>(null)
+const pickerViewWd = ref<PickerViewInstance | null>(null)
 const cell = useCell()
 
 const innerLoading = ref<boolean>(false) // 内部控制是否loading
@@ -194,7 +102,7 @@ const innerLoading = ref<boolean>(false) // 内部控制是否loading
 const popupShow = ref<boolean>(false)
 // 选定后展示的选中项
 const showValue = ref<string>('')
-const pickerValue = ref<string | number | boolean | (string | number | boolean)[]>('')
+const pickerValue = ref<string | number | boolean | string[] | number[] | boolean[]>('')
 const displayColumns = ref<Array<string | number | ColumnItem | Array<string | number | ColumnItem>>>([]) // 传入 pickerView 的columns
 const resetColumns = ref<Array<string | number | ColumnItem | Array<string | number | ColumnItem>>>([]) // 保存之前的 columns，当取消时，将数据源回滚，避免多级联动数据源不正确的情况
 const isPicking = ref<boolean>(false) // 判断pickview是否还在滑动中
@@ -207,15 +115,11 @@ const isLoading = computed(() => {
 watch(
   () => props.displayFormat,
   (fn) => {
-    if (fn && getType(fn) !== 'function') {
+    if (fn && !isFunction(fn)) {
       console.error('The type of displayFormat must be Function')
     }
-    if (pickerViewWd.value && pickerViewWd.value.selectedIndex && pickerViewWd.value.selectedIndex.length !== 0) {
-      if (props.modelValue) {
-        setShowValue(pickerViewWd.value.getSelects())
-      } else {
-        showValue.value = ''
-      }
+    if (pickerViewWd.value && pickerViewWd.value.getSelectedIndex().length !== 0) {
+      handleShowValueUpdate(props.modelValue)
     }
   },
   {
@@ -229,17 +133,7 @@ watch(
   (newValue) => {
     pickerValue.value = newValue
     // 获取初始选中项,并展示初始选中文案
-    if (isDef(newValue)) {
-      if (pickerViewWd.value && pickerViewWd.value.getSelects) {
-        nextTick(() => {
-          setShowValue(pickerViewWd.value!.getSelects())
-        })
-      } else {
-        setShowValue(getSelects(props.modelValue))
-      }
-    } else {
-      showValue.value = ''
-    }
+    handleShowValueUpdate(newValue)
   },
   {
     deep: true,
@@ -250,20 +144,10 @@ watch(
 watch(
   () => props.columns,
   (newValue) => {
-    displayColumns.value = newValue
-    resetColumns.value = newValue
+    displayColumns.value = deepClone(newValue)
+    resetColumns.value = deepClone(newValue)
     // 获取初始选中项,并展示初始选中文案
-    if (props.modelValue) {
-      if (pickerViewWd.value && pickerViewWd.value.getSelects) {
-        nextTick(() => {
-          setShowValue(pickerViewWd.value!.getSelects())
-        })
-      } else {
-        setShowValue(getSelects(props.modelValue))
-      }
-    } else {
-      showValue.value = ''
-    }
+    handleShowValueUpdate(props.modelValue)
   },
   {
     deep: true,
@@ -274,7 +158,7 @@ watch(
 watch(
   () => props.columnChange,
   (newValue) => {
-    if (newValue && getType(newValue) !== 'function') {
+    if (newValue && !isFunction(newValue)) {
       console.error('The type of columnChange must be Function')
     }
   },
@@ -311,13 +195,8 @@ const isRequired = computed(() => {
 
 const { proxy } = getCurrentInstance() as any
 
-const emit = defineEmits(['confirm', 'open', 'cancel', 'update:modelValue'])
-
 onMounted(() => {
-  props.modelValue && setShowValue(getSelects(props.modelValue))
-  if (props.modelValue && pickerViewWd.value && pickerViewWd.value.getSelects) {
-    setShowValue(pickerViewWd.value!.getSelects())
-  }
+  handleShowValueUpdate(props.modelValue)
 })
 
 onBeforeMount(() => {
@@ -326,18 +205,35 @@ onBeforeMount(() => {
 })
 
 /**
+ * 值变更时更新显示内容
+ * @param value
+ */
+function handleShowValueUpdate(value: string | number | Array<string | number>) {
+  // 获取初始选中项,并展示初始选中文案
+  if ((isArray(value) && value.length > 0) || (isDef(value) && !isArray(value) && value !== '')) {
+    if (pickerViewWd.value) {
+      nextTick(() => {
+        setShowValue(pickerViewWd.value!.getSelects())
+      })
+    } else {
+      setShowValue(getSelects(value)!)
+    }
+  } else {
+    showValue.value = ''
+  }
+}
+
+/**
  * @description 根据传入的value，picker组件获取当前cell展示值。
  * @param {String|Number|Array<String|Number|Array<any>>}value
  */
-function getSelects(value) {
+function getSelects(value: string | number | Array<string | number | Array<any>>) {
   const formatColumns = formatArray(props.columns, props.valueKey, props.labelKey)
   if (props.columns.length === 0) return
 
   // 使其默认选中首项
-  if (value === '' || value === null || value === undefined || (getType(value) === 'array' && value.length === 0)) {
-    value = formatColumns.map((col) => {
-      return col[0][props.valueKey]
-    })
+  if (value === '' || !isDef(value) || (isArray(value) && value.length === 0)) {
+    return
   }
   const valueType = getType(value)
   const type = ['string', 'number', 'boolean', 'array']
@@ -347,7 +243,7 @@ function getSelects(value) {
    * 2.根据formatColumns的长度截取Array<String>，保证下面的遍历不溢出
    * 3.根据每列的key值找到选项中value为此key的下标并记录
    */
-  value = value instanceof Array ? value : [value]
+  value = isArray(value) ? value : [value]
   value = value.slice(0, formatColumns.length)
 
   if (value.length === 0) {
@@ -379,7 +275,7 @@ function close() {
   onCancel()
 }
 /**
- * @description 展示popup，小程序有个bug，在picker-view弹出时设置value，会触发change事件，而且会将picker-view的value多次触发change重置为第一项
+ * 展示popup
  */
 function showPopup() {
   if (props.disabled || props.readonly) return
@@ -389,15 +285,16 @@ function showPopup() {
   pickerValue.value = props.modelValue
   displayColumns.value = resetColumns.value
 }
+
 /**
- * @description 点击取消按钮触发。关闭popup，触发cancel事件。
+ * 点击取消按钮触发。关闭popup，触发cancel事件。
  */
 function onCancel() {
   popupShow.value = false
   emit('cancel')
 }
 /**
- * @description 点击确定按钮触发。展示选中值，触发cancel事件。
+ * 点击确定按钮触发。展示选中值，触发cancel事件。
  */
 function onConfirm() {
   if (isLoading.value) return
@@ -409,10 +306,10 @@ function onConfirm() {
   }
 
   const { beforeConfirm } = props
-  if (beforeConfirm && getType(beforeConfirm) === 'function') {
+  if (beforeConfirm && isFunction(beforeConfirm)) {
     beforeConfirm(
       pickerValue.value,
-      (isPass) => {
+      (isPass: boolean) => {
         isPass && handleConfirm()
       },
       proxy.$.exposed
@@ -434,6 +331,7 @@ function handleConfirm() {
   popupShow.value = false
   resetColumns.value = deepClone(columns)
   emit('update:modelValue', values)
+
   setShowValue(selects)
   emit('confirm', {
     value: values,
@@ -441,19 +339,19 @@ function handleConfirm() {
   })
 }
 /**
- * @description 初始change事件
+ * 初始change事件
  * @param event
  */
-function pickerViewChange({ value }) {
+function pickerViewChange({ value }: any) {
   pickerValue.value = value
 }
 /**
- * @description 设置展示值
- * @param {Array<String>} items
+ * 设置展示值
+ * @param  items
  */
-function setShowValue(items) {
+function setShowValue(items: ColumnItem | ColumnItem[]) {
   // 避免值为空时调用自定义展示函数
-  if ((items instanceof Array && !items.length) || !items) return
+  if ((isArray(items) && !items.length) || !items) return
 
   const { valueKey, labelKey } = props
   showValue.value = (props.displayFormat || defaultDisplayFormat)(items, { valueKey, labelKey })
@@ -479,7 +377,7 @@ function setLoading(loading: boolean) {
   innerLoading.value = loading
 }
 
-defineExpose({
+defineExpose<PickerExpose>({
   close,
   open,
   setLoading

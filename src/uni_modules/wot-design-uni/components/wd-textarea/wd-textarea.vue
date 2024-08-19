@@ -1,5 +1,5 @@
 <template>
-  <view :class="rootClass" :style="customStyle" @click="handleClick">
+  <view :class="rootClass" :style="customStyle">
     <view v-if="label || useLabelSlot" :class="labelClass" :style="labelStyle">
       <view v-if="prefixIcon || usePrefixSlot" class="wd-textarea__prefix">
         <wd-icon v-if="prefixIcon && !usePrefixSlot" custom-class="wd-textarea__icon" :name="prefixIcon" @click="onClickPrefixIcon" />
@@ -10,16 +10,17 @@
         <slot v-else name="label"></slot>
       </view>
     </view>
+
     <!-- 文本域 -->
-    <view :class="`wd-textarea__value ${customTextareaContainerClass} ${showWordCount ? 'is-show-limit' : ''}`">
+    <view :class="`wd-textarea__value ${showClear ? 'is-suffix' : ''} ${customTextareaContainerClass} ${showWordCount ? 'is-show-limit' : ''}`">
       <textarea
-        :class="`wd-textarea__inner ${showClear ? 'is-suffix' : ''} ${customTextareaClass}`"
+        :class="`wd-textarea__inner ${customTextareaClass}`"
         v-model="inputValue"
         :show-count="false"
-        :placeholder="placeholder"
+        :placeholder="placeholderValue"
         :disabled="disabled"
         :maxlength="maxlength"
-        :focus="isFocus"
+        :focus="focused"
         :auto-focus="autoFocus"
         :placeholder-style="placeholderStyle"
         :placeholder-class="inputPlaceholderClass"
@@ -46,15 +47,10 @@
 
       <view v-if="readonly" class="wd-textarea__readonly-mask" />
       <view class="wd-textarea__suffix">
-        <wd-icon v-if="showClear" custom-class="wd-textarea__clear" name="error-fill" @click="clear" />
+        <wd-icon v-if="showClear" custom-class="wd-textarea__clear" name="error-fill" @click="handleClear" />
         <view v-if="showWordCount" class="wd-textarea__count">
-          <text
-            :class="[
-              inputValue && String(inputValue).length > 0 ? 'wd-textarea__count-current' : '',
-              String(inputValue).length > parseInt(String(maxlength)) ? 'is-error' : ''
-            ]"
-          >
-            {{ String(inputValue).length }}
+          <text :class="countClass">
+            {{ currentLength }}
           </text>
           /{{ maxlength }}
         </view>
@@ -76,108 +72,44 @@ export default {
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref, watch } from 'vue'
-import { objToStyle, requestAnimationFrame } from '../common/util'
+import { objToStyle, requestAnimationFrame, isDef, pause } from '../common/util'
 import { useCell } from '../composables/useCell'
 import { FORM_KEY, type FormItemRule } from '../wd-form/types'
 import { useParent } from '../composables/useParent'
-type ConfirmType = 'send' | 'search' | 'next' | 'go' | 'done'
+import { useTranslate } from '../composables/useTranslate'
+import { textareaProps } from './types'
 
-interface Props {
-  // 原生属性
-  placeholder?: string
-  placeholderStyle?: string
-  placeholderClass?: string
-  disabled?: boolean
-  maxlength?: number
-  focus?: boolean
-  autoFocus?: boolean
-  autoHeight?: boolean
-  fixed?: boolean
-  cursorSpacing?: number
-  cursor?: number
-  confirmType?: ConfirmType
-  confirmHold?: boolean
-  showConfirmBar?: boolean
-  selectionStart?: number
-  selectionEnd?: number
-  adjustPosition?: boolean
-  disableDefaultPadding?: boolean
-  holdKeyboard?: boolean
-  // 原生属性结束
-  modelValue: string | number
-  showPassword?: boolean
-  clearable?: boolean
-  readonly?: boolean
-  prefixIcon?: string
-  usePrefixSlot?: boolean
-  showWordLimit?: boolean
-  label?: string
-  labelWidth?: string
-  useLabelSlot?: boolean
-  size?: string
-  error?: boolean
-  center?: boolean
-  noBorder?: boolean
-  required?: boolean
-  prop?: string
-  rules?: FormItemRule[]
-  customTextareaContainerClass?: string
-  customTextareaClass?: string
-  customLabelClass?: string
-  customClass?: string
-  customStyle?: string
-}
+const { translate } = useTranslate('textarea')
 
-const props = withDefaults(defineProps<Props>(), {
-  customTextareaContainerClass: '',
-  customTextareaClass: '',
-  customLabelClass: '',
-  customClass: '',
-  customStyle: '',
-  maxlength: -1,
-  modelValue: '',
-  placeholder: '请输入...',
-  autoHeight: false,
-  clearable: false,
-  showPassword: false,
-  disabled: false,
-  readonly: false,
-  usePrefixSlot: false,
-  showWordLimit: false,
-  placeholderClass: '',
-  focus: false,
-  autoFocus: false,
-  cursorSpacing: 0,
-  fixed: false,
-  cursor: -1,
-  showConfirmBar: true,
-  selectionStart: -1,
-  selectionEnd: -1,
-  adjustPosition: true,
-  holdKeyboard: false,
-  confirmType: 'done',
-  confirmHold: false,
-  disableDefaultPadding: false,
-  error: false,
-  center: false,
-  labelWidth: '33%',
-  useLabelSlot: false,
-  required: false,
-  noBorder: false,
-  rules: () => []
+const props = defineProps(textareaProps)
+const emit = defineEmits([
+  'update:modelValue',
+  'clear',
+  'change',
+  'blur',
+  'focus',
+  'input',
+  'keyboardheightchange',
+  'confirm',
+  'linechange',
+  'clickprefixicon',
+  'click'
+])
+
+const placeholderValue = computed(() => {
+  return isDef(props.placeholder) ? props.placeholder : translate('placeholder')
 })
 
-const showClear = ref<boolean>(false)
-const showWordCount = ref<boolean>(false)
 const clearing = ref<boolean>(false)
-const isFocus = ref<boolean>(false) // 是否聚焦
+const focused = ref<boolean>(false) // 控制聚焦
+const focusing = ref<boolean>(false) // 当前是否激活状态
 const inputValue = ref<string | number>('') // 输入框的值
 const cell = useCell()
 
 watch(
   () => props.focus,
   (newValue) => {
-    isFocus.value = newValue
+    focused.value = newValue
   },
   { immediate: true, deep: true }
 )
@@ -185,18 +117,32 @@ watch(
 watch(
   () => props.modelValue,
   (newValue) => {
-    const { disabled, readonly, clearable } = props
-    if (newValue === null || newValue === undefined) {
-      newValue = ''
-      console.warn('[wot-design] warning(wd-textarea): value can not be null or undefined.')
-    }
-    inputValue.value = newValue
-    showClear.value = Boolean(clearable && !disabled && !readonly && newValue)
+    inputValue.value = isDef(newValue) ? String(newValue) : ''
   },
   { immediate: true, deep: true }
 )
 
 const { parent: form } = useParent(FORM_KEY)
+
+/**
+ * 展示清空按钮
+ */
+const showClear = computed(() => {
+  const { disabled, readonly, clearable, clearTrigger } = props
+  if (clearable && !readonly && !disabled && inputValue.value && (clearTrigger === 'always' || (props.clearTrigger === 'focus' && focusing.value))) {
+    return true
+  } else {
+    return false
+  }
+})
+
+/**
+ * 展示字数统计
+ */
+const showWordCount = computed(() => {
+  const { disabled, readonly, maxlength, showWordLimit } = props
+  return Boolean(!disabled && !readonly && isDef(maxlength) && maxlength > -1 && showWordLimit)
+})
 
 // 表单校验错误信息
 const errorMessage = computed(() => {
@@ -221,12 +167,17 @@ const isRequired = computed(() => {
   return props.required || props.rules.some((rule) => rule.required) || formRequired
 })
 
+// 当前文本域文字长度
+const currentLength = computed(() => {
+  return String(props.modelValue || '').length
+})
+
 const rootClass = computed(() => {
   return `wd-textarea   ${props.label || props.useLabelSlot ? 'is-cell' : ''} ${props.center ? 'is-center' : ''} ${
     cell.border.value ? 'is-border' : ''
   } ${props.size ? 'is-' + props.size : ''} ${props.error ? 'is-error' : ''} ${props.disabled ? 'is-disabled' : ''} ${
     props.autoHeight ? 'is-auto-height' : ''
-  } ${inputValue.value && String(inputValue.value).length > 0 ? 'is-not-empty' : ''}  ${props.noBorder ? 'is-no-border' : ''} ${props.customClass}`
+  } ${currentLength.value > 0 ? 'is-not-empty' : ''}  ${props.noBorder ? 'is-no-border' : ''} ${props.customClass}`
 })
 
 const labelClass = computed(() => {
@@ -235,6 +186,10 @@ const labelClass = computed(() => {
 
 const inputPlaceholderClass = computed(() => {
   return `wd-textarea__placeholder  ${props.placeholderClass}`
+})
+
+const countClass = computed(() => {
+  return `${currentLength.value > 0 ? 'wd-textarea__count-current' : ''} ${currentLength.value > props.maxlength ? 'is-error' : ''}`
 })
 
 const labelStyle = computed(() => {
@@ -246,91 +201,78 @@ const labelStyle = computed(() => {
     : ''
 })
 
-const emit = defineEmits([
-  'update:modelValue',
-  'clear',
-  'change',
-  'blur',
-  'focus',
-  'input',
-  'keyboardheightchange',
-  'confirm',
-  'linechange',
-  'clickprefixicon',
-  'click'
-])
-
 onBeforeMount(() => {
   initState()
 })
 
 // 状态初始化
 function initState() {
-  const { disabled, readonly, clearable, maxlength, showWordLimit } = props
-  let newVal = ''
-  if (showWordLimit && maxlength && inputValue.value.toString().length > maxlength) {
-    newVal = inputValue.value.toString().substring(0, maxlength)
-  }
-  showClear.value = Boolean(!disabled && !readonly && clearable && inputValue.value)
-  showWordCount.value = Boolean(!disabled && !readonly && maxlength && showWordLimit)
-  inputValue.value = newVal || inputValue.value
+  inputValue.value = formatValue(inputValue.value)
   emit('update:modelValue', inputValue.value)
 }
 
-function clear() {
+function formatValue(value: string | number) {
+  const { maxlength, showWordLimit } = props
+  if (showWordLimit && maxlength !== -1 && String(value).length > maxlength) {
+    return value.toString().substring(0, maxlength)
+  }
+  return value
+}
+
+function handleClear() {
+  clearing.value = true
+  focusing.value = false
   inputValue.value = ''
-  requestAnimationFrame()
-    .then(() => requestAnimationFrame())
-    .then(() => requestAnimationFrame())
-    .then(() => {
-      isFocus.value = true
-      emit('clear')
-      emit('change', {
-        value: ''
-      })
-      emit('update:modelValue', inputValue.value)
+  if (props.focusWhenClear) {
+    focused.value = false
+  }
+  requestAnimationFrame(() => {
+    if (props.focusWhenClear) {
+      focused.value = true
+      focusing.value = true
+    }
+    emit('change', {
+      value: ''
     })
-}
-// 失去焦点时会先后触发change、blur，未输入内容但失焦不触发 change 只触发 blur
-function handleBlur({ detail }) {
-  isFocus.value = false
-  emit('change', {
-    value: inputValue.value
-  })
-  emit('update:modelValue', inputValue.value)
-  emit('blur', {
-    value: inputValue.value,
-    // textarea 有 cursor
-    cursor: detail.cursor ? detail.cursor : null
+    emit('update:modelValue', inputValue.value)
+    emit('clear')
   })
 }
-function handleFocus({ detail }) {
+async function handleBlur({ detail }: any) {
+  // 等待150毫秒，clear执行完毕
+  await pause(150)
+
   if (clearing.value) {
     clearing.value = false
     return
   }
-  isFocus.value = true
+
+  focusing.value = false
+  emit('blur', {
+    value: inputValue.value,
+    cursor: detail.cursor ? detail.cursor : null
+  })
+}
+function handleFocus({ detail }: any) {
+  focusing.value = true
   emit('focus', detail)
 }
-// input事件需要传入
-function handleInput() {
+function handleInput({ detail }: any) {
+  inputValue.value = formatValue(inputValue.value as string)
   emit('update:modelValue', inputValue.value)
-  emit('input', inputValue.value)
+  emit('input', detail)
 }
-function handleKeyboardheightchange({ detail }) {
+function handleKeyboardheightchange({ detail }: any) {
   emit('keyboardheightchange', detail)
 }
-function handleConfirm({ detail }) {
+function handleConfirm({ detail }: any) {
   emit('confirm', detail)
 }
-function handleLineChange({ detail }) {
+function handleLineChange({ detail }: any) {
   emit('linechange', detail)
 }
 function onClickPrefixIcon() {
   emit('clickprefixicon')
-}
-function handleClick(event: MouseEvent) {
-  emit('click', event)
 }
 </script>
 

@@ -17,9 +17,11 @@ export default {
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref, watch } from 'vue'
-import { isObj, requestAnimationFrame } from '../common/util'
+import { isObj, isPromise, requestAnimationFrame } from '../common/util'
+import { transitionProps } from './types'
+import { AbortablePromise } from '../common/AbortablePromise'
 
-const getClassNames = (name) => {
+const getClassNames = (name?: string) => {
   if (!name) {
     return {
       enter: `${props.enterClass} ${props.enterActiveClass}`,
@@ -37,48 +39,8 @@ const getClassNames = (name) => {
   }
 }
 
-type TransitionName =
-  | 'fade'
-  | 'fade-down'
-  | 'fade-left'
-  | 'fade-right'
-  | 'fade-up'
-  | 'slide-down'
-  | 'slide-left'
-  | 'slide-right'
-  | 'slide-up'
-  | 'zoom-in'
-  | 'zoom-out'
-
-interface Props {
-  show?: boolean
-  duration?: Record<string, number> | number | boolean
-  name?: TransitionName | ''
-  customStyle?: string
-  lazyRender?: boolean
-  customClass?: string
-  // 定义进入过渡的开始状态。在元素被插入之前生效，在元素被插入之后的下一帧移除。
-  enterClass?: string
-  // 定义进入过渡生效时的状态。在整个进入过渡的阶段中应用，在元素被插入之前生效，在过渡/动画完成之后移除。这个类可以被用来定义进入过渡的过程时间，延迟和曲线函数。
-  enterActiveClass?: string
-  // 定义进入过渡的结束状态。在元素被插入之后下一帧生效 (与此同时 enter-class 被移除)，在过渡/动画完成之后移除。
-  enterToClass?: string
-  // 定义离开过渡的开始状态。在离开过渡被触发时立刻生效，下一帧被移除。
-  leaveClass?: string
-  // 定义离开过渡生效时的状态。在整个离开过渡的阶段中应用，在离开过渡被触发时立刻生效，在过渡/动画完成之后移除。这个类可以被用来定义离开过渡的过程时间，延迟和曲线函数。
-  leaveActiveClass?: string
-  // 定义离开过渡的结束状态。在离开过渡被触发之后下一帧生效 (与此同时 leave-class 被删除)，在过渡/动画完成之后移除。
-  leaveToClass?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customStyle: '',
-  show: false,
-  name: 'fade',
-  duration: 300,
-  lazyRender: true
-})
+const props = defineProps(transitionProps)
+const emit = defineEmits(['click', 'before-enter', 'enter', 'before-leave', 'leave', 'after-leave', 'after-enter'])
 
 // 初始化是否完成
 const inited = ref<boolean>(false)
@@ -92,8 +54,14 @@ const transitionEnded = ref<boolean>(false)
 const currentDuration = ref<number>(300)
 // 类名
 const classes = ref<string>('')
+// 用于控制enter和leave的顺序执行
+const enterPromise = ref<AbortablePromise<void> | null>(null)
 
-const emit = defineEmits(['click', 'before-enter', 'enter', 'before-leave', 'leave', 'after-leave', 'after-enter'])
+// 动画进入的生命周期
+const enterLifeCyclePromises = ref<AbortablePromise<unknown> | null>(null)
+
+// 动画离开的生命周期
+const leaveLifeCyclePromises = ref<AbortablePromise<unknown> | null>(null)
 
 const style = computed(() => {
   return `-webkit-transition-duration:${currentDuration.value}ms;transition-duration:${currentDuration.value}ms;${
@@ -114,56 +82,107 @@ onBeforeMount(() => {
 watch(
   () => props.show,
   (newVal) => {
-    observerShow(newVal)
+    handleShow(newVal)
   },
-  { deep: true, immediate: true }
+  { deep: true }
 )
 
 function handleClick() {
   emit('click')
 }
 
-function observerShow(value: boolean) {
-  value ? enter() : leave()
+function handleShow(value: boolean) {
+  if (value) {
+    handleAbortPromise()
+    enter()
+  } else {
+    leave()
+  }
+}
+/**
+ * 取消所有的promise
+ */
+function handleAbortPromise() {
+  isPromise(enterPromise.value) && enterPromise.value.abort()
+  isPromise(enterLifeCyclePromises.value) && enterLifeCyclePromises.value.abort()
+  isPromise(leaveLifeCyclePromises.value) && leaveLifeCyclePromises.value.abort()
+  enterPromise.value = null
+  enterLifeCyclePromises.value = null
+  leaveLifeCyclePromises.value = null
 }
 
 function enter() {
-  const classNames = getClassNames(props.name)
-  const duration = isObj(props.duration) ? (props.duration as any).enter : props.duration
-  status.value = 'enter'
-  emit('before-enter')
-
-  requestAnimationFrame(() => {
-    emit('enter')
-    classes.value = classNames.enter
-    currentDuration.value = duration
-    requestAnimationFrame(() => {
+  enterPromise.value = new AbortablePromise(async (resolve) => {
+    try {
+      const classNames = getClassNames(props.name)
+      const duration = isObj(props.duration) ? (props.duration as any).enter : props.duration
+      status.value = 'enter'
+      emit('before-enter')
+      enterLifeCyclePromises.value = requestAnimationFrame()
+      await enterLifeCyclePromises.value
+      emit('enter')
+      classes.value = classNames.enter
+      currentDuration.value = duration
+      enterLifeCyclePromises.value = requestAnimationFrame()
+      await enterLifeCyclePromises.value
       inited.value = true
       display.value = true
-      requestAnimationFrame(() => {
-        transitionEnded.value = false
-        classes.value = classNames['enter-to']
-      })
-    })
+      enterLifeCyclePromises.value = requestAnimationFrame()
+      await enterLifeCyclePromises.value
+      enterLifeCyclePromises.value = null
+      transitionEnded.value = false
+      classes.value = classNames['enter-to']
+      resolve()
+    } catch (error) {
+      /**
+       *
+       */
+    }
   })
 }
-function leave() {
-  if (!display.value) return
-  const classNames = getClassNames(props.name)
-  const duration = isObj(props.duration) ? (props.duration as any).leave : props.duration
-  status.value = 'leave'
-  emit('before-leave')
-
-  requestAnimationFrame(() => {
+async function leave() {
+  if (!enterPromise.value) {
+    transitionEnded.value = false
+    return onTransitionEnd()
+  }
+  try {
+    await enterPromise.value
+    if (!display.value) return
+    const classNames = getClassNames(props.name)
+    const duration = isObj(props.duration) ? (props.duration as any).leave : props.duration
+    status.value = 'leave'
+    emit('before-leave')
+    currentDuration.value = duration
+    leaveLifeCyclePromises.value = requestAnimationFrame()
+    await leaveLifeCyclePromises.value
     emit('leave')
     classes.value = classNames.leave
-    currentDuration.value = duration
+    leaveLifeCyclePromises.value = requestAnimationFrame()
+    await leaveLifeCyclePromises.value
+    transitionEnded.value = false
+    classes.value = classNames['leave-to']
+    leaveLifeCyclePromises.value = setPromise(currentDuration.value)
+    await leaveLifeCyclePromises.value
+    leaveLifeCyclePromises.value = null
+    onTransitionEnd()
+    enterPromise.value = null
+  } catch (error) {
+    /**
+     *
+     */
+  }
+}
 
-    requestAnimationFrame(() => {
-      transitionEnded.value = false
-      setTimeout(() => onTransitionEnd(), currentDuration.value)
-      classes.value = classNames['leave-to']
-    })
+/**
+ * 定时器promise化
+ * @param duration 持续时间ms
+ */
+function setPromise(duration: number) {
+  return new AbortablePromise<void>((resolve) => {
+    const timer = setTimeout(() => {
+      clearTimeout(timer)
+      resolve()
+    }, duration)
   })
 }
 function onTransitionEnd() {
@@ -177,6 +196,7 @@ function onTransitionEnd() {
     // 进入后触发
     emit('after-enter')
   }
+
   if (!props.show && display.value) {
     display.value = false
   }

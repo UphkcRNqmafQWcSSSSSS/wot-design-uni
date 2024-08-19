@@ -124,7 +124,7 @@ function prompt() {
 如果提供的弹框内容不满足需求，可以使用插槽自定义弹框内容。可以通过指定唯一标识`selector`的方式，在一个页面中使用多个`MessageBox`,`useMessage(selector)`会返回一个指定了`selector`的组件实例。
 
 ```html
-<wd-message-box selector="wd-message-box-slot" use-slot>
+<wd-message-box selector="wd-message-box-slot">
   <wd-rate custom-class="custom-rate-class" v-model="rate"/>
 </wd-message-box>
 
@@ -156,6 +156,42 @@ function withSlot() {
   display: block;
   height: 22px;
 }
+```
+
+## 确认前置处理
+
+设置 `beforeConfirm` 函数，在用户选择图片点击确认后，会执行 `beforeConfirm` 函数，接收 { resolve }，开发者可以在确认前进行处理，并通过 `resolve` 函数告知组件是否确定通过，`resolve` 接受 1 个 `boolean` 值，`resolve(true)` 表示选项通过，`resolve(false)` 表示选项不通过，不通过时不会完成确认操作。
+
+```html
+<wd-toast />
+<wd-message-box />
+<wd-button @click="beforeConfirm">beforeConfirm</wd-button>
+```
+```typescript
+import { useMessage, useToast } from '@/uni_modules/wot-design-uni'
+const message = useMessage()
+const toast = useToast()
+
+function beforeConfirm() {
+  message
+    .confirm({
+      msg: '是否删除',
+      title: '提示',
+      beforeConfirm: ({ resolve }) => {
+        toast.loading('删除中...')
+        setTimeout(() => {
+          toast.close()
+          resolve(true)
+          toast.success('删除成功')
+        }, 2000)
+      }
+    })
+    .then(() => {})
+    .catch((error) => {
+      console.log(error)
+    })
+}
+
 ```
 
 ---
@@ -193,7 +229,7 @@ MessageBox.prompt(options)
 | inputError        | 当 type 为 prompt 时，输入框检验不通过时的错误提示文案        | string          | -                        | 输入的数据不合法 | -        |
 | confirmButtonText | 确定按钮文案                                                  | string          | -                        | 确定             | -        |
 | cancelButtonText  | 取消按钮文案                                                  | string          | -                        | 取消             | -        |
-| selector          | 组件的 id                                                     | string          | -                        | #wd-message-box  | -        |
+| selector          | 指定唯一标识                                                 | string          | -                        | #wd-message-box  | -        |
 | zIndex            | 弹窗层级                                                      | number          | -                        | 99               | -    |
 | lazyRender        | 弹层内容懒渲染，触发展示时才渲染内容                          | boolean         | -                        | true             | -    |
 

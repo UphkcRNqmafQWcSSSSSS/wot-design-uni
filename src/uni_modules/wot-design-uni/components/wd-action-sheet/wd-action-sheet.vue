@@ -38,7 +38,7 @@
             :style="`color: ${action.color}`"
             @click="select(rowIndex, 'action')"
           >
-            <wd-loading v-if="action.loading" size="20px" />
+            <wd-loading custom-class="`wd-action-sheet__action-loading" v-if="action.loading" />
             <view v-else class="wd-action-sheet__name">{{ action.name }}</view>
             <view v-if="!action.loading && action.subname" class="wd-action-sheet__subname">{{ action.subname }}</view>
           </button>
@@ -72,59 +72,13 @@ export default {
 
 <script lang="ts" setup>
 import { watch, ref } from 'vue'
+import { actionSheetProps, type Panel } from './types'
+import { isArray } from '../common/util'
 
-interface Action {
-  // 选项名称
-  name: string
-  // 描述信息
-  subname: string
-  // 颜色
-  color: string
-  // 禁用
-  disabled: boolean
-  // 加载中状态
-  loading: boolean
-}
+const props = defineProps(actionSheetProps)
+const emit = defineEmits(['select', 'click-modal', 'cancel', 'closed', 'close', 'open', 'opened', 'update:modelValue'])
 
-interface Panel {
-  // 图片地址
-  iconUrl: string
-  // 标题内容
-  title: string
-}
-
-interface Props {
-  customClass?: string
-  customHeaderClass?: string
-  customStyle?: string
-  modelValue: boolean
-  actions?: Array<Action>
-  panels?: Array<Panel>
-  title?: string
-  cancelText?: string
-  closeOnClickAction?: boolean
-  closeOnClickModal?: boolean
-  duration?: number
-  zIndex?: number
-  lazyRender?: boolean
-  safeAreaInsetBottom?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  customClass: '',
-  customHeaderClass: '',
-  customStyle: '',
-  modelValue: false,
-  actions: () => [] as Array<Action>,
-  panels: () => [] as Array<Panel>,
-  closeOnClickAction: true,
-  closeOnClickModal: true,
-  duration: 200,
-  zIndex: 10,
-  lazyRender: true,
-  safeAreaInsetBottom: true
-})
-const formatPanels = ref<Array<Panel> | Array<Array<Panel>>>([])
+const formatPanels = ref<Array<Panel> | Array<Panel[]>>([])
 
 const showPopup = ref<boolean>(false)
 
@@ -138,29 +92,30 @@ watch(
   { deep: true, immediate: true }
 )
 
-const emit = defineEmits(['select', 'click-modal', 'cancel', 'closed', 'close', 'open', 'opened', 'update:modelValue'])
-
-function isArray() {
-  return props.panels.length && !(props.panels[0] instanceof Array)
+function isPanelArray() {
+  return props.panels.length && !isArray(props.panels[0])
 }
 function computedValue() {
-  formatPanels.value = isArray() ? [props.panels] : props.panels
+  formatPanels.value = isPanelArray() ? [props.panels as Panel[]] : (props.panels as Panel[][])
 }
 
 function select(rowIndex: number, type: 'action' | 'panels', colIndex?: number) {
   if (type === 'action') {
+    if (props.actions[rowIndex].disabled || props.actions[rowIndex].loading) {
+      return
+    }
     emit('select', {
       item: props.actions[rowIndex],
       index: rowIndex
     })
-  } else if (isArray()) {
+  } else if (isPanelArray()) {
     emit('select', {
       item: props.panels[Number(colIndex)],
       index: colIndex
     })
   } else {
     emit('select', {
-      item: props.panels[rowIndex][Number(colIndex)],
+      item: (props.panels as Panel[][])[rowIndex][Number(colIndex)],
       rowIndex,
       colIndex
     })

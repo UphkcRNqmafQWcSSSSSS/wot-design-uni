@@ -13,7 +13,7 @@
       @scroll="monthScroll"
       :scroll-top="scrollTop"
     >
-      <view v-for="(item, index) in months(minDate, maxDate)" :key="index" :id="`month${index}`">
+      <view v-for="(item, index) in months" :key="index" :id="`month${index}`">
         <month
           :type="type"
           :date="item.date"
@@ -32,7 +32,7 @@
     </scroll-view>
     <view v-if="timeType" class="wd-month-panel__time">
       <view v-if="type === 'datetimerange'" class="wd-month-panel__time-label">
-        <view class="wd-month-panel__time-text">{{ timeType === 'start' ? '开始' : '结束' }}</view>
+        <view class="wd-month-panel__time-text">{{ timeType === 'start' ? translate('startTime') : translate('endTime') }}</view>
       </view>
       <view class="wd-month-panel__time-picker">
         <wd-picker-view
@@ -40,6 +40,7 @@
           v-model="timeValue"
           :columns="timeData"
           :columns-height="125"
+          :immediate-change="immediateChange"
           @change="handleTimeChange"
           @pickstart="handlePickStart"
           @pickend="handlePickEnd"
@@ -60,43 +61,67 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { debounce, getType, isEqual } from '../../common/util'
+import { computed, ref, watch, onMounted } from 'vue'
+import { debounce, isArray, isEqual, isNumber, requestAnimationFrame } from '../../common/util'
 import { compareMonth, formatMonthTitle, getMonthEndDay, getMonths, getTimeData, getWeekLabel } from '../utils'
 import Month from '../month/month.vue'
-import type { MonthInfo } from './type'
+import { monthPanelProps, type MonthInfo, type MonthPanelTimeType, type MonthPanelExpose } from './types'
+import { useTranslate } from '../../composables/useTranslate'
+import type { CalendarItem } from '../types'
 
-interface Props {
-  type: string
-  value: Array<number> | number | null
-  minDate: number
-  maxDate: number
-  firstDayOfWeek: number
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  formatter?: Function
-  maxRange?: number
-  rangePrompt?: string
-  allowSameDay?: boolean
-  showPanelTitle?: boolean
-  defaultTime: Array<number>
-  panelHeight: number
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  timeFilter?: Function
-  hideSecond?: boolean
-}
-const props = withDefaults(defineProps<Props>(), {
-  allowSameDay: false,
-  showPanelTitle: false,
-  hideSecond: false
+const props = defineProps(monthPanelProps)
+const emit = defineEmits(['change', 'pickstart', 'pickend'])
+
+const { translate } = useTranslate('calendar-view')
+
+const scrollTop = ref<number>(0) // 滚动位置
+const scrollIndex = ref<number>(0) // 当前显示的月份索引
+const timeValue = ref<number[]>([]) // 当前选中的时分秒
+
+const timeType = ref<MonthPanelTimeType>('') // 当前时间类型，是开始还是结束
+const innerValue = ref<string | number | (number | null)[]>('') // 内部保存一个值，用于判断新老值，避免监听器触发
+
+const handleChange = debounce((value) => {
+  emit('change', {
+    value
+  })
+}, 50)
+
+// 时间picker的列数据
+const timeData = computed<Array<CalendarItem[]>>(() => {
+  let timeColumns: Array<CalendarItem[]> = []
+  if (props.type === 'datetime' && isNumber(props.value)) {
+    const date = new Date(props.value)
+    date.setHours(timeValue.value[0])
+    date.setMinutes(timeValue.value[1])
+    date.setSeconds(props.hideSecond ? 0 : timeValue.value[2])
+    const dateTime = date.getTime()
+    timeColumns = getTime(dateTime) || []
+  } else if (isArray(props.value) && props.type === 'datetimerange') {
+    const [start, end] = props.value!
+    const dataValue = timeType.value === 'start' ? start : end
+    const date = new Date(dataValue || '')
+    date.setHours(timeValue.value[0])
+    date.setMinutes(timeValue.value[1])
+    date.setSeconds(props.hideSecond ? 0 : timeValue.value[2])
+    const dateTime = date.getTime()
+    const finalValue = [start, end]
+    if (timeType.value === 'start') {
+      finalValue[0] = dateTime
+    } else {
+      finalValue[1] = dateTime
+    }
+    timeColumns = getTime(finalValue, timeType.value) || []
+  }
+  return timeColumns
 })
 
-const title = ref<string>('')
-const scrollTop = ref<number>(0) // 滚动位置
-const timeValue = ref<Array<string>>([])
-const timeData = ref<Array<string | string[]>>([])
-const timeType = ref<string>('') // 当前时间类型，是开始还是结束
-const innerValue = ref<string | number[]>('') // 内部保存一个值，用于判断新老值，避免监听器触发
+// 标题
+const title = computed(() => {
+  return formatMonthTitle(months.value[scrollIndex.value].date)
+})
 
+// 周标题
 const weekLabel = computed(() => {
   return (index: number) => {
     return getWeekLabel(index - 1)
@@ -110,18 +135,15 @@ const scrollHeight = computed(() => {
 })
 
 // 月份日期和月份高度
-const months = computed(() => {
-  return (minDate: number, maxDate: number): MonthInfo[] => {
-    let months = getMonths(minDate, maxDate).map((month) => {
-      const offset = (7 + new Date(month).getDay() - props.firstDayOfWeek) % 7
-      const totalDay = getMonthEndDay(new Date(month).getFullYear(), new Date(month).getMonth() + 1)
-      return {
-        height: (offset + totalDay > 35 ? 64 * 6 : 64 * 5) + 45,
-        date: month
-      }
-    })
-    return months
-  }
+const months = computed<MonthInfo[]>(() => {
+  return getMonths(props.minDate, props.maxDate).map((month) => {
+    const offset = (7 + new Date(month).getDay() - props.firstDayOfWeek) % 7
+    const totalDay = getMonthEndDay(new Date(month).getFullYear(), new Date(month).getMonth() + 1)
+    return {
+      height: (offset + totalDay > 35 ? 64 * 6 : 64 * 5) + 45,
+      date: month
+    }
+  })
 })
 
 watch(
@@ -129,7 +151,7 @@ watch(
   (val) => {
     if (
       (val === 'datetime' && props.value) ||
-      (val === 'datetimerange' && typeof props.value === 'object' && props.value && props.value.length > 0 && props.value[0])
+      (val === 'datetimerange' && isArray(props.value) && props.value && props.value.length > 0 && props.value[0])
     ) {
       setTime(props.value, 'start')
     }
@@ -145,7 +167,7 @@ watch(
   (val) => {
     if (isEqual(val, innerValue.value)) return
 
-    if ((props.type === 'datetime' && val) || (props.type === 'datetimerange' && val && typeof val === 'object' && val.length > 0 && val[0])) {
+    if ((props.type === 'datetime' && val) || (props.type === 'datetimerange' && val && isArray(val) && val.length > 0 && val[0])) {
       setTime(val, 'start')
     }
   },
@@ -159,21 +181,15 @@ onMounted(() => {
   scrollIntoView()
 })
 
-const emit = defineEmits(['change', 'pickstart', 'pickend'])
-
-const handleChange = debounce((value) => {
-  emit('change', {
-    value
-  })
-}, 50)
-
+/**
+ * 使当前日期或者选中日期滚动到可视区域
+ */
 function scrollIntoView() {
-  setTimeout(() => {
-    let activeDate
-    const type = getType(props.value)
-    if (type === 'array') {
+  requestAnimationFrame(() => {
+    let activeDate: number | null = 0
+    if (isArray(props.value)) {
       activeDate = props.value![0]
-    } else if (type === 'number') {
+    } else if (isNumber(props.value)) {
       activeDate = props.value
     }
 
@@ -181,42 +197,37 @@ function scrollIntoView() {
       activeDate = Date.now()
     }
 
-    const monthsInfo = months.value(props.minDate, props.maxDate)
-
     let top: number = 0
-    for (let index = 0; index < monthsInfo.length; index++) {
-      if (compareMonth(monthsInfo[index].date, activeDate) === 0) {
+    for (let index = 0; index < months.value.length; index++) {
+      if (compareMonth(months.value[index].date, activeDate) === 0) {
         break
       }
-      top += monthsInfo[index] ? Number(monthsInfo[index].height) : 0
+      top += months.value[index] ? Number(months.value[index].height) : 0
     }
     scrollTop.value = 0
-    nextTick(() => {
+    requestAnimationFrame(() => {
       scrollTop.value = top
     })
-  }, 50)
+  })
 }
 /**
  * 获取时间 picker 的数据
  * @param {timestamp|array} value 当前时间
  * @param {string} type 类型，是开始还是结束
  */
-function getTime(value, type?: string) {
-  if (!props.value) {
-    return []
-  }
+function getTime(value: number | (number | null)[], type?: string) {
   if (props.type === 'datetime') {
     return getTimeData({
-      date: value,
+      date: value as number,
       minDate: props.minDate,
       maxDate: props.maxDate,
       filter: props.timeFilter,
       isHideSecond: props.hideSecond
     })
   } else {
-    if (type === 'start' && typeof props.value === 'object') {
+    if (type === 'start' && isArray(props.value)) {
       return getTimeData({
-        date: value[0],
+        date: (value as Array<number>)[0],
         minDate: props.minDate,
         maxDate: props.value[1] ? props.value[1] : props.maxDate,
         filter: props.timeFilter,
@@ -224,8 +235,8 @@ function getTime(value, type?: string) {
       })
     } else {
       return getTimeData({
-        date: value[1],
-        minDate: value[0],
+        date: (value as Array<number>)[1],
+        minDate: (value as Array<number>)[0],
         maxDate: props.maxDate,
         filter: props.timeFilter,
         isHideSecond: props.hideSecond
@@ -238,33 +249,32 @@ function getTime(value, type?: string) {
  * @param {timestamp} date 时间
  * @param {string} type 类型，是开始还是结束
  */
-function getTimeValue(date, type) {
+function getTimeValue(date: number | (number | null)[], type: MonthPanelTimeType) {
+  let dateValue: Date = new Date()
   if (props.type === 'datetime') {
-    date = new Date(date)
-  } else {
+    dateValue = new Date(date as number)
+  } else if (isArray(date)) {
     if (type === 'start') {
-      date = new Date(date[0])
+      dateValue = new Date(date[0] || '')
     } else {
-      date = new Date(date[1])
+      dateValue = new Date(date[1] || '')
     }
   }
 
-  const hour = date.getHours()
-  const minute = date.getMinutes()
-  const second = date.getSeconds()
-
+  const hour = dateValue.getHours()
+  const minute = dateValue.getMinutes()
+  const second = dateValue.getSeconds()
   return props.hideSecond ? [hour, minute] : [hour, minute, second]
 }
-function setTime(value, type) {
-  if (getType(value) === 'array' && value[0] && value[1] && type === 'start' && timeType.value === 'start') {
+
+function setTime(value: number | (number | null)[], type?: MonthPanelTimeType) {
+  if (isArray(value) && value[0] && value[1] && type === 'start' && timeType.value === 'start') {
     type = 'end'
   }
-
-  timeData.value = getTime(value, type) || []
-  timeValue.value = getTimeValue(value, type)
-  timeType.value = type
+  timeType.value = type || ''
+  timeValue.value = getTimeValue(value, type || '')
 }
-function handleDateChange({ value, type }) {
+function handleDateChange({ value, type }: { value: number | (number | null)[]; type?: MonthPanelTimeType }) {
   if (!isEqual(value, props.value)) {
     // 内部保存一个值，用于判断新老值，避免监听器触发
     innerValue.value = value
@@ -275,23 +285,21 @@ function handleDateChange({ value, type }) {
     setTime(value, type)
   }
 }
-function handleTimeChange({ value }) {
+function handleTimeChange({ value }: { value: any[] }) {
   if (!props.value) {
     return
   }
-  if (props.type === 'datetime' && typeof props.value === 'number') {
+  if (props.type === 'datetime' && isNumber(props.value)) {
     const date = new Date(props.value)
     date.setHours(value[0])
     date.setMinutes(value[1])
     date.setSeconds(props.hideSecond ? 0 : value[2])
     const dateTime = date.getTime()
-    timeData.value = getTime(dateTime) || []
-    timeValue.value = value
     handleChange(dateTime)
-  } else if (typeof props.value === 'object') {
+  } else if (isArray(props.value) && props.type === 'datetimerange') {
     const [start, end] = props.value!
     const dataValue = timeType.value === 'start' ? start : end
-    const date = new Date(dataValue)
+    const date = new Date(dataValue || '')
     date.setHours(value[0])
     date.setMinutes(value[1])
     date.setSeconds(props.hideSecond ? 0 : value[2])
@@ -305,9 +313,6 @@ function handleTimeChange({ value }) {
     } else {
       finalValue[1] = dateTime
     }
-
-    timeData.value = getTime(finalValue, timeType.value) || []
-    timeValue.value = value
     innerValue.value = finalValue // 内部保存一个值，用于判断新老值，避免监听器触发
     handleChange(finalValue)
   }
@@ -320,30 +325,29 @@ function handlePickEnd() {
 }
 
 const monthScroll = (event: { detail: { scrollTop: number } }) => {
-  const monthsInfo = months.value(props.minDate, props.maxDate)
-  if (monthsInfo.length <= 1) {
+  if (months.value.length <= 1) {
     return
   }
   const scrollTop = Math.max(0, event.detail.scrollTop)
-  doSetSubtitle(scrollTop, monthsInfo)
+  doSetSubtitle(scrollTop)
 }
 
 /**
  * 设置小标题
  * scrollTop 滚动条位置
  */
-function doSetSubtitle(scrollTop: number, monthsInfo: MonthInfo[]) {
+function doSetSubtitle(scrollTop: number) {
   let height: number = 0 // 月份高度和
-  for (let index = 0; index < monthsInfo.length; index++) {
-    height = height + monthsInfo[index].height
+  for (let index = 0; index < months.value.length; index++) {
+    height = height + months.value[index].height
     if (scrollTop < height + 45) {
-      title.value = formatMonthTitle(monthsInfo[index].date)
+      scrollIndex.value = index
       return
     }
   }
 }
 
-defineExpose({
+defineExpose<MonthPanelExpose>({
   scrollIntoView
 })
 </script>

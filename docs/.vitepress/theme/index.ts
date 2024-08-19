@@ -1,7 +1,7 @@
 /*
  * @Author: weisheng
  * @Date: 2023-07-27 12:36:30
- * @LastEditTime: 2024-01-06 22:19:53
+ * @LastEditTime: 2024-07-20 16:52:08
  * @LastEditors: weisheng
  * @Description: 
  * @FilePath: /wot-design-uni/docs/.vitepress/theme/index.ts
@@ -12,28 +12,29 @@ import Theme from 'vitepress/theme'
 import './styles/vars.css'
 import './styles/custom.css'
 import './styles/scrollbar.scss'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
 
-// import HomeSponsors from './components/HomeSponsors.vue'
+import HomeFriendly from './components/HomeFriendly.vue'
 import NavBarTitleAfter from './components/NavBarTitleAfter.vue'
 import CustomFooter from './components/CustomFooter.vue'
 import SvgImage from './components/SvgImage.vue'
+import HomeStar from './components/HomeStar.vue'
 import frame from './components/frame.vue'
-
+import { ElTag } from 'element-plus'
 
 export default {
   ...Theme,
   Layout() {
     return h(Theme.Layout, null, {
-      // 'home-features-after': () => h(HomeSponsors),
+      'home-hero-info-after':()=>h(HomeStar),
+      'home-features-after': () => h(HomeFriendly),
       'layout-bottom':() => h(CustomFooter),
       'nav-bar-title-after': () => h(NavBarTitleAfter),
     })
   },
   enhanceApp({ app }) {
-    app.use(ElementPlus)
     app.component('SvgImage', SvgImage)
     app.component('frame', frame)
+    app.component('ElTag', ElTag)
+
   },
 }

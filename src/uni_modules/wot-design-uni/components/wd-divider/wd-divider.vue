@@ -1,5 +1,5 @@
 <template>
-  <view :class="`wd-divider ${customClass}`">
+  <view :class="`wd-divider ${customClass}`" :style="customStyle">
     <view class="wd-divider__line" :style="color ? 'background: ' + color : ''"></view>
     <view class="wd-divider__content" :style="color ? 'color: ' + color : ''">
       <slot></slot>
@@ -19,15 +19,9 @@ export default {
 </script>
 
 <script lang="ts" setup>
-interface Props {
-  customClass?: string
-  color?: string
-}
+import { dividerProps } from './types'
 
-const props = withDefaults(defineProps<Props>(), {
-  color: '',
-  customClass: ''
-})
+defineProps(dividerProps)
 </script>
 
 <style lang="scss" scoped>
