@@ -1,6 +1,6 @@
-<frame/>
-
 #  PickerView 选择器视图
+
+选择器视图，用于从一组数据中选择单个或多个值。
 
 ## 基本用法
 
@@ -127,6 +127,7 @@ const onChangeDistrict = (pickerView, value, columnIndex, resolve) => {
 | getColumnIndex | 获取某一列的选中项下标 | columnIndex | - |
 | getColumnData | 获取某一列的选项 | columnIndex | - |
 | setColumnData | 设置某一列的选项 | columnIndex, values | - |
+| resetColumns | 重置列数据为指定列数据 | columns（类型与props中columns相同） | 1.3.9 |
 
 ## Events
 

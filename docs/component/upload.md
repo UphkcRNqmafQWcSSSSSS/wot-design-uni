@@ -1,5 +1,3 @@
-<frame/>
-
 # Upload 上传
 
 图片、视频和文件上传组件
@@ -21,7 +19,7 @@
 `action` 设置上传的地址；
 
 ```html
-<wd-upload :file-list="fileList1" image-mode="aspectFill" :action="action" @change="handleChange1"></wd-upload>
+<wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" @change="handleChange"></wd-upload>
 ```
 
 ```typescript
@@ -97,9 +95,22 @@ const action: string = 'https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bdd86e
 ></wd-upload>
 ```
 
+## 覆盖上传
+
+上传组件可通过设置 `reupload` 来实现在选中时自动替换上一个文件。
+
+```html
+<wd-upload
+  :file-list="fileList"
+  reupload
+  action="https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bdd86eb04dc1e8fd64865cb5/upload"
+  @change="handleChange"
+></wd-upload>
+```
+
 ## 拦截预览图片操作
 
-设置 `before-preview` 函数，在用户点击图片进行预览时，会执行 `before-preview` 函数，接收 { index: 当前预览的下标, imgList: 所有图片地址列表, resolve }，通过 `resolve` 函数告知组件是否确定通过，`resolve` 接受 1 个 boolean 值，`resolve(true)` 表示选项通过，`resolve(false)` 表示选项不通过，不通过时不会执行预览图片操作。
+设置 `before-preview` 函数，在用户点击图片进行预览时，会执行 `before-preview` 函数，接收 { file: 预览文件, index: 当前预览的下标, imgList: 所有图片地址列表, resolve }，通过 `resolve` 函数告知组件是否确定通过，`resolve` 接受 1 个 boolean 值，`resolve(true)` 表示选项通过，`resolve(false)` 表示选项不通过，不通过时不会执行预览图片操作。
 
 ```html
 <wd-upload
@@ -135,8 +146,8 @@ const beforePreview = ({ file, resolve }) => {
     })
 }
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -178,8 +189,8 @@ const beforeUpload = ({ files, resolve }) => {
     })
 }
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -222,8 +233,8 @@ const beforeRemove = ({ file, fileList, resolve }) => {
     })
 }
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -251,7 +262,7 @@ const fileList = ref<any[]>([
   }
 ])
 
-const beforeChoose = (file, resolve) => {
+const beforeChoose = ({fileList, resolve}) => {
   messageBox
     .confirm({
       msg: '是否选择',
@@ -265,8 +276,8 @@ const beforeChoose = (file, resolve) => {
     })
 }
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -416,9 +427,7 @@ const buildFormData = ({ file, formData, resolve }) => {
 
 ```html
 <wd-upload :file-list="fileList" action="https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bdd86eb04dc1e8fd64865cb5/upload" @change="handleChange">
-  <wd-upload :file-list="fileList" :limit="5" action="https://ftf.jd.com/api/uploadImg" @change="handleChange">
     <wd-button>上传</wd-button>
-  </wd-upload>
 </wd-upload>
 ```
 
@@ -443,8 +452,8 @@ const action = ref<string>('https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bd
 
 const fileList = ref([])
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -461,8 +470,8 @@ const action = ref<string>('https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bd
 
 const fileList = ref([])
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -479,8 +488,8 @@ const action = ref<string>('https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bd
 
 const fileList = ref([])
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -497,8 +506,8 @@ const action = ref<string>('https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bd
 
 const fileList = ref([])
 
-function handleChange({ files }) {
-  fileList.value = files
+function handleChange({ fileList }) {
+  fileList.value = fileList
 }
 ```
 
@@ -567,6 +576,43 @@ const customUpload: UploadMethod = (file, formData, options) => {
 }
 ```
 
+
+## 自定义预览样式
+
+使用 `preview-cover` 插槽可以自定义覆盖在预览区域上方的内容
+
+```html
+<wd-upload v-model:file-list="fileList" accept="image" image-mode="aspectFill" :action="action">
+  <template #preview-cover="{ file,index }">
+            <!-- 小程序拿不到文件 -->
+    <view class="preview-cover">{{ file?.name||`文件${index+1}` }}</view>
+  </template>
+</wd-upload>
+<style>
+  .preview-cover {
+  margin-top: 10rpx;
+  text-align: center;
+}
+</style>
+```
+
+```typescript
+const fileList = ref<UploadFile[]>([])
+const action: string = 'https://mockapi.eolink.com/zhTuw2P8c29bc981a741931bdd86eb04dc1e8fd64865cb5/upload'
+```
+
+## 根据文件拓展名过滤
+
+通过设置 `extension` 可以限制选择文件的格式。以下示例限制只能选择 jpg 和 png 格式的图片:
+
+```html
+<wd-upload
+  v-model:file-list="fileList"
+  :extension="['.jpg', '.png']"
+  action="https://mockapi.eolink.com/xxx"
+></wd-upload>
+```
+
 ## Attributes
 
 | 参数                          | 说明                                                                                                                                                                           | 类型                                   | 可选值                                         | 默认值                     | 最低版本         |
@@ -576,6 +622,7 @@ const customUpload: UploadMethod = (file, formData, options) => {
 | header                        | 设置上传的请求头部                                                                                                                                                             | object                                 | -                                              | -                          | -                |
 | multiple                      | 是否支持多选文件                                                                                                                                                               | boolean                                | -                                              | -                          | -                |
 | disabled                      | 是否禁用                                                                                                                                                                       | boolean                                | -                                              | false                      | -                |
+| reupload    | 是否开启覆盖上传，开启后会关闭图片预览   | boolean          | -                                              | false                       | 1.5.0 |
 | limit                         | 最大允许上传个数                                                                                                                                                               | number                                 | -                                              | -                          | -                |
 | show-limit-num                | 限制上传个数的情况下，是否展示当前上传的个数                                                                                                                                   | boolean                                | -                                              | false                      | -                |
 | max-size                      | 文件大小限制，单位为`byte`                                                                                                                                                     | number                                 | -                                              | -                          | -                |
@@ -588,7 +635,7 @@ const customUpload: UploadMethod = (file, formData, options) => {
 | before-upload                 | 上传文件之前的钩子，参数为上传的文件和文件列表，若返回 false 或者返回 Promise 且被 reject，则停止上传。                                                                        | function({ files, fileList, resolve }) | -                                              | -                          | -                |
 | before-choose                 | 选择图片之前的钩子，参数为文件列表，若返回 false 或者返回 Promise 且被 reject，则停止上传。                                                                                    | function({ fileList, resolve })        | -                                              | -                          | -                |
 | before-remove                 | 删除文件之前的钩子，参数为要删除的文件和文件列表，若返回 false 或者返回 Promise 且被 reject，则停止上传。                                                                      | function({ file, fileList, resolve })  | -                                              | -                          | -                |
-| before-preview                | 图片预览前的钩子，参数为预览的图片下标和图片列表，若返回 false 或者返回 Promise 且被 reject，则停止上传。                                                                      | function({ index, imgList, resolve })  | -                                              | -                          | -                |
+| before-preview                | 图片预览前的钩子，参数为预览的图片下标和图片列表，若返回 false 或者返回 Promise 且被 reject，则停止上传。                                                                      | function({file, index, imgList, resolve })  | -                                              | -                          | -                |
 | build-form-data               | 构建上传`formData`的钩子，参数为上传的文件、待处理的`formData`，返回值为处理后的`formData`，若返回 false 或者返回 Promise 且被 reject，则停止上传。                            | function({ file, formData, resolve })  | -                                              | -                          | 0.1.61           |
 | loading-type                  | [加载中图标类型](/component/loading)                                                                                                                                           | string                                 | -                                              | circular-ring              | -                |
 | loading-color                 | [加载中图标颜色](/component/loading)                                                                                                                                           | string                                 | -                                              | #ffffff                    | -                |
@@ -602,16 +649,60 @@ const customUpload: UploadMethod = (file, formData, options) => {
 | successStatus                 | 接口响应的成功状态（statusCode）值                                                                                                                                             | number                                 | -                                              | 200                        | 1.3.4            |
 | auto-upload                   | 是否选择文件后自动上传。为 false 时应手动调用 submit() 方法开始上传                                                                                                            | boolean                                | -                                              | true                       | 1.3.8 |
 | upload-method                 | 自定义上传方法                                                                                                                                                     | UploadMethod                                | -                                              | -                       | 1.3.8 |
+| extension | 根据文件拓展名过滤(H5支持全部类型过滤,微信小程序支持all和file时过滤,其余平台不支持) | string[] | - | - | 1.9.0 |
 
 ## accept 的合法值
 
 | name  | 说明                                                                                   | 最低版本 |
 | ----- | -------------------------------------------------------------------------------------- | -------- |
-| image | 图片，全平台支持                                                                       | -        |
-| video | 视频，全平台支持                                                                       | 1.3.0    |
+| image | 图片，全平台支持，微信支持平台使用`chooseMedia`实现                                              | -        |
+| video | 视频，全平台支持，微信支持平台使用`chooseMedia`实现                                          | 1.3.0    |
 | media | 图片和视频，仅微信支持，使用`chooseMedia`实现                                          | 1.3.0    |
 | file  | 从客户端会话选择图片和视频以外的文件，仅微信支持，使用`chooseMessageFile`实现          | 1.3.0    |
 | all   | 全部类型的文件，仅微信和 H5 支持，微信使用`chooseMessageFile`，H5 使用`chooseFile`实现 | 1.3.0    |
+
+## 文件选择数量限制
+
+不同平台的文件选择方法具有不同的最大选择数量限制，这些限制由 uni-app 平台 API 本身决定：
+
+### 微信平台
+
+微信小程序平台具有更丰富的文件选择能力和更高的数量上限：
+
+| 选择方法 | 最大选择数量 | 说明 | 适用文件类型 |
+| -------- | ------------ | ---- | ------------ |
+| `chooseMedia` | 20 | 选择图片和视频时的最大数量限制 | accept 为 `image`、`video` 或 `media` 时使用 |
+| `chooseMessageFile` | 100 | 从客户端会话选择文件时的最大数量限制 | accept 为 `file` 或 `all` 时使用 |
+
+### H5平台
+
+H5 平台支持多种文件选择方式：
+
+| 选择方法 | 最大选择数量 | 说明 | 适用文件类型 |
+| -------- | ------------ | ---- | ------------ |
+| `chooseImage` | 9 | 选择图片时的最大数量限制 | accept 为 `image` 时使用 |
+| `chooseVideo` | 1 | 不支持多选，只能选择单个视频文件 | accept 为 `video` 时使用 |
+| `chooseFile` | 100 | 选择文件时的最大数量限制 | accept 为 `all` 时使用 |
+
+::: warning H5平台特别说明
+count 值在 H5 平台的表现基于浏览器本身的规范。目前测试结果来看，只能限制单选/多选，并不能限制具体数量。并且，在实际的手机浏览器中很少有能够支持多选的。
+:::
+
+### 其他平台
+
+其他平台（如支付宝小程序、钉钉小程序、App等）的文件选择能力相对有限：
+
+| 选择方法 | 最大选择数量 | 说明 | 适用文件类型 |
+| -------- | ------------ | ---- | ------------ |
+| `chooseImage` | 9 | 选择图片时的最大数量限制 | accept 为 `image` 时使用 |
+| `chooseVideo` | 1 | 不支持多选，只能选择单个视频文件 | accept 为 `video` 时使用 |
+
+::: tip 提示
+- 当设置的 `limit` 或 `maxCount` 超过上述平台限制时，实际选择数量将以平台限制为准
+- 微信小程序平台优先使用 `chooseMedia` 来选择图片和视频，具有更高的选择数量上限
+- 视频选择在非微信平台受限于 `chooseVideo` API，仅支持单选
+- 平台能力的优先级：微信平台 > H5平台 > 其他平台
+:::
 
 ## file 数据结构
 
@@ -630,6 +721,7 @@ const customUpload: UploadMethod = (file, formData, options) => {
 | name    | 说明             | 最低版本 |
 | ------- | ---------------- | -------- |
 | default | 上传唤起插槽样式 | -        |
+| preview-cover | 自定义覆盖在预览区域上方的内容 |   1.3.12   |
 
 ## Events
 
@@ -656,3 +748,5 @@ const customUpload: UploadMethod = (file, formData, options) => {
 | custom-class         | 根节点样式类             | -        |
 | custom-evoke-class   | 自定义上传按钮样式类     | -        |
 | custom-preview-class | 自定义预览图片列表样式类 | -        |
+
+

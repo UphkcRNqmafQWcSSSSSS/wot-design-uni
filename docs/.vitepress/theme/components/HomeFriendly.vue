@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useFriendly } from '../composables/friendly'
+import { useData } from 'vitepress'
 import VPFeature from 'vitepress/dist/client/theme-default/components/VPFeature.vue'
 
 const { data } = useFriendly()
+const { lang } = useData()
 
 const links = computed(() => {
-  return data.value.length ? data.value : []
+  return lang.value === 'en-US' ? [] : (data.value.length ? data.value : [])
 })
 
 const grid = computed(() => {
@@ -14,7 +16,7 @@ const grid = computed(() => {
   if (!length) {
     return
   } else {
-    return 'grid-3'
+    return 'grid-4'
   }
 })
 </script>
@@ -103,12 +105,12 @@ const grid = computed(() => {
 }
 
 @media (min-width: 768px) {
-  .item.grid-2,
-  .item.grid-4 {
+  .item.grid-2 {
     width: calc(100% / 2);
   }
 
   .item.grid-3,
+  .item.grid-4,
   .item.grid-6 {
     width: calc(100% / 3);
   }

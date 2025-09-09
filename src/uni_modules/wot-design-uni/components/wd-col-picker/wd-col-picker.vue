@@ -1,33 +1,34 @@
 <template>
-  <view :class="`wd-col-picker ${cell.border.value ? 'is-border' : ''} ${customClass}`" :style="customStyle">
-    <view class="wd-col-picker__field" @click="showPicker">
-      <slot v-if="useDefaultSlot"></slot>
-      <view
-        v-else
-        :class="`wd-col-picker__cell ${disabled && 'is-disabled'} ${readonly && 'is-readonly'} ${alignRight && 'is-align-right'} ${
-          error && 'is-error'
-        }  ${size && 'is-' + size}`"
-      >
-        <view
-          v-if="label || useLabelSlot"
-          :class="`wd-col-picker__label ${isRequired && 'is-required'} ${customLabelClass}`"
-          :style="labelWidth ? 'min-width:' + labelWidth + ';max-width:' + labelWidth + ';' : ''"
-        >
-          <block v-if="label">{{ label }}</block>
-          <slot v-else name="label"></slot>
-        </view>
-        <view class="wd-col-picker__body">
-          <view class="wd-col-picker__value-wraper">
-            <view
-              :class="`wd-col-picker__value ${ellipsis && 'is-ellipsis'} ${customValueClass} ${showValue ? '' : 'wd-col-picker__value--placeholder'}`"
-            >
-              {{ showValue || placeholder || translate('placeholder') }}
-            </view>
-            <wd-icon v-if="!disabled && !readonly" custom-class="wd-col-picker__arrow" name="arrow-right" />
-          </view>
-          <view v-if="errorMessage" class="wd-col-picker__error-message">{{ errorMessage }}</view>
-        </view>
-      </view>
+  <view :class="`wd-col-picker ${customClass}`" :style="customStyle">
+    <wd-cell
+      v-if="!$slots.default"
+      :title="label"
+      :value="showValue || placeholder || translate('placeholder')"
+      :required="required"
+      :size="size"
+      :title-width="labelWidth"
+      :prop="prop"
+      :rules="rules"
+      :clickable="!disabled && !readonly"
+      :value-align="alignRight ? 'right' : 'left'"
+      :custom-class="cellClass"
+      :custom-style="customStyle"
+      :custom-title-class="customLabelClass"
+      :custom-value-class="customValueClass"
+      :ellipsis="ellipsis"
+      :use-title-slot="!!$slots.label"
+      :marker-side="markerSide"
+      @click="showPicker"
+    >
+      <template v-if="$slots.label" #title>
+        <slot name="label"></slot>
+      </template>
+      <template #right-icon>
+        <wd-icon v-if="showArrow" custom-class="wd-col-picker__arrow" name="arrow-right" />
+      </template>
+    </wd-cell>
+    <view v-else @click="showPicker">
+      <slot></slot>
     </view>
     <wd-action-sheet
       v-model="pickerShow"
@@ -36,8 +37,10 @@
       :close-on-click-modal="closeOnClickModal"
       :z-index="zIndex"
       :safe-area-inset-bottom="safeAreaInsetBottom"
+      :root-portal="rootPortal"
       @open="handlePickerOpend"
       @close="handlePickerClose"
+      @closed="handlePickerClosed"
     >
       <view class="wd-col-picker__selected">
         <scroll-view :scroll-x="true" scroll-with-animation :scroll-left="scrollLeft">
@@ -95,11 +98,12 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, onMounted, ref, watch, type CSSProperties, reactive, nextTick } from 'vue'
+import wdIcon from '../wd-icon/wd-icon.vue'
+import wdLoading from '../wd-loading/wd-loading.vue'
+import wdActionSheet from '../wd-action-sheet/wd-action-sheet.vue'
+import wdCell from '../wd-cell/wd-cell.vue'
+import { computed, getCurrentInstance, onMounted, ref, watch, type CSSProperties, reactive } from 'vue'
 import { addUnit, debounce, getRect, isArray, isBoolean, isDef, isFunction, objToStyle } from '../common/util'
-import { useCell } from '../composables/useCell'
-import { FORM_KEY, type FormItemRule } from '../wd-form/types'
-import { useParent } from '../composables/useParent'
 import { useTranslate } from '../composables/useTranslate'
 import { colPickerProps, type ColPickerExpose } from './types'
 
@@ -130,8 +134,6 @@ const state = reactive({
 
 const { proxy } = getCurrentInstance() as any
 
-const cell = useCell()
-
 const updateLineAndScroll = debounce(function (animation = true) {
   setLineStyle(animation)
   lineScrollIntoView()
@@ -151,6 +153,15 @@ const showValue = computed(() => {
       })
       .join('')
   }
+})
+
+const cellClass = computed(() => {
+  const classes = ['wd-col-picker__cell']
+  if (props.disabled) classes.push('is-disabled')
+  if (props.readonly) classes.push('is-readonly')
+  if (props.error) classes.push('is-error')
+  if (!showValue.value) classes.push('wd-col-picker__cell--placeholder')
+  return classes.join(' ')
 })
 
 watch(
@@ -173,7 +184,7 @@ watch(
   () => props.columns,
   (newValue, oldValue) => {
     if (newValue.length && !isArray(newValue[0])) {
-      console.error('[wot design] error(wd-col-picker): the columns props of wd-col-picker should be a two-dimensional array')
+      console.error('[wot ui] error(wd-col-picker): the columns props of wd-col-picker should be a two-dimensional array')
       return
     }
     if (newValue.length === 0 && !oldValue) return
@@ -236,29 +247,9 @@ watch(
   }
 )
 
-const { parent: form } = useParent(FORM_KEY)
-
-// 表单校验错误信息
-const errorMessage = computed(() => {
-  if (form && props.prop && form.errorMessages && form.errorMessages[props.prop]) {
-    return form.errorMessages[props.prop]
-  } else {
-    return ''
-  }
-})
-
-// 是否展示必填
-const isRequired = computed(() => {
-  let formRequired = false
-  if (form && form.props.rules) {
-    const rules = form.props.rules
-    for (const key in rules) {
-      if (Object.prototype.hasOwnProperty.call(rules, key) && key === props.prop && Array.isArray(rules[key])) {
-        formRequired = rules[key].some((rule: FormItemRule) => rule.required)
-      }
-    }
-  }
-  return props.required || props.rules.some((rule) => rule.required) || formRequired
+// 是否展示箭头
+const showArrow = computed(() => {
+  return !props.disabled && !props.readonly
 })
 
 onMounted(() => {
@@ -279,7 +270,10 @@ function handlePickerOpend() {
 
 function handlePickerClose() {
   pickerShow.value = false
-  // 如果目前用户正在选择，需要在popup关闭时将数据重置回上次数据，popup 关闭时间 250
+  emit('close')
+}
+
+function handlePickerClosed() {
   if (isChange.value) {
     setTimeout(() => {
       selectList.value = lastSelectList.value.slice(0)
@@ -291,8 +285,8 @@ function handlePickerClose() {
       isChange.value = false
     }, 250)
   }
-  emit('close')
 }
+
 function showPicker() {
   const { disabled, readonly } = props
 
@@ -350,7 +344,7 @@ function handleColChange(colIndex: number, item: Record<string, any>, index: num
       rowIndex: index,
       resolve: (nextColumn: Record<string, any>[]) => {
         if (!isArray(nextColumn)) {
-          console.error('[wot design] error(wd-col-picker): the data of each column of wd-col-picker should be an array')
+          console.error('[wot ui] error(wd-col-picker): the data of each column of wd-col-picker should be an array')
           return
         }
 
@@ -427,40 +421,44 @@ function handleColClick(index: number) {
 function setLineStyle(animation: boolean = true) {
   if (!inited.value) return
   const { lineWidth, lineHeight } = props
-  getRect($item, true, proxy).then((rects) => {
-    const lineStyle: CSSProperties = {}
-    if (isDef(lineWidth)) {
-      lineStyle.width = addUnit(lineWidth)
-    }
-    if (isDef(lineHeight)) {
-      lineStyle.height = addUnit(lineHeight)
-      lineStyle.borderRadius = `calc(${addUnit(lineHeight)} / 2)`
-    }
-    const rect = rects[currentCol.value]
-    let left = rects.slice(0, currentCol.value).reduce((prev, curr) => prev + Number(curr.width), 0) + Number(rect.width) / 2
-    lineStyle.transform = `translateX(${left}px) translateX(-50%)`
+  getRect($item, true, proxy)
+    .then((rects) => {
+      const lineStyle: CSSProperties = {}
+      if (isDef(lineWidth)) {
+        lineStyle.width = addUnit(lineWidth)
+      }
+      if (isDef(lineHeight)) {
+        lineStyle.height = addUnit(lineHeight)
+        lineStyle.borderRadius = `calc(${addUnit(lineHeight)} / 2)`
+      }
+      const rect = rects[currentCol.value]
+      let left = rects.slice(0, currentCol.value).reduce((prev, curr) => prev + Number(curr.width), 0) + Number(rect.width) / 2
+      lineStyle.transform = `translateX(${left}px) translateX(-50%)`
 
-    if (animation) {
-      lineStyle.transition = 'width 300ms ease, transform 300ms ease'
-    }
+      if (animation) {
+        lineStyle.transition = 'width 300ms ease, transform 300ms ease'
+      }
 
-    state.lineStyle = objToStyle(lineStyle)
-  })
+      state.lineStyle = objToStyle(lineStyle)
+    })
+    .catch(() => {})
 }
 /**
  * @description scroll-view滑动到active的tab_nav
  */
 function lineScrollIntoView() {
   if (!inited.value) return
-  Promise.all([getRect($item, true, proxy), getRect($container, false, proxy)]).then(([navItemsRects, navRect]) => {
-    if (!isArray(navItemsRects) || navItemsRects.length === 0) return
-    // 选中元素
-    const selectItem = navItemsRects[currentCol.value]
-    // 选中元素之前的节点的宽度总和
-    const offsetLeft = navItemsRects.slice(0, currentCol.value).reduce((prev, curr) => prev + Number(curr.width), 0)
-    // scroll-view滑动到selectItem的偏移量
-    scrollLeft.value = offsetLeft - ((navRect as any).width - Number(selectItem.width)) / 2
-  })
+  Promise.all([getRect($item, true, proxy), getRect($container, false, proxy)])
+    .then(([navItemsRects, navRect]) => {
+      if (!isArray(navItemsRects) || navItemsRects.length === 0) return
+      // 选中元素
+      const selectItem = navItemsRects[currentCol.value]
+      // 选中元素之前的节点的宽度总和
+      const offsetLeft = navItemsRects.slice(0, currentCol.value).reduce((prev, curr) => prev + Number(curr.width), 0)
+      // scroll-view滑动到selectItem的偏移量
+      scrollLeft.value = offsetLeft - ((navRect as any).width - Number(selectItem.width)) / 2
+    })
+    .catch(() => {})
 }
 
 // 递归列数据补齐

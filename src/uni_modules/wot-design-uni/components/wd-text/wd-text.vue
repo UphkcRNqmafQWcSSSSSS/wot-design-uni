@@ -21,7 +21,7 @@ export default {
 import { computed, ref, watch } from 'vue'
 import { isDef, objToStyle } from '../common/util'
 import { textProps } from './types'
-import { dayjs } from '../common/dayjs'
+import dayjs from '../../dayjs'
 
 // 获取组件的 props 和 emit 函数
 const props = defineProps(textProps)
@@ -43,8 +43,9 @@ watch(
   }),
   ({ type }) => {
     // 验证 type 属性
-    if (type && !['primary', 'error', 'warning', 'success', 'default'].includes(type)) {
-      console.error(`type must be one of ${type.toString()}`)
+    const types = ['primary', 'error', 'warning', 'success', 'default']
+    if (type && !types.includes(type)) {
+      console.error(`type must be one of ${types.toString()}`)
     }
     computeTextClass()
   },
@@ -71,7 +72,7 @@ const rootStyle = computed(() => {
   if (props.decoration) {
     rootStyle['text-decoration'] = `${props.decoration}`
   }
-  return `${objToStyle(rootStyle)};${props.customStyle}`
+  return `${objToStyle(rootStyle)}${props.customStyle}`
 })
 
 // 计算文本类名的函数
@@ -124,7 +125,7 @@ const formattedText = computed(() => {
   if (mode === 'price') {
     return formatNumber(text)
   }
-  return formatText(text, format, mode)
+  return formatText(`${text}`, format, mode)
 })
 
 // 处理点击事件

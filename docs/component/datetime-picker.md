@@ -1,8 +1,6 @@
-<frame/>
-
 # DatetimePicker 日期时间选择器
 
-为 Picker 组件的封装，在其内部构建好日期时间选项。
+为 DatetimePickerView 组件的封装，在其内部构建好日期时间选项。
 
 ## 基本用法
 
@@ -78,6 +76,28 @@ const value = ref<number>(Date.now())
 ```
 ```typescript
 const value4 = ref<string>('09:20')
+```
+
+## time 类型（带秒）
+
+`time` 类型设置 `use-second` 属性可以展示时分秒，绑定值为 `HH:mm:ss` 格式。
+
+```html
+<wd-datetime-picker type="time" v-model="value" label="时分秒" use-second />
+```
+```typescript
+const value = ref<string>('09:20:30')
+```
+
+## datetime 类型（带秒）
+
+`datetime` 类型设置 `use-second` 属性可以展示年月日时分秒，绑定值为时间戳。
+
+```html
+<wd-datetime-picker type="datetime" v-model="value" label="年月日时分秒" use-second />
+```
+```typescript
+const value = ref<number>(Date.now())
 ```
 
 ## 修改展示格式
@@ -177,6 +197,10 @@ const filter = (type, values) => {
 
 设置 `before-confirm` 函数，在用户点击`确定`按钮时，会执行 `before-confirm` 函数，并传入 `value`(time 类型为字符串，其他为时间戳，当picker为区间选择时，`value`为数组) 、 `resolve` 和 `picker` 参数，可以对 `value` 进行校验，并通过 `resolve` 函数告知组件是否确定通过，`resolve` 接受1个 boolean 值，`resolve(true)` 表示选项通过，`resolve(false)` 表示选项不通过，不通过时不会关闭 `picker`弹窗。可以通过 `picker` 参数直接设置 `loading` 等属性。
 
+:::tip 提示
+在调用 `resolve` 之前须确保 `picker` 参数 `loading` 的加载状态为 `false` ，否则无法正确触发组件的 `@confirm` 事件。
+:::
+
 ```html
 <wd-toast></wd-toast>
 <wd-datetime-picker label="before-confirm" v-model="value" :before-confirm="beforeConfirm" @confirm="handleConfirm" />
@@ -206,10 +230,10 @@ function handleConfirm({ value }) {
 
 ## 唤起项插槽
 
-开启 `use-default-slot` ，设置默认插槽修改唤起picker组件的形式。
+设置默认插槽修改唤起picker组件的形式。
 
 ```html
-<wd-datetime-picker  v-model="value" use-default-slot>
+<wd-datetime-picker  v-model="value">
   <wd-button>插槽唤起</wd-button>
 </wd-datetime-picker>
 ```
@@ -259,8 +283,8 @@ const displayFormatTabLabel = (items) => {
 
 | 参数 | 说明 | 类型 | 可选值 | 默认值 | 最低版本 |
 |-----|------|-----|-------|-------|---------|
-| v-model | 选中项，当 type 为 time 时，类型为字符串；当 type 为 Array 时，类型为范围选择；否则为 Date | string / date / array | - | - | - |
-| default-value | 默认日期，类型保持与 value 一致，打开面板时面板自动选到默认日期 | string / date / array | - | - | - |
+| v-model | 选中项，当 type 为 time 时，类型为字符串；当 type 为 Array 时，类型为范围选择；否则为 `timestamp` | `string` / `timestamp` / `array` | - | - |
+| default-value | 默认日期，类型保持与 value 一致，打开面板时面板自动选到默认日期 | `string` / `timestamp` / `array` | - | - | - |
 | type | 选择器类型 | string | date / year-month / time / year | datetime | - |
 | loading | 加载中 | boolean | - | false | - |
 | loading-color | 加载的颜色，只能使用十六进制的色值写法，且不能使用缩写 | string | - | #4D80F0 | - |
@@ -270,7 +294,7 @@ const displayFormatTabLabel = (items) => {
 | confirm-button-text | 确认按钮文案 | string | - | 完成 | - |
 | label | 选择器左侧文案，label可以不传 | string | - | - | - |
 | placeholder | 选择器占位符 | string | - | 请选择 | - |
-| disabled | 禁用 | boolean | - | fasle | - |
+| disabled | 禁用 | boolean | - | false | - |
 | readonly | 只读 | boolean | - | false | - |
 | display-format | 自定义展示文案的格式化函数，返回一个字符串 | function | - | - | - |
 | formatter | 自定义弹出层选项文案的格式化函数，返回一个字符串 | function | - | - | - |
@@ -283,12 +307,13 @@ const displayFormatTabLabel = (items) => {
 | minMinute | 最小分钟，time类型时生效 | number | - | 0 | - |
 | maxMinute | 最大分钟，time类型时生效 | number | - | 59 | - |
 | required | 表单属性，必填 | boolean | - | false | - |
+| marker-side | 必填标记位置 | string | before / after | before | 1.12.0 |
 | size | 设置选择器大小 | string | large | - | - |
 | label-width | 设置左侧标题宽度 | string | - | 33% | - |
 | error | 是否为错误状态，错误状态时右侧内容为红色 | boolean | - | false | - |
 | align-right | 选择器的值靠右展示 | boolean | - | false | - |
-| use-label-slot | label 使用插槽 | boolean | - | false | - |
-| use-default-slot | 使用默认插槽 | boolean | - | false | - |
+| <s>use-label-slot</s> | <s>label 使用插槽</s>，已废弃，直接使用label插槽即可 | boolean | - | false | - |
+| <s>use-default-slot</s> | <s>使用默认插槽</s>，已废弃，直接使用默认插槽即可 | boolean | - | false | - |
 | before-confirm | 确定前校验函数，接收 (value, resolve, picker) 参数，通过 resolve 继续执行 picker，resolve 接收1个boolean参数 | function | - | - | - |
 | close-on-click-modal | 点击遮罩是否关闭 | boolean | - | true | - |
 | z-index | 弹窗层级 | number | - | 15 | - |
@@ -297,6 +322,9 @@ const displayFormatTabLabel = (items) => {
 | prop | 表单域 `model` 字段名，在使用表单校验功能的情况下，该属性是必填的 | string | - | - | - |
 | rules | 表单验证规则，结合`wd-form`组件使用	 | `FormItemRule []`	 | - | `[]` | - |
 | immediate-change | 是否在手指松开时立即触发picker-view的 change 事件。若不开启则会在滚动动画结束后触发 change 事件，1.2.25版本起提供，仅微信小程序和支付宝小程序支持。 | boolean | - | false | 1.2.25 |
+| use-second | 是否显示秒选择，仅在 time 和 datetime 类型下生效 | boolean | - | false | 1.10.0 |
+| clearable | 显示清空按钮 | boolean | - | false | 1.11.0 |
+| root-portal | 是否从页面中脱离出来，用于解决各种 fixed 失效问题 | boolean | - | false | 1.11.0 |
 
 ### FormItemRule 数据结构
 
@@ -314,6 +342,7 @@ const displayFormatTabLabel = (items) => {
 | confirm | 点击右侧按钮触发 | `{ value }`, value 为当前选中日期的时间戳，'time' 类型则为字符串 | - |
 | cancel | 点击左侧按钮触发 | - | - |
 | toggle | 在区域选择模式下，tab标签切换时触发 | 切换到当前picker选中的值 | - |
+| clear | 点击清空按钮触发 | - | 1.11.0 |
 
 ## Methods
 

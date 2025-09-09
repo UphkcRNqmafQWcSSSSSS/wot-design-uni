@@ -61,6 +61,8 @@ export default {
 </script>
 
 <script lang="ts" setup>
+import wdIcon from '../wd-icon/wd-icon.vue'
+import wdTransition from '../wd-transition/wd-transition.vue'
 import { getCurrentInstance, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { usePopover } from '../composables/usePopover'
 import { closeOther, pushToQueue, removeFromQueue } from '../common/clickoutside'
@@ -74,7 +76,7 @@ const emit = defineEmits(['update:modelValue', 'menuclick', 'change', 'open', 'c
 const queue = inject<Queue | null>(queueKey, null)
 const selector: string = 'popover'
 const { proxy } = getCurrentInstance() as any
-const popover = usePopover()
+const popover = usePopover(props.visibleArrow)
 
 const showPopover = ref<boolean>(false) // 控制popover显隐
 

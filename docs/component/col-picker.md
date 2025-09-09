@@ -1,5 +1,3 @@
-<frame/>
-
 # ColPicker 多列选择器
 
 使用多列选择器来做级联，交互效果较好，多列选择器支持无限级选择。
@@ -214,13 +212,13 @@ const area = ref<any[]>([
       label: item.text
     }
   }),
-  findChildrenByCode(colPickerData, '130000')!.map((item) => {
+  findChildrenByCode(colPickerData, '150000')!.map((item) => {
     return {
       value: item.value,
       label: item.text
     }
   }),
-  findChildrenByCode(colPickerData, '130200')!.map((item) => {
+  findChildrenByCode(colPickerData, '150100')!.map((item) => {
     return {
       value: item.value,
       label: item.text
@@ -278,7 +276,7 @@ onMounted(async () => {
 
 const columnChange: ColPickerColumnChange = async ({ selectedItem, resolve, finish }) => {
   // 模拟异步请求
-  
+
   await sleep(0.3)
   const areaData = findChildrenByCode(colPickerData, selectedItem.value)
   if (areaData && areaData.length) {
@@ -302,7 +300,6 @@ function sleep(second: number = 1) {
     }, 1000 * second)
   })
 }
-
 ```
 
 ## 禁用
@@ -577,11 +574,11 @@ function handleConfirm({ selectedItems }: any) {
 
 ## 自定义选择器
 
-如果默认的 cell 类型的展示格式不满足需求，可以通过默认插槽进行自定义选择器样式。
+如果默认的 cell 类型的展示格式不满足需求，可以通过默认插槽进行自定义选择器样式。在标签上添加 use-default-slot 属性并设置为 true。
 
 ```html
 <view style="margin-bottom: 10px;">当前选中项: {{ displayValue }}</view>
-<wd-col-picker v-model="value" :columns="area" :column-change="columnChange" @confirm="handleConfirm">
+<wd-col-picker :use-default-slot="true" v-model="value" :columns="area" :column-change="columnChange" @confirm="handleConfirm">
   <wd-button>选择地址</wd-button>
 </wd-col-picker>
 ```
@@ -633,7 +630,7 @@ const columnChange = ({ selectedItem, resolve, finish }) => {
 | title                  | 弹出层标题                                                                                                                     | string            | -      | -       | -        |
 | label                  | 选择器左侧文案                                                                                                                 | string            | -      | -       | -        |
 | placeholder            | 选择器占位符                                                                                                                   | string            | -      | 请选择  | -        |
-| disabled               | 禁用                                                                                                                           | boolean           | -      | fasle   | -        |
+| disabled               | 禁用                                                                                                                           | boolean           | -      | false   | -        |
 | readonly               | 只读                                                                                                                           | boolean           | -      | false   | -        |
 | display-format         | 自定义展示文案的格式化函数，返回一个字符串                                                                                     | function          | -      | -       | -        |
 | column-change          | 接收当前列的选中项 item、当前列下标、当前列选中项下标下一列数据处理函数 resolve、结束选择 finish                               | function          | -      | -       | -        |
@@ -641,6 +638,7 @@ const columnChange = ({ selectedItem, resolve, finish }) => {
 | label-width            | 设置左侧标题宽度                                                                                                               | string            | -      | 33%     | -        |
 | error                  | 是否为错误状态，错误状态时右侧内容为红色                                                                                       | boolean           | -      | false   | -        |
 | required               | 必填样式                                                                                                                       | boolean           | -      | false   | -        |
+| marker-side            | 必填标记位置                                                                                                                   | string            | before / after | before  | 1.12.0 |
 | align-right            | 选择器的值靠右展示                                                                                                             | boolean           | -      | false   | -        |
 | before-confirm         | 确定前校验函数，接收 (value, resolve) 参数，通过 resolve 继续执行 picker，resolve 接收 1 个 boolean 参数                       | function          | -      | -       | -        |
 | loading-color          | loading 图标的颜色                                                                                                             | string            | -      | #4D80F0 | -        |
@@ -653,8 +651,9 @@ const columnChange = ({ selectedItem, resolve, finish }) => {
 | ellipsis               | 是否超出隐藏                                                                                                                   | boolean           | -      | false   | -        |
 | prop                   | 表单域 `model` 字段名，在使用表单校验功能的情况下，该属性是必填的                                                              | string            | -      | -       | -        |
 | rules                  | 表单验证规则，结合`wd-form`组件使用                                                                                            | `FormItemRule []` | -      | `[]`    | -        |
-| lineWidth     | 底部条宽度，单位像素             | number          | -      | -     | 1.3.7        |
-| lineHeight    | 底部条高度，单位像素             | number          | -      | -      | 1.3.7        |
+| lineWidth              | 底部条宽度，单位像素                                                                                                           | number            | -      | -       | 1.3.7    |
+| lineHeight             | 底部条高度，单位像素                                                                                                           | number            | -      | -       | 1.3.7    |
+| root-portal            | 是否从页面中脱离出来，用于解决各种 fixed 失效问题                                                                             | boolean           | -      | false   | 1.11.0 |
 
 ### FormItemRule 数据结构
 
@@ -679,7 +678,7 @@ const columnChange = ({ selectedItem, resolve, finish }) => {
 | 事件名称 | 说明                       | 参数                                             | 最低版本 |
 | -------- | -------------------------- | ------------------------------------------------ | -------- |
 | confirm  | 最后一列选项选中时触发     | `{ value(选项值数组), selectedItems(选项数组) }` | -        |
-| cancel   | 点击关闭按钮或者蒙层时触发 | -                                                | -        |
+| close    | 点击关闭按钮或者蒙层时触发 | -                                                | -        |
 
 ## Methods
 
