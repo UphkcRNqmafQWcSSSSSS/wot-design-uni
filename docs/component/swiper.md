@@ -299,6 +299,27 @@ const current = ref <number>(0)
 const isLoop = ref(false)
 ```
 
+
+## 插槽用法
+
+通过默认插槽可以自定义轮播项的内容。
+
+```html
+<wd-swiper
+  :list="swiperList"
+  autoplay
+  v-model:current="current"
+  :indicator="{ type: 'dots-bar' }"
+  @click="handleClick"
+  @change="onChange"
+>
+  <template #default="{ item }">
+    <image :src="item as string" mode="aspectFill" style="width: 100%; height: 100%" />
+  </template>
+</wd-swiper>
+```
+
+
 ## Attributes
 
 | 参数                      | 说明                                                               | 类型                              | 可选值                                                                                                 | 默认值       | 最低版本         |
@@ -383,7 +404,8 @@ const isLoop = ref(false)
 
 | name      | 说明         | 参数                                 | 最低版本 |
 | --------- | ------------ | ------------------------------------ | -------- |
-| indicator | 自定义指示器 | `{ current: number, total: number }` | 0.1.22   |
+| indicator | 自定义指示器 | `{ current: number, total: number }` | 1.13.0   |
+| default   | item展示内容 | `{ item: string | SwiperList, index: number }`       | 1.13.0   |
 
 
 ## 外部样式类

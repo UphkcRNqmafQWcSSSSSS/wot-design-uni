@@ -1,7 +1,7 @@
 /*
  * @Author: weisheng
  * @Date: 2024-10-12 22:09:33
- * @LastEditTime: 2025-09-03 16:11:27
+ * @LastEditTime: 2025-10-30 11:09:04
  * @LastEditors: weisheng
  * @Description: 
  * @FilePath: /wot-design-uni/docs/.vitepress/theme/index.ts
@@ -9,7 +9,6 @@
  */
 import { h } from 'vue'
 import Theme from 'vitepress/theme'
-import { useRouter } from 'vitepress'
 import './styles/vars.css'
 import './styles/custom.css'
 import './styles/scrollbar.scss'
@@ -21,9 +20,11 @@ import SvgImage from './components/SvgImage.vue'
 import HomeStar from './components/HomeStar.vue'
 import ExternalLink from './components/ExternalLink.vue'
 import WwAds from './components/WwAds.vue'
+import SpecialSponsor from './components/SpecialSponsor.vue'
+import Banner from './components/Banner.vue'
 import ElementPlus, { ElMessageBox } from 'element-plus'
 import 'element-plus/dist/index.css'
-
+import 'element-plus/theme-chalk/dark/css-vars.css'
 // 声明百度统计全局变量
 declare global {
   interface Window {
@@ -36,7 +37,9 @@ export default {
   ...Theme,
   Layout() {
     return h(Theme.Layout, null, {
+      'layout-top': () => h(Banner),
       'home-hero-info-after':()=>h(HomeStar),
+      'home-hero-after': () => h(SpecialSponsor),
       'home-features-after': () => h(HomeFriendly),
       'layout-bottom':() => h(CustomFooter),
       'nav-bar-title-after': () => h(NavBarTitleAfter),
